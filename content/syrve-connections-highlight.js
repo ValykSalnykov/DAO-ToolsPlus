@@ -58,6 +58,7 @@
     lastActivity: LAST_ACTIVITY_HEADER
   };
   let hasHelpDeskContext = false;
+  let hasResolvedHelpDeskContext = false;
   let contextRequestPromise = null;
   let contextRetryCount = 0;
   let activeStaleLicenseRequestId = '';
@@ -69,6 +70,8 @@
   let resetFallbackEnabled = false;
   let pendingResetVerification = null;
   let staleThresholdMinutes = DEFAULT_STALE_THRESHOLD_MINUTES;
+  let lastActionStatusMessage = '';
+  let lastActionStatusIsError = false;
 
   if (window.location.pathname !== CONNECTIONS_PATH) {
     return;
@@ -471,6 +474,10 @@
 
         const cells = Array.from(row.children).filter((cell) => cell instanceof HTMLTableCellElement);
         const license = {
+          ipAddress: getCellText(cells, columnMap.ipAddress),
+          computerName: getCellText(cells, columnMap.computerName),
+          terminalName: getCellText(cells, columnMap.terminalName),
+          login: getCellText(cells, columnMap.login),
           moduleId: getCellText(cells, columnMap.moduleId),
           moduleName: getCellText(cells, columnMap.moduleName),
           moduleDisplayName: getCellText(cells, columnMap.moduleDisplayName),
@@ -485,6 +492,7 @@
         result.push({
           ...license,
           displayName: getLicenseDisplayName(license),
+          ageLabel: formatAgeLabel(license.lastActivity),
           isActive: ageMs !== null && ageMs < getStaleThresholdMs(),
           isStale: ageMs !== null && ageMs >= getStaleThresholdMs()
         });
@@ -632,6 +640,73 @@
     }
 
     return `${hours} год. ${minutes} хв.`;
+  };
+
+  const buildConnectionsActionSnapshot = () => {
+    const staleLicenses = collectStaleLicenses();
+    const mode = getCurrentActionMode();
+    const busy = Boolean(
+      activeStaleLicenseRequestId
+      || activeHelpDeskRequestId
+      || activeStaleLicenseResetRequestId
+    );
+    const hasRequiredContext = mode === 'reset' || hasHelpDeskContext;
+
+    return {
+      mode,
+      label: getActionButtonDefaultLabel(),
+      status: normalizeText(
+        document.getElementById(ACTION_STATUS_ID)?.textContent
+        || lastActionStatusMessage
+        || (staleLicenses.length ? getInitialActionStatus() : '')
+      ),
+      state: lastActionStatusIsError ? 'error' : busy ? 'running' : 'ready',
+      busy,
+      enabled: staleLicenses.length > 0 && hasRequiredContext && !busy,
+      hasHelpDeskContext,
+      staleCount: staleLicenses.length
+    };
+  };
+
+  const reportConnectionsActionState = () => {
+    if (getCurrentActionMode() === 'helpdesk' && !hasResolvedHelpDeskContext) {
+      return;
+    }
+
+    chrome.runtime.sendMessage({
+      action: 'SYRVE_CONNECTIONS_STALE_ACTION_STATE',
+      actionState: buildConnectionsActionSnapshot()
+    }, () => {
+      void chrome.runtime.lastError;
+    });
+  };
+
+  const reportConnectionsSnapshot = () => {
+    const connectionsTable = Array.from(document.querySelectorAll('table')).find((table) => findLastActivityColumn(table));
+    if (!(connectionsTable instanceof HTMLTableElement)) {
+      return false;
+    }
+
+    const allConnections = collectLicenseConnections();
+    const rows = allConnections.slice(0, 1000);
+    const summary = buildLicenseSummary(rows);
+    const staleLicenses = collectStaleLicenses();
+    chrome.runtime.sendMessage({
+      action: 'SYRVE_CONNECTIONS_SNAPSHOT_RESULT',
+      snapshot: {
+        sourceUrl: window.location.href,
+        capturedAt: new Date().toISOString(),
+        thresholdMinutes: staleThresholdMinutes,
+        truncated: allConnections.length > rows.length,
+        rows,
+        summary,
+        staleLicenses,
+        action: buildConnectionsActionSnapshot()
+      }
+    }, () => {
+      void chrome.runtime.lastError;
+    });
+    return true;
   };
 
   const clearStaleRow = (row) => {
@@ -849,13 +924,14 @@
   };
 
   const setActionStatus = (message, isError = false) => {
+    lastActionStatusMessage = message || '';
+    lastActionStatusIsError = isError === true;
     const statusNode = document.getElementById(ACTION_STATUS_ID);
-    if (!statusNode) {
-      return;
+    if (statusNode) {
+      statusNode.textContent = lastActionStatusMessage;
+      statusNode.style.color = lastActionStatusIsError ? '#991b1b' : '#7c2d12';
     }
-
-    statusNode.textContent = message || '';
-    statusNode.style.color = isError ? '#991b1b' : '#7c2d12';
+    reportConnectionsActionState();
   };
 
   const setActionButtonBusy = (isBusy, label = 'Готуємо...') => {
@@ -1026,6 +1102,7 @@
     })
       .then((response) => {
         hasHelpDeskContext = response.available === true;
+        hasResolvedHelpDeskContext = true;
         renderHelpDeskActionBar();
 
         if (getCurrentActionMode() === 'helpdesk' && !hasHelpDeskContext && contextRetryCount < CONTEXT_RETRY_LIMIT) {
@@ -1037,6 +1114,7 @@
       })
       .catch(() => {
         hasHelpDeskContext = false;
+        hasResolvedHelpDeskContext = true;
         renderHelpDeskActionBar();
       })
       .finally(() => {
@@ -1199,6 +1277,26 @@
   });
 
   chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
+    if (message?.action === 'RUN_STALE_LICENSE_ACTION') {
+      const action = buildConnectionsActionSnapshot();
+      if (action.busy) {
+        sendResponse({ ok: false, error: 'Попередня дія для завислих ліцензій ще виконується.' });
+        return false;
+      }
+      if (!action.staleCount) {
+        sendResponse({ ok: false, error: 'Завислі ліцензії не знайдено.' });
+        return false;
+      }
+      if (!action.enabled) {
+        sendResponse({ ok: false, error: getMissingPlanfixContextStatus() });
+        return false;
+      }
+
+      handleActionButtonClick();
+      sendResponse({ ok: true, mode: action.mode });
+      return false;
+    }
+
     if (message?.action === 'WAIT_STALE_LICENSE_CAPTURE_READY') {
       waitForCaptureReady(Number(message.timeoutMs) || 4000)
         .then(() => sendResponse({ ok: true }))
@@ -1326,10 +1424,11 @@
     }
 
     highlightStaleConnections();
-    void loadStaleThresholdMinutes().then(() => {
+    const contextPromise = refreshHelpDeskContext();
+    void Promise.all([loadStaleThresholdMinutes(), contextPromise]).then(() => {
       highlightStaleConnections();
+      reportConnectionsSnapshot();
     });
-    void refreshHelpDeskContext();
     if (pendingResetVerification) {
       void verifyPendingResetAfterReload();
     }

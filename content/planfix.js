@@ -387,6 +387,16 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
         return;
     }
 
+    if (message.action === 'CONNECTIONS_SNAPSHOT_RESULT') {
+        handleCardConnectionsSnapshotResult(message);
+        return;
+    }
+
+    if (message.action === 'CONNECTIONS_STALE_ACTION_STATE') {
+        handleCardConnectionsStaleActionState(message);
+        return;
+    }
+
     if (message.action === 'HELPDESK_DRAFT_FILL_RESULT') {
         if (!message.requestId || message.requestId !== activeHelpDeskDraftRequestId) {
             return;
@@ -676,10 +686,25 @@ const DAO_SERVICE_STATUS_STATES = {
     online: 'online',
     offline: 'offline'
 };
+const CARD_CONNECTIONS_GROUPING_MODES = Object.freeze({
+    terminal: 'terminal',
+    license: 'license',
+    status: 'status'
+});
 
 let cardErrorPollToken = 0;
 let activePeriodRequestId = null;
 let activePeriodRequestContext = null;
+let activeConnectionsSnapshotRequestId = null;
+let activeConnectionsSnapshotContext = null;
+let activeConnectionsSnapshotButton = null;
+let activeConnectionsSnapshotLatestSnapshot = null;
+let activeConnectionsSnapshotHasResult = false;
+let cardConnectionsModulesExpanded = false;
+let cardConnectionsExpandedTerminalKeys = null;
+let cardConnectionsGroupingMode = CARD_CONNECTIONS_GROUPING_MODES.license;
+let cardConnectionsSkipDisclosureCapture = false;
+let cardConnectionsActionBusy = false;
 let lastCardVersionCheckResult = null;
 let cardLoginStatusTimeoutId = 0;
 let cardLoginRequestToken = 0;
@@ -1987,6 +2012,13 @@ const resetActiveCardLicenseCheckButton = () => {
     delete activeCardLicenseCheckButton.dataset.licenseCheckToken;
     setCardActionButtonLoading(activeCardLicenseCheckButton, false);
     activeCardLicenseCheckButton = null;
+};
+
+const resetActiveConnectionsSnapshotButton = () => {
+    if (activeConnectionsSnapshotButton instanceof HTMLButtonElement) {
+        setCardActionButtonLoading(activeConnectionsSnapshotButton, false);
+    }
+    activeConnectionsSnapshotButton = null;
 };
 
 const removeCardLicenseModal = () => {
@@ -3415,6 +3447,365 @@ const ensureCardLicenseModalStyles = () => {
             animation: dao-license-modal-spin 0.85s linear infinite;
         }
 
+        #${CARD_LICENSE_MODAL_ID} .dao-license-modal__connections-overview {
+            display: grid;
+            gap: 16px;
+        }
+
+        #${CARD_LICENSE_MODAL_ID} .dao-license-modal__connections-heading {
+            display: grid;
+            grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
+            align-items: flex-start;
+            gap: 18px;
+        }
+
+        #${CARD_LICENSE_MODAL_ID} .dao-license-modal__connections-heading-title {
+            min-width: 0;
+        }
+
+        #${CARD_LICENSE_MODAL_ID} .dao-license-modal__connections-source {
+            color: #64748b;
+            font-size: 12px;
+            font-weight: 600;
+            line-height: 1.45;
+            text-align: right;
+            white-space: pre-line;
+            justify-self: end;
+        }
+
+        #${CARD_LICENSE_MODAL_ID} .dao-license-modal__connections-grouping {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            color: #64748b;
+            font-size: 11px;
+            font-weight: 750;
+            justify-self: center;
+            white-space: nowrap;
+        }
+
+        #${CARD_LICENSE_MODAL_ID} .dao-license-modal__connections-grouping-select {
+            min-width: 166px;
+            padding: 7px 30px 7px 10px;
+            border: 1px solid rgba(124, 58, 237, 0.2);
+            border-radius: 9px;
+            background: #ffffff;
+            color: #334155;
+            cursor: pointer;
+            font: 750 11px/1.2 -apple-system, BlinkMacSystemFont, "Segoe UI", Arial, sans-serif;
+        }
+
+        #${CARD_LICENSE_MODAL_ID} .dao-license-modal__connections-disclosure,
+        #${CARD_LICENSE_MODAL_ID} .dao-license-modal__connections-terminal {
+            overflow: hidden;
+            border: 1px solid rgba(148, 163, 184, 0.17);
+            border-radius: 15px;
+            background: rgba(248, 250, 252, 0.72);
+        }
+
+        #${CARD_LICENSE_MODAL_ID} .dao-license-modal__connections-disclosure-summary,
+        #${CARD_LICENSE_MODAL_ID} .dao-license-modal__connections-terminal-summary {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 12px 14px;
+            color: #334155;
+            cursor: pointer;
+            font-size: 12px;
+            font-weight: 800;
+            list-style: none;
+            user-select: none;
+        }
+
+        #${CARD_LICENSE_MODAL_ID} .dao-license-modal__connections-disclosure-summary::-webkit-details-marker,
+        #${CARD_LICENSE_MODAL_ID} .dao-license-modal__connections-terminal-summary::-webkit-details-marker {
+            display: none;
+        }
+
+        #${CARD_LICENSE_MODAL_ID} .dao-license-modal__connections-disclosure-summary::before,
+        #${CARD_LICENSE_MODAL_ID} .dao-license-modal__connections-terminal-summary::before {
+            color: #7c3aed;
+            content: '›';
+            font-size: 19px;
+            line-height: 1;
+            transform: rotate(0deg);
+            transition: transform 0.16s ease;
+        }
+
+        #${CARD_LICENSE_MODAL_ID} details[open] > .dao-license-modal__connections-disclosure-summary::before,
+        #${CARD_LICENSE_MODAL_ID} details[open] > .dao-license-modal__connections-terminal-summary::before {
+            transform: rotate(90deg);
+        }
+
+        #${CARD_LICENSE_MODAL_ID} .dao-license-modal__connections-disclosure .dao-license-modal__connections-modules {
+            padding: 0 12px 12px;
+        }
+
+        #${CARD_LICENSE_MODAL_ID} .dao-license-modal__connections-modules {
+            display: grid;
+            grid-template-columns: repeat(3, minmax(0, 1fr));
+            gap: 10px;
+        }
+
+        #${CARD_LICENSE_MODAL_ID} .dao-license-modal__connections-module {
+            display: grid;
+            grid-template-columns: minmax(0, 1fr) auto;
+            align-items: center;
+            gap: 12px;
+            min-height: 64px;
+            padding: 12px 14px;
+            border: 1px solid rgba(124, 58, 237, 0.13);
+            border-radius: 14px;
+            background: linear-gradient(145deg, rgba(124, 58, 237, 0.08), rgba(59, 130, 246, 0.04));
+            box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.72);
+        }
+
+        #${CARD_LICENSE_MODAL_ID} .dao-license-modal__connections-module--primary {
+            border-color: rgba(124, 58, 237, 0.23);
+            background: linear-gradient(145deg, rgba(124, 58, 237, 0.14), rgba(59, 130, 246, 0.07));
+        }
+
+        #${CARD_LICENSE_MODAL_ID} .dao-license-modal__connections-module-name {
+            color: #1e293b;
+            font-size: 13px;
+            font-weight: 800;
+            line-height: 1.35;
+        }
+
+        #${CARD_LICENSE_MODAL_ID} .dao-license-modal__connections-module-meta {
+            margin-top: 3px;
+            color: #64748b;
+            font-size: 11px;
+            font-weight: 650;
+        }
+
+        #${CARD_LICENSE_MODAL_ID} .dao-license-modal__connections-module-count {
+            display: inline-grid;
+            place-items: center;
+            min-width: 34px;
+            height: 34px;
+            padding: 0 8px;
+            border-radius: 11px;
+            background: linear-gradient(180deg, #7c3aed, #6d28d9);
+            color: #ffffff;
+            font-size: 15px;
+            font-weight: 850;
+            box-shadow: 0 8px 16px rgba(109, 40, 217, 0.18);
+        }
+
+        #${CARD_LICENSE_MODAL_ID} .dao-license-modal__connections-table-wrap {
+            width: 100%;
+            overflow: auto;
+            border: 1px solid rgba(148, 163, 184, 0.16);
+            border-radius: 16px;
+            background: rgba(255, 255, 255, 0.82);
+        }
+
+        #${CARD_LICENSE_MODAL_ID} .dao-license-modal__connections-table {
+            width: 100%;
+            min-width: 680px;
+            border-collapse: separate;
+            border-spacing: 0;
+            color: #334155;
+            font-size: 12px;
+        }
+
+        #${CARD_LICENSE_MODAL_ID} .dao-license-modal__connections-table th {
+            position: sticky;
+            top: 0;
+            z-index: 1;
+            padding: 11px 12px;
+            border-bottom: 1px solid rgba(148, 163, 184, 0.18);
+            background: rgba(241, 245, 249, 0.97);
+            color: #64748b;
+            font-size: 10px;
+            font-weight: 850;
+            letter-spacing: 0.06em;
+            text-align: left;
+            text-transform: uppercase;
+            white-space: nowrap;
+        }
+
+        #${CARD_LICENSE_MODAL_ID} .dao-license-modal__connections-table td {
+            padding: 12px;
+            border-bottom: 1px solid rgba(148, 163, 184, 0.12);
+            vertical-align: top;
+        }
+
+        #${CARD_LICENSE_MODAL_ID} .dao-license-modal__connections-table tbody tr:last-child td {
+            border-bottom: 0;
+        }
+
+        #${CARD_LICENSE_MODAL_ID} .dao-license-modal__connections-table tbody tr:hover td {
+            background: rgba(124, 58, 237, 0.035);
+        }
+
+        #${CARD_LICENSE_MODAL_ID} .dao-license-modal__connections-row--stale td {
+            background: rgba(239, 68, 68, 0.055);
+        }
+
+        #${CARD_LICENSE_MODAL_ID} .dao-license-modal__connections-primary {
+            display: block;
+            color: #1e293b;
+            font-weight: 800;
+            line-height: 1.35;
+        }
+
+        #${CARD_LICENSE_MODAL_ID} .dao-license-modal__connections-secondary {
+            display: block;
+            margin-top: 3px;
+            color: #64748b;
+            font-size: 11px;
+            line-height: 1.4;
+        }
+
+        #${CARD_LICENSE_MODAL_ID} .dao-license-modal__connections-status {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 5px 8px;
+            border-radius: 999px;
+            font-size: 10px;
+            font-weight: 850;
+            white-space: nowrap;
+        }
+
+        #${CARD_LICENSE_MODAL_ID} .dao-license-modal__connections-status::before {
+            width: 7px;
+            height: 7px;
+            border-radius: 999px;
+            background: currentColor;
+            content: '';
+        }
+
+        #${CARD_LICENSE_MODAL_ID} .dao-license-modal__connections-status--active {
+            background: rgba(34, 197, 94, 0.12);
+            color: #15803d;
+        }
+
+        #${CARD_LICENSE_MODAL_ID} .dao-license-modal__connections-status--stale {
+            background: rgba(239, 68, 68, 0.12);
+            color: #b91c1c;
+        }
+
+        #${CARD_LICENSE_MODAL_ID} .dao-license-modal__connections-status--unknown {
+            background: rgba(148, 163, 184, 0.15);
+            color: #64748b;
+        }
+
+        #${CARD_LICENSE_MODAL_ID} .dao-license-modal__connections-truncated {
+            margin: 12px 0 0;
+            color: #b45309;
+            font-size: 12px;
+            font-weight: 700;
+        }
+
+        #${CARD_LICENSE_MODAL_ID} .dao-license-modal__connections-terminal-list {
+            display: grid;
+            gap: 10px;
+        }
+
+        #${CARD_LICENSE_MODAL_ID} .dao-license-modal__connections-terminal--stale {
+            border-color: rgba(239, 68, 68, 0.3);
+            background: rgba(254, 242, 242, 0.72);
+        }
+
+        #${CARD_LICENSE_MODAL_ID} .dao-license-modal__connections-terminal-summary {
+            justify-content: space-between;
+        }
+
+        #${CARD_LICENSE_MODAL_ID} .dao-license-modal__connections-terminal-summary::before {
+            flex: 0 0 auto;
+        }
+
+        #${CARD_LICENSE_MODAL_ID} .dao-license-modal__connections-terminal-identity {
+            min-width: 0;
+            margin-right: auto;
+        }
+
+        #${CARD_LICENSE_MODAL_ID} .dao-license-modal__connections-terminal-title {
+            color: #1e293b;
+            font-size: 13px;
+            font-weight: 850;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+        #${CARD_LICENSE_MODAL_ID} .dao-license-modal__connections-terminal-meta {
+            margin-top: 3px;
+            color: #64748b;
+            font-size: 11px;
+            font-weight: 650;
+            overflow-wrap: anywhere;
+        }
+
+        #${CARD_LICENSE_MODAL_ID} .dao-license-modal__connections-terminal-count {
+            flex: 0 0 auto;
+            min-width: 28px;
+            padding: 4px 7px;
+            border-radius: 9px;
+            background: rgba(124, 58, 237, 0.11);
+            color: #6d28d9;
+            text-align: center;
+        }
+
+        #${CARD_LICENSE_MODAL_ID} .dao-license-modal__connections-terminal .dao-license-modal__connections-table-wrap {
+            border-width: 1px 0 0;
+            border-radius: 0;
+        }
+
+        #${CARD_LICENSE_MODAL_ID} .dao-license-modal__connections-action {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 16px;
+            padding: 14px 16px;
+            border: 1px solid rgba(239, 68, 68, 0.22);
+            border-radius: 15px;
+            background: linear-gradient(145deg, rgba(254, 242, 242, 0.92), rgba(255, 247, 237, 0.82));
+        }
+
+        #${CARD_LICENSE_MODAL_ID} .dao-license-modal__connections-action-text {
+            min-width: 0;
+        }
+
+        #${CARD_LICENSE_MODAL_ID} .dao-license-modal__connections-action-title {
+            color: #991b1b;
+            font-size: 13px;
+            font-weight: 850;
+        }
+
+        #${CARD_LICENSE_MODAL_ID} .dao-license-modal__connections-action-status {
+            margin-top: 4px;
+            color: #7c2d12;
+            font-size: 11px;
+            font-weight: 650;
+            line-height: 1.4;
+        }
+
+        #${CARD_LICENSE_MODAL_ID} .dao-license-modal__connections-action-button {
+            flex: 0 0 auto;
+            padding: 9px 13px;
+            border: 0;
+            border-radius: 10px;
+            background: linear-gradient(180deg, #ef4444, #dc2626);
+            color: #ffffff;
+            cursor: pointer;
+            font-size: 12px;
+            font-weight: 850;
+            box-shadow: 0 8px 16px rgba(220, 38, 38, 0.2);
+        }
+
+        #${CARD_LICENSE_MODAL_ID} .dao-license-modal__connections-action-button:disabled {
+            cursor: not-allowed;
+            opacity: 0.58;
+        }
+
+        #${CARD_LICENSE_MODAL_ID} .dao-license-modal__connections-action-button[data-busy='true'] {
+            cursor: wait;
+        }
+
         #${CARD_LICENSE_MODAL_ID}[data-theme='dark'] {
             background: rgba(2, 6, 23, 0.84);
             backdrop-filter: blur(12px) saturate(1.08);
@@ -3467,6 +3858,101 @@ const ensureCardLicenseModalStyles = () => {
 
         #${CARD_LICENSE_MODAL_ID}[data-theme='dark'] .dao-license-modal__panel::before {
             background: linear-gradient(90deg, rgba(148, 163, 184, 0.34), rgba(148, 163, 184, 0));
+        }
+
+        #${CARD_LICENSE_MODAL_ID}[data-theme='dark'] .dao-license-modal__connections-source,
+        #${CARD_LICENSE_MODAL_ID}[data-theme='dark'] .dao-license-modal__connections-module-meta,
+        #${CARD_LICENSE_MODAL_ID}[data-theme='dark'] .dao-license-modal__connections-secondary,
+        #${CARD_LICENSE_MODAL_ID}[data-theme='dark'] .dao-license-modal__connections-terminal-meta {
+            color: #94a3b8;
+        }
+
+        #${CARD_LICENSE_MODAL_ID}[data-theme='dark'] .dao-license-modal__connections-grouping {
+            color: #94a3b8;
+        }
+
+        #${CARD_LICENSE_MODAL_ID}[data-theme='dark'] .dao-license-modal__connections-grouping-select {
+            border-color: rgba(167, 139, 250, 0.22);
+            background: #1e293b;
+            color: #e2e8f0;
+        }
+
+        #${CARD_LICENSE_MODAL_ID}[data-theme='dark'] .dao-license-modal__connections-disclosure,
+        #${CARD_LICENSE_MODAL_ID}[data-theme='dark'] .dao-license-modal__connections-terminal {
+            border-color: rgba(148, 163, 184, 0.16);
+            background: rgba(15, 23, 42, 0.72);
+        }
+
+        #${CARD_LICENSE_MODAL_ID}[data-theme='dark'] .dao-license-modal__connections-terminal--stale {
+            border-color: rgba(248, 113, 113, 0.26);
+            background: rgba(69, 10, 10, 0.24);
+        }
+
+        #${CARD_LICENSE_MODAL_ID}[data-theme='dark'] .dao-license-modal__connections-disclosure-summary,
+        #${CARD_LICENSE_MODAL_ID}[data-theme='dark'] .dao-license-modal__connections-terminal-summary,
+        #${CARD_LICENSE_MODAL_ID}[data-theme='dark'] .dao-license-modal__connections-terminal-title {
+            color: #e2e8f0;
+        }
+
+        #${CARD_LICENSE_MODAL_ID}[data-theme='dark'] .dao-license-modal__connections-terminal-count {
+            background: rgba(167, 139, 250, 0.16);
+            color: #c4b5fd;
+        }
+
+        #${CARD_LICENSE_MODAL_ID}[data-theme='dark'] .dao-license-modal__connections-action {
+            border-color: rgba(248, 113, 113, 0.24);
+            background: linear-gradient(145deg, rgba(69, 10, 10, 0.36), rgba(67, 20, 7, 0.28));
+        }
+
+        #${CARD_LICENSE_MODAL_ID}[data-theme='dark'] .dao-license-modal__connections-action-title {
+            color: #fca5a5;
+        }
+
+        #${CARD_LICENSE_MODAL_ID}[data-theme='dark'] .dao-license-modal__connections-action-status {
+            color: #fdba74;
+        }
+
+        #${CARD_LICENSE_MODAL_ID}[data-theme='dark'] .dao-license-modal__connections-module {
+            border-color: rgba(167, 139, 250, 0.15);
+            background: linear-gradient(145deg, rgba(91, 33, 182, 0.22), rgba(30, 64, 175, 0.12));
+            box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.04);
+        }
+
+        #${CARD_LICENSE_MODAL_ID}[data-theme='dark'] .dao-license-modal__connections-module--primary {
+            border-color: rgba(196, 181, 253, 0.24);
+            background: linear-gradient(145deg, rgba(109, 40, 217, 0.3), rgba(30, 64, 175, 0.16));
+        }
+
+        #${CARD_LICENSE_MODAL_ID}[data-theme='dark'] .dao-license-modal__connections-module-name,
+        #${CARD_LICENSE_MODAL_ID}[data-theme='dark'] .dao-license-modal__connections-primary {
+            color: #f8fafc;
+        }
+
+        #${CARD_LICENSE_MODAL_ID}[data-theme='dark'] .dao-license-modal__connections-table-wrap {
+            border-color: rgba(148, 163, 184, 0.15);
+            background: rgba(15, 23, 42, 0.72);
+        }
+
+        #${CARD_LICENSE_MODAL_ID}[data-theme='dark'] .dao-license-modal__connections-table {
+            color: #cbd5e1;
+        }
+
+        #${CARD_LICENSE_MODAL_ID}[data-theme='dark'] .dao-license-modal__connections-table th {
+            border-color: rgba(148, 163, 184, 0.16);
+            background: rgba(30, 41, 59, 0.98);
+            color: #94a3b8;
+        }
+
+        #${CARD_LICENSE_MODAL_ID}[data-theme='dark'] .dao-license-modal__connections-table td {
+            border-color: rgba(148, 163, 184, 0.11);
+        }
+
+        #${CARD_LICENSE_MODAL_ID}[data-theme='dark'] .dao-license-modal__connections-table tbody tr:hover td {
+            background: rgba(139, 92, 246, 0.07);
+        }
+
+        #${CARD_LICENSE_MODAL_ID}[data-theme='dark'] .dao-license-modal__connections-row--stale td {
+            background: rgba(127, 29, 29, 0.2);
         }
 
         #${CARD_LICENSE_MODAL_ID}[data-theme='dark'] .dao-license-modal__badge {
@@ -3845,6 +4331,10 @@ const ensureCardLicenseModalStyles = () => {
         }
 
         @media (max-width: 960px) {
+            #${CARD_LICENSE_MODAL_ID} .dao-license-modal__connections-modules {
+                grid-template-columns: repeat(2, minmax(0, 1fr));
+            }
+
             #${CARD_LICENSE_MODAL_ID} .dao-license-modal__queue-header {
                 display: none;
             }
@@ -3893,8 +4383,37 @@ const ensureCardLicenseModalStyles = () => {
             }
 
             #${CARD_LICENSE_MODAL_ID} .dao-license-modal__badges,
-            #${CARD_LICENSE_MODAL_ID} .dao-license-modal__license-list {
+            #${CARD_LICENSE_MODAL_ID} .dao-license-modal__license-list,
+            #${CARD_LICENSE_MODAL_ID} .dao-license-modal__connections-modules {
                 grid-template-columns: 1fr;
+            }
+
+            #${CARD_LICENSE_MODAL_ID} .dao-license-modal__connections-heading {
+                grid-template-columns: 1fr;
+            }
+
+            #${CARD_LICENSE_MODAL_ID} .dao-license-modal__connections-source {
+                justify-self: start;
+                text-align: left;
+            }
+
+            #${CARD_LICENSE_MODAL_ID} .dao-license-modal__connections-grouping {
+                align-items: stretch;
+                flex-direction: column;
+                justify-self: stretch;
+            }
+
+            #${CARD_LICENSE_MODAL_ID} .dao-license-modal__connections-grouping-select {
+                width: 100%;
+            }
+
+            #${CARD_LICENSE_MODAL_ID} .dao-license-modal__connections-action {
+                align-items: stretch;
+                flex-direction: column;
+            }
+
+            #${CARD_LICENSE_MODAL_ID} .dao-license-modal__connections-action-button {
+                width: 100%;
             }
 
             #${CARD_LICENSE_MODAL_ID} .dao-license-modal__license-item,
@@ -4686,9 +5205,11 @@ const renderCardLicenseModal = ({
     displayMode = CARD_LICENSE_DISPLAY_MODES.cards,
     layout = CARD_LICENSE_MODAL_LAYOUTS.default,
     footerActions = null,
-    onClose = null
+    onClose = null,
+    preserveScroll = false
 }) => {
     const { modal, titleWrapNode, titleNode, subtitleNode, viewportNode, bodyNode, actionsNode } = ensureCardLicenseModalShell();
+    const previousScrollTop = preserveScroll && viewportNode ? viewportNode.scrollTop : 0;
     const hasTitle = Boolean(title);
     const hasSubtitle = Boolean(subtitle);
     const resolvedDisplayMode = normalizeCardLicenseDisplayMode(displayMode);
@@ -4707,7 +5228,7 @@ const renderCardLicenseModal = ({
     actionsNode.replaceChildren(...actionButtons);
     cardLicenseModalCloseHandler = typeof onClose === 'function' ? onClose : null;
     if (viewportNode) {
-        viewportNode.scrollTop = 0;
+        viewportNode.scrollTop = preserveScroll ? previousScrollTop : 0;
     }
 
     queueMicrotask(() => {
@@ -4779,6 +5300,685 @@ const showCardLicenseResultModal = (serverContext, licenseResult, displayMode) =
         displayMode,
         content: buildCardLicenseResultContent(serverContext, licenseResult)
     });
+};
+
+const normalizeCardConnectionsSnapshot = (snapshot) => {
+    const normalizeValue = (value) => String(value ?? '').replace(/\s+/g, ' ').trim();
+    const rows = Array.isArray(snapshot?.rows)
+        ? snapshot.rows.map((row) => ({
+            ipAddress: normalizeValue(row?.ipAddress),
+            computerName: normalizeValue(row?.computerName),
+            terminalName: normalizeValue(row?.terminalName),
+            login: normalizeValue(row?.login),
+            moduleId: normalizeValue(row?.moduleId),
+            moduleName: normalizeValue(row?.moduleName),
+            moduleDisplayName: normalizeValue(row?.moduleDisplayName),
+            displayName: normalizeValue(row?.displayName || row?.moduleDisplayName || row?.moduleName),
+            lastActivity: normalizeValue(row?.lastActivity),
+            ageLabel: normalizeValue(row?.ageLabel),
+            isActive: row?.isActive === true,
+            isStale: row?.isStale === true
+        }))
+        : [];
+    const rawGroups = Array.isArray(snapshot?.summary?.groups) ? snapshot.summary.groups : [];
+    const groups = rawGroups.map((group) => ({
+        displayName: normalizeValue(group?.displayName) || 'Невідомий модуль',
+        moduleId: normalizeValue(group?.moduleId),
+        activeCount: Math.max(0, Number(group?.activeCount) || 0),
+        occupiedCount: Math.max(0, Number(group?.occupiedCount) || 0),
+        primaryPriority: group?.primaryPriority === null || group?.primaryPriority === undefined || group?.primaryPriority === ''
+            ? null
+            : Number.isFinite(Number(group.primaryPriority)) ? Number(group.primaryPriority) : null
+    }));
+    const rawAction = snapshot?.action && typeof snapshot.action === 'object' ? snapshot.action : {};
+
+    return {
+        sourceUrl: normalizeValue(snapshot?.sourceUrl),
+        capturedAt: normalizeValue(snapshot?.capturedAt),
+        thresholdMinutes: Math.max(1, Number(snapshot?.thresholdMinutes) || 1),
+        truncated: snapshot?.truncated === true,
+        rows,
+        summary: {
+            occupiedCount: Math.max(0, Number(snapshot?.summary?.occupiedCount) || rows.length),
+            activeCount: Math.max(0, Number(snapshot?.summary?.activeCount) || rows.filter((row) => row.isActive).length),
+            staleCount: Math.max(0, Number(snapshot?.summary?.staleCount) || rows.filter((row) => row.isStale).length),
+            unknownActivityCount: Math.max(0, Number(snapshot?.summary?.unknownActivityCount) || rows.filter((row) => !row.isActive && !row.isStale).length),
+            groups
+        },
+        action: {
+            mode: rawAction.mode === 'reset' ? 'reset' : 'helpdesk',
+            label: normalizeValue(rawAction.label) || (rawAction.mode === 'reset' ? 'Сбросить лицензии' : 'Створити заявку'),
+            status: normalizeValue(rawAction.status),
+            state: normalizeValue(rawAction.state) || 'ready',
+            busy: rawAction.busy === true,
+            enabled: rawAction.enabled === true,
+            hasHelpDeskContext: rawAction.hasHelpDeskContext === true,
+            staleCount: Object.prototype.hasOwnProperty.call(rawAction, 'staleCount')
+                ? Math.max(0, Number(rawAction.staleCount) || 0)
+                : rows.filter((row) => row.isStale).length
+        }
+    };
+};
+
+const formatCardConnectionsCapturedAt = (value) => {
+    const parsedDate = new Date(value);
+    if (Number.isNaN(parsedDate.getTime())) {
+        return 'щойно';
+    }
+
+    return parsedDate.toLocaleString('uk-UA', {
+        day: '2-digit',
+        month: '2-digit',
+        hour: '2-digit',
+        minute: '2-digit',
+        second: '2-digit'
+    });
+};
+
+const buildCardConnectionsModuleNode = (group) => {
+    const className = [
+        'dao-license-modal__connections-module',
+        group.primaryPriority === null ? '' : 'dao-license-modal__connections-module--primary'
+    ].filter(Boolean).join(' ');
+    const node = createCardLicenseModalNode('article', className);
+    const text = createCardLicenseModalNode('div', '');
+    text.appendChild(createCardLicenseModalNode('div', 'dao-license-modal__connections-module-name', group.displayName));
+    text.appendChild(createCardLicenseModalNode(
+        'div',
+        'dao-license-modal__connections-module-meta',
+        [group.moduleId ? `ID ${group.moduleId}` : '', `активні ${group.activeCount} з ${group.occupiedCount}`].filter(Boolean).join(' · ')
+    ));
+    node.appendChild(text);
+    node.appendChild(createCardLicenseModalNode('strong', 'dao-license-modal__connections-module-count', String(group.occupiedCount)));
+    return node;
+};
+
+const buildCardConnectionsStatusNode = (row) => {
+    const status = row.isActive ? 'active' : row.isStale ? 'stale' : 'unknown';
+    const label = status === 'active' ? 'Активна' : status === 'stale' ? 'Зависла' : 'Невідомо';
+    return createCardLicenseModalNode(
+        'span',
+        `dao-license-modal__connections-status dao-license-modal__connections-status--${status}`,
+        label
+    );
+};
+
+const appendCardConnectionsTextPair = (cell, primary, secondary = '') => {
+    cell.appendChild(createCardLicenseModalNode('span', 'dao-license-modal__connections-primary', primary || '—'));
+    if (secondary) {
+        cell.appendChild(createCardLicenseModalNode('span', 'dao-license-modal__connections-secondary', secondary));
+    }
+};
+
+const buildCardConnectionsTable = (rows, columns) => {
+    const wrap = createCardLicenseModalNode('div', 'dao-license-modal__connections-table-wrap');
+    const table = createCardLicenseModalNode('table', 'dao-license-modal__connections-table');
+    const head = document.createElement('thead');
+    const headRow = document.createElement('tr');
+    const columnLabels = {
+        terminal: 'Термінал',
+        login: 'Логін',
+        module: 'Модуль',
+        status: 'Стан',
+        activity: 'Остання активність'
+    };
+    columns.forEach((column) => {
+        headRow.appendChild(createCardLicenseModalNode('th', '', columnLabels[column] || column));
+    });
+    head.appendChild(headRow);
+    table.appendChild(head);
+
+    const body = document.createElement('tbody');
+    rows.forEach((row) => {
+        const rowNode = document.createElement('tr');
+        if (row.isStale) {
+            rowNode.className = 'dao-license-modal__connections-row--stale';
+        }
+
+        columns.forEach((column) => {
+            const cell = document.createElement('td');
+            if (column === 'terminal') {
+                appendCardConnectionsTextPair(
+                    cell,
+                    row.terminalName || row.computerName || row.ipAddress,
+                    [
+                        row.computerName && row.computerName !== row.terminalName ? row.computerName : '',
+                        row.ipAddress
+                    ].filter(Boolean).join(' · ')
+                );
+            } else if (column === 'login') {
+                appendCardConnectionsTextPair(cell, row.login);
+            } else if (column === 'module') {
+                appendCardConnectionsTextPair(
+                    cell,
+                    row.displayName || row.moduleDisplayName || row.moduleName,
+                    [row.moduleId ? `ID ${row.moduleId}` : '', row.moduleName].filter(Boolean).join(' · ')
+                );
+            } else if (column === 'status') {
+                cell.appendChild(buildCardConnectionsStatusNode(row));
+            } else if (column === 'activity') {
+                appendCardConnectionsTextPair(cell, row.ageLabel || row.lastActivity);
+                cell.title = row.lastActivity;
+            }
+            rowNode.appendChild(cell);
+        });
+        body.appendChild(rowNode);
+    });
+    table.appendChild(body);
+    wrap.appendChild(table);
+    return wrap;
+};
+
+const getCardConnectionsTerminalKey = (row) => [
+    row.terminalName,
+    row.computerName,
+    row.ipAddress,
+    row.login
+].join('|');
+
+const getCardConnectionsLicenseKey = (row) => [
+    row.moduleId,
+    row.moduleName,
+    row.displayName
+].join('|');
+
+const getCardConnectionsStatusKey = (row) => (
+    row.isStale ? 'stale' : row.isActive ? 'active' : 'unknown'
+);
+
+const groupCardConnectionsRows = (rows) => {
+    const groups = new Map();
+    rows.forEach((row) => {
+        let key = '';
+        if (cardConnectionsGroupingMode === CARD_CONNECTIONS_GROUPING_MODES.license) {
+            key = `license:${getCardConnectionsLicenseKey(row) || 'unknown-license'}`;
+        } else if (cardConnectionsGroupingMode === CARD_CONNECTIONS_GROUPING_MODES.status) {
+            key = `status:${getCardConnectionsStatusKey(row)}`;
+        } else {
+            key = `terminal:${getCardConnectionsTerminalKey(row) || 'unknown-terminal'}`;
+        }
+        const group = groups.get(key) || { key, rows: [] };
+        group.rows.push(row);
+        groups.set(key, group);
+    });
+
+    const result = Array.from(groups.values()).map((group) => {
+        const firstRow = group.rows[0] || {};
+        const staleCount = group.rows.filter((row) => row.isStale).length;
+        if (cardConnectionsGroupingMode === CARD_CONNECTIONS_GROUPING_MODES.license) {
+            return {
+                ...group,
+                title: firstRow.displayName || firstRow.moduleDisplayName || firstRow.moduleName || 'Невідомий модуль',
+                meta: staleCount ? `Завислі: ${staleCount}` : '',
+                hasStale: staleCount > 0,
+                columns: ['terminal', 'login', 'status', 'activity']
+            };
+        }
+        if (cardConnectionsGroupingMode === CARD_CONNECTIONS_GROUPING_MODES.status) {
+            const statusKey = getCardConnectionsStatusKey(firstRow);
+            const statusTitle = statusKey === 'stale' ? 'Завислі' : statusKey === 'active' ? 'Активні' : 'Невідомий стан';
+            return {
+                ...group,
+                title: statusTitle,
+                meta: `${group.rows.length} підключень`,
+                hasStale: statusKey === 'stale',
+                columns: ['terminal', 'login', 'module', 'activity'],
+                statusPriority: statusKey === 'stale' ? 0 : statusKey === 'active' ? 1 : 2
+            };
+        }
+        return {
+            ...group,
+            title: `ПК: ${firstRow.computerName || '—'}, термінал: ${firstRow.terminalName || '—'}, IP: ${firstRow.ipAddress || '—'}`,
+            meta: '',
+            hasStale: staleCount > 0,
+            columns: ['module', 'login', 'status', 'activity']
+        };
+    });
+
+    return result.sort((left, right) => {
+        if (cardConnectionsGroupingMode === CARD_CONNECTIONS_GROUPING_MODES.status) {
+            return (left.statusPriority ?? 99) - (right.statusPriority ?? 99);
+        }
+        if (cardConnectionsGroupingMode === CARD_CONNECTIONS_GROUPING_MODES.license) {
+            const priority = (group) => {
+                const row = group.rows[0];
+                const name = group.title.toUpperCase();
+                if (row.moduleId === '100' || row.moduleName === 'FRONT_OFFICE_FAST_FOOD' || name === 'RMS (FRONT FAST FOOD)') return 0;
+                if (row.moduleId === '101' || row.moduleName === 'FRONT_OFFICE_TABLE_SERVICE' || name === 'RMS (TABLESERVICE)') return 1;
+                return 2;
+            };
+            return priority(left) - priority(right) || left.title.localeCompare(right.title, 'uk');
+        }
+        const leftStale = left.rows.some((row) => row.isStale);
+        const rightStale = right.rows.some((row) => row.isStale);
+        return Number(rightStale) - Number(leftStale) || left.title.localeCompare(right.title, 'uk');
+    });
+};
+
+const captureCardConnectionsDisclosureState = () => {
+    const modal = document.getElementById(CARD_LICENSE_MODAL_ID);
+    if (!modal) {
+        return;
+    }
+
+    const modules = modal.querySelector('[data-connections-modules="true"]');
+    if (modules instanceof HTMLDetailsElement) {
+        cardConnectionsModulesExpanded = modules.open;
+    }
+
+    const groupNodes = Array.from(modal.querySelectorAll('[data-connections-group-key]'));
+    if (groupNodes.length) {
+        cardConnectionsExpandedTerminalKeys = new Set(
+            groupNodes
+                .filter((node) => node instanceof HTMLDetailsElement && node.open)
+                .map((node) => node.dataset.connectionsGroupKey || '')
+                .filter(Boolean)
+        );
+    }
+};
+
+const buildCardConnectionsModulesDisclosure = (groups) => {
+    const details = createCardLicenseModalNode('details', 'dao-license-modal__connections-disclosure');
+    details.dataset.connectionsModules = 'true';
+    details.open = cardConnectionsModulesExpanded;
+    const total = groups.reduce((sum, group) => sum + group.occupiedCount, 0);
+    const summary = createCardLicenseModalNode(
+        'summary',
+        'dao-license-modal__connections-disclosure-summary',
+        `Кількість за модулями · ${total}`
+    );
+    details.appendChild(summary);
+    const modules = createCardLicenseModalNode('div', 'dao-license-modal__connections-modules');
+    groups.forEach((group) => modules.appendChild(buildCardConnectionsModuleNode(group)));
+    details.appendChild(modules);
+    details.addEventListener('toggle', captureCardConnectionsDisclosureState);
+    return details;
+};
+
+const buildCardConnectionsGroupingControl = () => {
+    const label = createCardLicenseModalNode('label', 'dao-license-modal__connections-grouping');
+    const select = createCardLicenseModalNode('select', 'dao-license-modal__connections-grouping-select');
+    select.setAttribute('aria-label', 'Групування підключень');
+    [
+        [CARD_CONNECTIONS_GROUPING_MODES.terminal, 'За терміналом'],
+        [CARD_CONNECTIONS_GROUPING_MODES.license, 'За типом ліцензії'],
+        [CARD_CONNECTIONS_GROUPING_MODES.status, 'За станом']
+    ].forEach(([value, text]) => {
+        const option = document.createElement('option');
+        option.value = value;
+        option.textContent = text;
+        select.appendChild(option);
+    });
+    select.value = cardConnectionsGroupingMode;
+    select.addEventListener('change', () => {
+        const nextMode = Object.values(CARD_CONNECTIONS_GROUPING_MODES).includes(select.value)
+            ? select.value
+            : CARD_CONNECTIONS_GROUPING_MODES.license;
+        if (nextMode === cardConnectionsGroupingMode) {
+            return;
+        }
+
+        cardConnectionsGroupingMode = nextMode;
+        cardConnectionsExpandedTerminalKeys = null;
+        cardConnectionsSkipDisclosureCapture = true;
+        if (activeConnectionsSnapshotLatestSnapshot && activeConnectionsSnapshotContext) {
+            showCardConnectionsResultModal(activeConnectionsSnapshotContext, activeConnectionsSnapshotLatestSnapshot);
+        }
+    });
+    label.appendChild(select);
+    return label;
+};
+
+const buildCardConnectionsGroup = (group) => {
+    const details = createCardLicenseModalNode(
+        'details',
+        `dao-license-modal__connections-terminal${group.hasStale ? ' dao-license-modal__connections-terminal--stale' : ''}`
+    );
+    details.dataset.connectionsGroupKey = group.key;
+    details.open = cardConnectionsExpandedTerminalKeys === null
+        ? cardConnectionsGroupingMode !== CARD_CONNECTIONS_GROUPING_MODES.license || /^RMS \((Front Fast Food|TableService)\)$/i.test(group.title)
+        : cardConnectionsExpandedTerminalKeys.has(group.key);
+
+    const summary = createCardLicenseModalNode('summary', 'dao-license-modal__connections-terminal-summary');
+    const identity = createCardLicenseModalNode('div', 'dao-license-modal__connections-terminal-identity');
+    identity.appendChild(createCardLicenseModalNode(
+        'div',
+        'dao-license-modal__connections-terminal-title',
+        group.title
+    ));
+    if (group.meta) {
+        identity.appendChild(createCardLicenseModalNode(
+            'div',
+            'dao-license-modal__connections-terminal-meta',
+            group.meta
+        ));
+    }
+    summary.appendChild(identity);
+    summary.appendChild(createCardLicenseModalNode(
+        'span',
+        'dao-license-modal__connections-terminal-count',
+        String(group.rows.length)
+    ));
+    details.appendChild(summary);
+    details.appendChild(buildCardConnectionsTable(group.rows, group.columns));
+    details.addEventListener('toggle', captureCardConnectionsDisclosureState);
+    return details;
+};
+
+const buildCardConnectionsStaleAction = (snapshot) => {
+    if (!snapshot.action.staleCount) {
+        return null;
+    }
+
+    const panel = createCardLicenseModalNode('div', 'dao-license-modal__connections-action');
+    const text = createCardLicenseModalNode('div', 'dao-license-modal__connections-action-text');
+    text.appendChild(createCardLicenseModalNode(
+        'div',
+        'dao-license-modal__connections-action-title',
+        `Завислі ліцензії: ${snapshot.action.staleCount}`
+    ));
+    text.appendChild(createCardLicenseModalNode(
+        'div',
+        'dao-license-modal__connections-action-status',
+        snapshot.action.status || ''
+    ));
+    panel.appendChild(text);
+
+    const button = createCardLicenseModalNode(
+        'button',
+        'dao-license-modal__connections-action-button',
+        cardConnectionsActionBusy || snapshot.action.busy ? 'Виконуємо...' : snapshot.action.label
+    );
+    button.type = 'button';
+    const isBusy = cardConnectionsActionBusy || snapshot.action.busy;
+    button.disabled = isBusy || !snapshot.action.enabled;
+    button.dataset.busy = String(isBusy);
+    if (button.disabled && !isBusy && snapshot.action.status) {
+        button.title = snapshot.action.status;
+    }
+    button.addEventListener('click', () => runCardConnectionsStaleAction(snapshot));
+    panel.appendChild(button);
+    return panel;
+};
+
+const buildCardConnectionsResultContent = (context, rawSnapshot) => {
+    const snapshot = normalizeCardConnectionsSnapshot(rawSnapshot);
+    const fragment = document.createDocumentFragment();
+    const overview = createCardLicenseModalNode('section', 'dao-license-modal__panel dao-license-modal__connections-overview');
+    const heading = createCardLicenseModalNode('div', 'dao-license-modal__connections-heading');
+    heading.appendChild(buildCardConnectionsGroupingControl());
+    const count = createCardLicenseModalNode('span', 'dao-license-modal__connections-source', `Усього: ${snapshot.rows.length}`);
+    count.title = `Оновлено: ${formatCardConnectionsCapturedAt(snapshot.capturedAt)}`;
+    heading.appendChild(count);
+    overview.appendChild(heading);
+
+    const staleAction = buildCardConnectionsStaleAction(snapshot);
+    if (staleAction) {
+        overview.appendChild(staleAction);
+    }
+    fragment.appendChild(overview);
+
+    const details = createCardLicenseModalNode('section', 'dao-license-modal__panel');
+    if (snapshot.rows.length) {
+        const terminalList = createCardLicenseModalNode('div', 'dao-license-modal__connections-terminal-list');
+        groupCardConnectionsRows(snapshot.rows).forEach((group) => {
+            terminalList.appendChild(buildCardConnectionsGroup(group));
+        });
+        details.appendChild(terminalList);
+    } else {
+        details.appendChild(createCardLicenseModalNode('div', 'dao-license-modal__empty-state', 'Сервер відповів без зайнятих ліцензій.'));
+    }
+    if (snapshot.truncated) {
+        details.appendChild(createCardLicenseModalNode('p', 'dao-license-modal__connections-truncated', 'Показано перші 1000 підключень.'));
+    }
+    fragment.appendChild(details);
+    return fragment;
+};
+
+const requestCardConnectionsSnapshot = (context, requestId) => new Promise((resolve, reject) => {
+    chrome.runtime.sendMessage({
+        action: 'OPEN_SYRVE_CONNECTIONS_SNAPSHOT',
+        server: context?.server,
+        port: context?.port,
+        requestId,
+        connectionsHelpDeskPayload: context?.connectionsHelpDeskPayload || null
+    }, (response) => {
+        if (chrome.runtime.lastError) {
+            reject(new Error(chrome.runtime.lastError.message));
+            return;
+        }
+
+        if (!response?.ok) {
+            reject(new Error(response?.error || 'Не вдалося запустити отримання зайнятих ліцензій.'));
+            return;
+        }
+
+        resolve(response);
+    });
+});
+
+const cancelActiveCardConnectionsSnapshot = () => {
+    const requestId = activeConnectionsSnapshotRequestId;
+    activeConnectionsSnapshotRequestId = null;
+    activeConnectionsSnapshotContext = null;
+    activeConnectionsSnapshotLatestSnapshot = null;
+    activeConnectionsSnapshotHasResult = false;
+    cardConnectionsModulesExpanded = false;
+    cardConnectionsExpandedTerminalKeys = null;
+    cardConnectionsGroupingMode = CARD_CONNECTIONS_GROUPING_MODES.license;
+    cardConnectionsSkipDisclosureCapture = false;
+    cardConnectionsActionBusy = false;
+    resetActiveConnectionsSnapshotButton();
+    removeCardLicenseModal();
+
+    if (requestId) {
+        chrome.runtime.sendMessage({
+            action: 'CANCEL_SYRVE_CONNECTIONS_SNAPSHOT',
+            requestId
+        }, () => {
+            void chrome.runtime.lastError;
+        });
+    }
+};
+
+const openCardConnectionsServicePage = (context) => {
+    cancelActiveCardConnectionsSnapshot();
+    chrome.runtime.sendMessage({
+        action: 'OPEN_SYRVE_PAGE',
+        server: context?.server,
+        port: context?.port,
+        path: '/resto/service/monitoring/connections.jsp',
+        connectionsHelpDeskPayload: context?.connectionsHelpDeskPayload || null
+    }, (response) => {
+        if (chrome.runtime.lastError || !response?.ok) {
+            showCardConnectionsErrorModal(
+                context,
+                chrome.runtime.lastError?.message || response?.error || 'Не вдалося відкрити службову сторінку.'
+            );
+        }
+    });
+};
+
+const showCardConnectionsLoadingModal = (context) => {
+    const content = buildCardLicenseLoadingContent();
+    const title = content.querySelector('.dao-license-modal__section-title');
+    const caption = content.querySelector('.dao-license-modal__section-caption');
+    if (title) title.textContent = 'Завантажуємо зайняті ліцензії...';
+    if (caption) caption.textContent = 'Фоново авторизуємося на сервері та читаємо актуальну таблицю.';
+    renderCardLicenseModal({
+        title: 'Зайняті ліцензії Syrve',
+        subtitle: '',
+        content,
+        onClose: cancelActiveCardConnectionsSnapshot
+    });
+};
+
+const showCardConnectionsErrorModal = (context, errorMessage) => {
+    renderCardLicenseModal({
+        title: 'Зайняті ліцензії Syrve',
+        subtitle: '',
+        content: buildCardLicenseErrorContent(errorMessage),
+        footerActions: [
+            { label: 'Закрити', onClick: closeCardLicenseCheckModal },
+            { label: 'Службова сторінка', onClick: () => openCardConnectionsServicePage(context) },
+            { label: 'Повторити', variant: 'primary', onClick: () => startCardConnectionsSnapshot(context?.sourceButton, context) }
+        ]
+    });
+};
+
+const showCardConnectionsResultModal = (context, snapshot) => {
+    if (activeConnectionsSnapshotHasResult && !cardConnectionsSkipDisclosureCapture) {
+        captureCardConnectionsDisclosureState();
+    }
+    renderCardLicenseModal({
+        title: 'Зайняті ліцензії Syrve',
+        subtitle: '',
+        content: buildCardConnectionsResultContent(context, snapshot),
+        footerActions: [
+            { label: 'Закрити', onClick: closeCardLicenseCheckModal },
+            { label: 'Службова сторінка', onClick: () => openCardConnectionsServicePage(context) }
+        ],
+        onClose: cancelActiveCardConnectionsSnapshot,
+        preserveScroll: activeConnectionsSnapshotHasResult
+    });
+    activeConnectionsSnapshotHasResult = true;
+    cardConnectionsSkipDisclosureCapture = false;
+};
+
+const runCardConnectionsStaleAction = (snapshot) => {
+    if (!activeConnectionsSnapshotRequestId || cardConnectionsActionBusy || snapshot?.action?.enabled !== true) {
+        return;
+    }
+
+    cardConnectionsActionBusy = true;
+    const actionSnapshot = {
+        ...snapshot,
+        action: {
+            ...snapshot.action,
+            busy: true,
+            enabled: false,
+            state: 'running',
+            status: 'Запускаємо стандартну дію розширення...'
+        }
+    };
+    activeConnectionsSnapshotLatestSnapshot = actionSnapshot;
+    showCardConnectionsResultModal(activeConnectionsSnapshotContext, actionSnapshot);
+
+    chrome.runtime.sendMessage({
+        action: 'RUN_SYRVE_CONNECTIONS_STALE_ACTION',
+        requestId: activeConnectionsSnapshotRequestId
+    }, (response) => {
+        if (chrome.runtime.lastError || !response?.ok) {
+            cardConnectionsActionBusy = false;
+            const errorSnapshot = {
+                ...activeConnectionsSnapshotLatestSnapshot,
+                action: {
+                    ...activeConnectionsSnapshotLatestSnapshot?.action,
+                    busy: false,
+                    enabled: true,
+                    state: 'error',
+                    status: chrome.runtime.lastError?.message || response?.error || 'Не вдалося запустити дію.'
+                }
+            };
+            activeConnectionsSnapshotLatestSnapshot = errorSnapshot;
+            showCardConnectionsResultModal(activeConnectionsSnapshotContext, errorSnapshot);
+        }
+    });
+};
+
+const startCardConnectionsSnapshot = (button, context) => {
+    if (!context?.server) {
+        return;
+    }
+
+    if (activeConnectionsSnapshotRequestId) {
+        return;
+    }
+
+    const requestId = `${Date.now()}-${Math.random().toString(36).slice(2, 9)}`;
+    const requestContext = {
+        ...context,
+        sourceButton: button instanceof HTMLButtonElement ? button : context?.sourceButton || null
+    };
+    activeConnectionsSnapshotRequestId = requestId;
+    activeConnectionsSnapshotContext = requestContext;
+    activeConnectionsSnapshotLatestSnapshot = null;
+    activeConnectionsSnapshotHasResult = false;
+    cardConnectionsModulesExpanded = false;
+    cardConnectionsExpandedTerminalKeys = null;
+    cardConnectionsGroupingMode = CARD_CONNECTIONS_GROUPING_MODES.license;
+    cardConnectionsSkipDisclosureCapture = false;
+    cardConnectionsActionBusy = false;
+    activeConnectionsSnapshotButton = requestContext.sourceButton;
+    if (activeConnectionsSnapshotButton instanceof HTMLButtonElement) {
+        setCardActionButtonLoading(activeConnectionsSnapshotButton, true, 'Завантаження...');
+    }
+    showCardConnectionsLoadingModal(requestContext);
+
+    void requestCardConnectionsSnapshot(requestContext, requestId).catch((error) => {
+        if (activeConnectionsSnapshotRequestId !== requestId) {
+            return;
+        }
+
+        activeConnectionsSnapshotRequestId = null;
+        activeConnectionsSnapshotContext = null;
+        activeConnectionsSnapshotLatestSnapshot = null;
+        resetActiveConnectionsSnapshotButton();
+        showCardConnectionsErrorModal(requestContext, error?.message || 'Не вдалося отримати зайняті ліцензії.');
+    });
+};
+
+const handleCardConnectionsSnapshotResult = (message) => {
+    if (!message?.requestId || message.requestId !== activeConnectionsSnapshotRequestId) {
+        return;
+    }
+
+    const context = activeConnectionsSnapshotContext;
+
+    if (message.error) {
+        activeConnectionsSnapshotRequestId = null;
+        activeConnectionsSnapshotContext = null;
+        activeConnectionsSnapshotLatestSnapshot = null;
+        activeConnectionsSnapshotHasResult = false;
+        cardConnectionsActionBusy = false;
+        resetActiveConnectionsSnapshotButton();
+        showCardConnectionsErrorModal(context, message.error);
+        return;
+    }
+
+    const snapshot = normalizeCardConnectionsSnapshot(message.snapshot || {});
+    activeConnectionsSnapshotLatestSnapshot = snapshot;
+    if (!snapshot.action.staleCount) {
+        cardConnectionsActionBusy = false;
+    }
+    resetActiveConnectionsSnapshotButton();
+    const focusedElement = document.activeElement;
+    if (focusedElement instanceof HTMLSelectElement && focusedElement.closest(`#${CARD_LICENSE_MODAL_ID}`)) {
+        return;
+    }
+    showCardConnectionsResultModal(context, snapshot);
+};
+
+const handleCardConnectionsStaleActionState = (message) => {
+    if (!message?.requestId || message.requestId !== activeConnectionsSnapshotRequestId || !activeConnectionsSnapshotLatestSnapshot) {
+        return;
+    }
+
+    const actionState = message.actionState && typeof message.actionState === 'object' ? message.actionState : {};
+    const nextSnapshot = normalizeCardConnectionsSnapshot({
+        ...activeConnectionsSnapshotLatestSnapshot,
+        action: {
+            ...activeConnectionsSnapshotLatestSnapshot.action,
+            ...actionState
+        }
+    });
+    cardConnectionsActionBusy = nextSnapshot.action.busy;
+    activeConnectionsSnapshotLatestSnapshot = nextSnapshot;
+    const focusedElement = document.activeElement;
+    if (focusedElement instanceof HTMLSelectElement && focusedElement.closest(`#${CARD_LICENSE_MODAL_ID}`)) {
+        return;
+    }
+    showCardConnectionsResultModal(activeConnectionsSnapshotContext, nextSnapshot);
 };
 
 const buildBulkLicenseQueueItemLicenseResult = (item) => {
@@ -7839,6 +9039,7 @@ const readSendDataResponseMessage = async (response) => {
         btn.id = DEVICES_BUTTON_ID;
         btn.type = 'button';
         btn.dataset.cardButtonIntent = CARD_BUTTON_INTENTS.devices;
+        btn.dataset.connectionsSnapshotMode = 'modal';
         btn.textContent = 'Зайняті ліцензії';
         btn.style.cssText = `
             margin-left: 8px;
@@ -7882,17 +9083,10 @@ const readSendDataResponseMessage = async (response) => {
                 }
             }
 
-            try {
-                await openSyrvePageWithCredentials({
-                    server: serverData.server,
-                    port: serverData.port,
-                    path: '/resto/service/monitoring/connections.jsp',
-                    connectionsHelpDeskPayload
-                });
-            } catch (error) {
-                console.error('Не вдалося відкрити сторінку пристроїв Syrve:', error);
-                setCardErrorMessage(`Не вдалося відкрити Пристрої: ${error?.message || 'невідома помилка'}`);
-            }
+            startCardConnectionsSnapshot(btn, {
+                ...serverData,
+                connectionsHelpDeskPayload
+            });
         });
         return btn;
     };
@@ -8024,7 +9218,7 @@ const readSendDataResponseMessage = async (response) => {
         btn.id = DIRECTORIES_BUTTON_ID;
         btn.type = 'button';
         btn.dataset.cardButtonIntent = CARD_BUTTON_INTENTS.directories;
-        btn.textContent = 'Довідники';
+        btn.textContent = 'API: Запити';
         btn.style.cssText = `
             margin-left: 8px;
             cursor: pointer;
@@ -8324,11 +9518,11 @@ const readSendDataResponseMessage = async (response) => {
             container.appendChild(createPeriodBtn(scopeRoot));
             container.appendChild(createLoyaltyBtn(scopeRoot));
             container.appendChild(createWebBtn(scopeRoot));
-            container.appendChild(createDirectoriesBtn(scopeRoot));
             container.appendChild(createApiBtn(scopeRoot));
             if (isTaskPage()) {
                 container.appendChild(createHelpDeskDraftBtn(scopeRoot));
             }
+            container.appendChild(createDirectoriesBtn(scopeRoot));
 
             wrapperBox.after(container);
         } else if (container.previousElementSibling !== wrapperBox) {
@@ -8356,7 +9550,6 @@ const readSendDataResponseMessage = async (response) => {
         }
 
         const existingWebButton = container.querySelector(`#${WEB_BUTTON_ID}`);
-        const existingDirectoriesButton = container.querySelector(`#${DIRECTORIES_BUTTON_ID}`);
         const existingApiButton = container.querySelector(`#${API_BUTTON_ID}`);
         if (!existingWebButton) {
             const loyaltyBtn = container.querySelector(`#${LOYALTY_BUTTON_ID}`);
@@ -8368,21 +9561,11 @@ const readSendDataResponseMessage = async (response) => {
             }
         }
 
-        if (!existingDirectoriesButton) {
-            const webBtn = container.querySelector(`#${WEB_BUTTON_ID}`);
-            const directoriesBtn = createDirectoriesBtn(scopeRoot);
-            if (webBtn?.nextSibling) {
-                container.insertBefore(directoriesBtn, webBtn.nextSibling);
-            } else {
-                container.appendChild(directoriesBtn);
-            }
-        }
-
         if (!existingApiButton) {
-            const directoriesBtn = container.querySelector(`#${DIRECTORIES_BUTTON_ID}`);
+            const webBtn = container.querySelector(`#${WEB_BUTTON_ID}`);
             const apiBtn = createApiBtn(scopeRoot);
-            if (directoriesBtn?.nextSibling) {
-                container.insertBefore(apiBtn, directoriesBtn.nextSibling);
+            if (webBtn?.nextSibling) {
+                container.insertBefore(apiBtn, webBtn.nextSibling);
             } else {
                 container.appendChild(apiBtn);
             }
@@ -8399,6 +9582,14 @@ const readSendDataResponseMessage = async (response) => {
                 resetActiveHelpDeskDraftButton();
             }
             existingHelpDeskButton.remove();
+        }
+
+        let directoriesButton = container.querySelector(`#${DIRECTORIES_BUTTON_ID}`);
+        if (!directoriesButton) {
+            directoriesButton = createDirectoriesBtn(scopeRoot);
+            container.appendChild(directoriesButton);
+        } else if (directoriesButton !== container.lastElementChild) {
+            container.appendChild(directoriesButton);
         }
 
         container.querySelectorAll('button').forEach((button) => {

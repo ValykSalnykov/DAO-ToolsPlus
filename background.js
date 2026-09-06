@@ -28,11 +28,14 @@ const log = createLogger('background', 'info');
 
 const TAB_STATE = new Map();
 const HEALTH_PERIOD_REQUESTS = new Map();
+const CONNECTIONS_SNAPSHOT_REQUESTS = new Map();
+const CANCELLED_CONNECTIONS_SNAPSHOT_REQUESTS = new Set();
 const SYRVE_TAB_CREDENTIALS = new Map();
 const LOYALTY_TAB_CREDENTIALS = new Map();
 const GROOVY_LICENSE_RESET_COMPLETIONS = new Map();
 const SUPPORTED_PROTOCOLS = new Set(['http:', 'https:', 'file:', 'ftp:']);
 const HEALTH_PERIOD_TIMEOUT_MS = 30000;
+const CONNECTIONS_SNAPSHOT_TIMEOUT_MS = 30000;
 const SYRVE_CREDENTIAL_TTL_MS = 120000;
 const HELPDESK_DRAFT_REQUEST_TTL_MS = 5 * 60 * 1000;
 const CONNECTIONS_HELPDESK_CONTEXT_TTL_MS = 30 * 60 * 1000;
@@ -2849,6 +2852,54 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
     return true;
   }
 
+  if (message?.action === 'OPEN_SYRVE_CONNECTIONS_SNAPSHOT') {
+    const requesterTabId = sender.tab?.id;
+    if (requesterTabId === undefined || !message.server || !message.requestId) {
+      sendResponse({ ok: false, error: 'Missing requester tab, server, or request id' });
+      return false;
+    }
+
+    openConnectionsSnapshotTab({
+      requesterTabId,
+      server: message.server,
+      port: message.port,
+      requestId: message.requestId,
+      connectionsHelpDeskPayload: message.connectionsHelpDeskPayload
+    })
+      .then((serviceTabId) => sendResponse({ ok: true, tabId: serviceTabId }))
+      .catch((error) => sendResponse({ ok: false, error: error?.message || 'Failed to read Syrve connections' }));
+
+    return true;
+  }
+
+  if (message?.action === 'RUN_SYRVE_CONNECTIONS_STALE_ACTION') {
+    const requesterTabId = sender.tab?.id;
+    if (requesterTabId === undefined || !message.requestId) {
+      sendResponse({ ok: false, error: 'Missing requester tab or request id' });
+      return false;
+    }
+
+    runConnectionsSnapshotStaleAction(requesterTabId, message.requestId)
+      .then((result) => sendResponse({ ok: true, ...result }))
+      .catch((error) => sendResponse({ ok: false, error: error?.message || 'Failed to run stale license action' }));
+
+    return true;
+  }
+
+  if (message?.action === 'CANCEL_SYRVE_CONNECTIONS_SNAPSHOT') {
+    const requesterTabId = sender.tab?.id;
+    if (requesterTabId === undefined || !message.requestId) {
+      sendResponse({ ok: false, error: 'Missing requester tab or request id' });
+      return false;
+    }
+
+    cancelConnectionsSnapshotRequest(requesterTabId, message.requestId)
+      .then((cancelled) => sendResponse({ ok: true, cancelled }))
+      .catch((error) => sendResponse({ ok: false, error: error?.message || 'Failed to cancel Syrve connections request' }));
+
+    return true;
+  }
+
   if (message?.action === 'OPEN_SYRVE_PAGE') {
     if (!message.server || !message.path) {
       sendResponse({ ok: false, error: 'Missing server or path' });
@@ -3282,6 +3333,11 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
 
     const nextAttempt = advanceSyrveCredentialsForTab(tabId);
     if (!nextAttempt) {
+      if (CONNECTIONS_SNAPSHOT_REQUESTS.has(tabId)) {
+        finalizeConnectionsSnapshotRequest(tabId, {
+          error: 'Усі доступні облікові записи Syrve відхилено цим сервером.'
+        });
+      }
       sendResponse({
         ok: false,
         exhausted: true,
@@ -3406,6 +3462,42 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
     });
   }
 
+  if (message?.action === 'SYRVE_CONNECTIONS_SNAPSHOT_RESULT') {
+    const serviceTabId = sender.tab?.id;
+    if (serviceTabId === undefined) {
+      sendResponse({ ok: false, error: 'Missing service tab id' });
+      return false;
+    }
+
+    if (!CONNECTIONS_SNAPSHOT_REQUESTS.has(serviceTabId)) {
+      sendResponse({ ok: false, error: 'Connections snapshot request is no longer active' });
+      return false;
+    }
+
+    forwardConnectionsSnapshotResult(serviceTabId, {
+      snapshot: message.snapshot,
+      error: message.error
+    });
+    sendResponse({ ok: true });
+    return false;
+  }
+
+  if (message?.action === 'SYRVE_CONNECTIONS_STALE_ACTION_STATE') {
+    const serviceTabId = sender.tab?.id;
+    const request = serviceTabId === undefined ? null : CONNECTIONS_SNAPSHOT_REQUESTS.get(serviceTabId);
+    if (!request) {
+      sendResponse({ ok: false, error: 'Connections snapshot request is no longer active' });
+      return false;
+    }
+
+    notifyConnectionsStaleActionState(request.requesterTabId, {
+      requestId: request.requestId,
+      actionState: message.actionState
+    });
+    sendResponse({ ok: true });
+    return false;
+  }
+
   return false;
 });
 
@@ -3438,6 +3530,23 @@ chrome.tabs.onRemoved.addListener((tabId) => {
       error: 'Службова вкладка отримання періоду була закрита раніше завершення.'
     });
   }
+
+  const connectionsRequest = CONNECTIONS_SNAPSHOT_REQUESTS.get(tabId);
+  if (connectionsRequest) {
+    CONNECTIONS_SNAPSHOT_REQUESTS.delete(tabId);
+    clearTimeout(connectionsRequest.timeoutId);
+    notifyConnectionsSnapshotResult(connectionsRequest.requesterTabId, {
+      requestId: connectionsRequest.requestId,
+      error: 'Службову вкладку отримання зайнятих ліцензій було закрито раніше завершення.'
+    });
+  }
+
+  cancelConnectionsSnapshotRequestsByRequesterTabId(tabId).catch((error) => {
+    log.warn('Failed to close orphaned Syrve connections tabs', {
+      requesterTabId: tabId,
+      error: error?.message
+    });
+  });
 
   resolveClosedHelpDeskDraftTab(tabId).catch((error) => {
     log.warn('Failed to resolve closed HelpDeskEddy draft tab', {
@@ -3946,6 +4055,161 @@ async function openHealthPeriodTab({ requesterTabId, server, port, requestId }) 
   return createdTab.id;
 }
 
+function clearConnectionsSnapshotRequest(serviceTabId) {
+  const request = CONNECTIONS_SNAPSHOT_REQUESTS.get(serviceTabId);
+  if (!request) {
+    return null;
+  }
+
+  CONNECTIONS_SNAPSHOT_REQUESTS.delete(serviceTabId);
+  clearTimeout(request.timeoutId);
+  clearSyrveCredentialsForTab(serviceTabId);
+  return request;
+}
+
+function buildConnectionsSnapshotRequestKey(requesterTabId, requestId) {
+  return `${requesterTabId}:${requestId}`;
+}
+
+async function openConnectionsSnapshotTab({
+  requesterTabId,
+  server,
+  port,
+  requestId,
+  connectionsHelpDeskPayload = null
+}) {
+  const requestKey = buildConnectionsSnapshotRequestKey(requesterTabId, requestId);
+  const credentialSet = await fetchSyrveCredentials();
+  if (CANCELLED_CONNECTIONS_SNAPSHOT_REQUESTS.delete(requestKey)) {
+    throw new Error('Запит отримання зайнятих ліцензій скасовано.');
+  }
+  const pageUrl = buildSyrvePageUrl({
+    server,
+    port,
+    path: CONNECTIONS_PATH
+  });
+  const createdTab = await chrome.tabs.create({
+    url: 'about:blank',
+    active: false
+  });
+
+  if (createdTab.id === undefined) {
+    throw new Error('Connections snapshot tab was created without an id');
+  }
+
+  if (CANCELLED_CONNECTIONS_SNAPSHOT_REQUESTS.delete(requestKey)) {
+    await chrome.tabs.remove(createdTab.id).catch(() => {});
+    throw new Error('Запит отримання зайнятих ліцензій скасовано.');
+  }
+
+  const serviceTabId = createdTab.id;
+  const timeoutId = setTimeout(() => {
+    finalizeConnectionsSnapshotRequest(serviceTabId, {
+      error: 'Сервер не повернув таблицю зайнятих ліцензій за 30 секунд.'
+    });
+  }, CONNECTIONS_SNAPSHOT_TIMEOUT_MS);
+
+  CONNECTIONS_SNAPSHOT_REQUESTS.set(serviceTabId, {
+    requesterTabId,
+    requestId,
+    timeoutId,
+    server,
+    port,
+    pageUrl
+  });
+  cacheSyrveCredentialsForTab(serviceTabId, credentialSet);
+
+  try {
+    if (connectionsHelpDeskPayload && typeof connectionsHelpDeskPayload === 'object') {
+      await storeConnectionsHelpDeskContext(serviceTabId, connectionsHelpDeskPayload, {
+        server,
+        port,
+        path: CONNECTIONS_PATH,
+        url: pageUrl
+      });
+    }
+    await chrome.tabs.update(serviceTabId, { url: pageUrl, active: false });
+  } catch (error) {
+    clearConnectionsSnapshotRequest(serviceTabId);
+    await chrome.tabs.remove(serviceTabId).catch(() => {});
+    throw error;
+  }
+
+  log.info('Opened background Syrve connections snapshot tab', {
+    requesterTabId,
+    serviceTabId,
+    server,
+    port,
+    requestId
+  });
+
+  return serviceTabId;
+}
+
+async function runConnectionsSnapshotStaleAction(requesterTabId, requestId) {
+  const entry = Array.from(CONNECTIONS_SNAPSHOT_REQUESTS.entries()).find(([, request]) => (
+    request.requesterTabId === requesterTabId && request.requestId === requestId
+  ));
+  if (!entry) {
+    throw new Error('Фонове оновлення таблиці вже зупинено. Відкрийте список ліцензій ще раз.');
+  }
+
+  const [serviceTabId] = entry;
+  const deadline = Date.now() + 3000;
+  let lastError = null;
+  while (Date.now() < deadline) {
+    try {
+      const response = await chrome.tabs.sendMessage(serviceTabId, {
+        action: 'RUN_STALE_LICENSE_ACTION'
+      });
+      if (response?.ok) {
+        return {
+          serviceTabId,
+          mode: response.mode || ''
+        };
+      }
+      throw new Error(response?.error || 'Дія для завислих ліцензій недоступна.');
+    } catch (error) {
+      lastError = error;
+      if (!String(error?.message || '').includes('Receiving end does not exist')) {
+        throw error;
+      }
+    }
+
+    await waitForDelay(150);
+  }
+
+  throw lastError || new Error('Не вдалося запустити дію для завислих ліцензій.');
+}
+
+async function cancelConnectionsSnapshotRequest(requesterTabId, requestId) {
+  const entry = Array.from(CONNECTIONS_SNAPSHOT_REQUESTS.entries()).find(([, request]) => (
+    request.requesterTabId === requesterTabId && request.requestId === requestId
+  ));
+
+  if (!entry) {
+    CANCELLED_CONNECTIONS_SNAPSHOT_REQUESTS.add(buildConnectionsSnapshotRequestKey(requesterTabId, requestId));
+    return true;
+  }
+
+  const [serviceTabId] = entry;
+  clearConnectionsSnapshotRequest(serviceTabId);
+  await chrome.tabs.remove(serviceTabId).catch(() => {});
+  return true;
+}
+
+async function cancelConnectionsSnapshotRequestsByRequesterTabId(requesterTabId) {
+  const serviceTabIds = Array.from(CONNECTIONS_SNAPSHOT_REQUESTS.entries())
+    .filter(([, request]) => request.requesterTabId === requesterTabId)
+    .map(([serviceTabId]) => serviceTabId);
+
+  serviceTabIds.forEach((serviceTabId) => {
+    clearConnectionsSnapshotRequest(serviceTabId);
+  });
+
+  await Promise.all(serviceTabIds.map((serviceTabId) => chrome.tabs.remove(serviceTabId).catch(() => {})));
+}
+
 async function openSyrvePage({ server, path, port, active = true, connectionsHelpDeskPayload = null }) {
   const credentialSet = await fetchSyrveCredentials();
   const pageUrl = buildSyrvePageUrl({ server, port, path });
@@ -4077,6 +4341,72 @@ function notifyHealthPeriodResult(requesterTabId, payload) {
     ...payload
   }).catch((error) => {
     log.warn('Failed to deliver health period result to PlanFix tab', {
+      requesterTabId,
+      error: error?.message
+    });
+  });
+}
+
+function finalizeConnectionsSnapshotRequest(serviceTabId, result) {
+  const request = clearConnectionsSnapshotRequest(serviceTabId);
+  if (!request) {
+    return;
+  }
+
+  notifyConnectionsSnapshotResult(request.requesterTabId, {
+    requestId: request.requestId,
+    snapshot: result?.snapshot,
+    error: result?.error
+  });
+
+  chrome.tabs.remove(serviceTabId).catch((error) => {
+    log.debug('Connections snapshot tab already closed', { serviceTabId, error: error?.message });
+  });
+}
+
+function forwardConnectionsSnapshotResult(serviceTabId, result) {
+  const request = CONNECTIONS_SNAPSHOT_REQUESTS.get(serviceTabId);
+  if (!request) {
+    return;
+  }
+
+  if (result?.error) {
+    finalizeConnectionsSnapshotRequest(serviceTabId, result);
+    return;
+  }
+
+  clearTimeout(request.timeoutId);
+  request.timeoutId = setTimeout(() => {
+    finalizeConnectionsSnapshotRequest(serviceTabId, {
+      error: 'Оновлення таблиці зайнятих ліцензій зупинилося більш ніж на 30 секунд.'
+    });
+  }, CONNECTIONS_SNAPSHOT_TIMEOUT_MS);
+
+  notifyConnectionsSnapshotResult(request.requesterTabId, {
+    requestId: request.requestId,
+    snapshot: result?.snapshot,
+    streaming: true
+  });
+}
+
+function notifyConnectionsSnapshotResult(requesterTabId, payload) {
+  chrome.tabs.sendMessage(requesterTabId, {
+    action: 'CONNECTIONS_SNAPSHOT_RESULT',
+    ...payload
+  }).catch((error) => {
+    log.warn('Failed to deliver Syrve connections snapshot to PlanFix tab', {
+      requesterTabId,
+      error: error?.message
+    });
+  });
+}
+
+function notifyConnectionsStaleActionState(requesterTabId, payload) {
+  chrome.tabs.sendMessage(requesterTabId, {
+    action: 'CONNECTIONS_STALE_ACTION_STATE',
+    ...payload
+  }).catch((error) => {
+    log.warn('Failed to deliver stale license action state to PlanFix tab', {
       requesterTabId,
       error: error?.message
     });
