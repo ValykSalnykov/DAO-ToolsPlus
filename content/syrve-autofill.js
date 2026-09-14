@@ -336,8 +336,8 @@
       .join('.');
   }
 
-  function extractHealthServerPeriod(value) {
-    const section = String(value || '').split(/Current server period\s*:/i)[1]?.split(/Current user period\s*:/i)[0] || '';
+  function extractHealthUserPeriod(value) {
+    const section = String(value || '').split(/Current user period\s*:/i)[1] || '';
     const days = section.match(/^\s*(\d+)\s*days?\b/i);
     const date = section.match(/\(from\s+(\d{2}\.\d{2}\.\d{4})(?:\s+\d{2}:\d{2})?/i);
     return days && date ? { period: days[1], periodStartDate: date[1] } : null;
@@ -368,17 +368,17 @@
     }
 
     const periodCell = valueCells[periodColumnIndex];
-    const serverPeriod = [periodCell, headerCells[periodColumnIndex]]
-      .map((cell) => extractHealthServerPeriod(cell?.getAttribute('title')))
+    const userPeriod = [periodCell, headerCells[periodColumnIndex]]
+      .map((cell) => extractHealthUserPeriod(cell?.getAttribute('title')))
       .find(Boolean);
-    if (!serverPeriod) {
+    if (!userPeriod) {
       return null;
     }
 
     const versionCell = document.getElementById('version');
     const versionRaw = extractHealthVersionRaw(versionCell?.textContent || '');
     return {
-      ...serverPeriod,
+      ...userPeriod,
       version: normalizeHealthVersion(versionRaw),
       versionRaw
     };

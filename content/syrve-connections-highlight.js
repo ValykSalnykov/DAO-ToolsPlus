@@ -46,6 +46,15 @@
     'BACKOFFICE',
     'BACK_OFFICE_APP'
   ]);
+  // Только для этих модулей имеет смысл понятие «зависшая лицензия».
+  // Остальные модули не помечаются как зависшие ни в сводке, ни в окне «Зайняті ліцензії».
+  const STALE_TRACKED_LICENSE_NAMES = new Set([
+    'RMS (FRONT FAST FOOD)',
+    'RMS (TABLESERVICE)',
+    'RMS (SOUSCHEF)',
+    'RMS (OFFICE)',
+    'DELIVERY (DELIVERY)'
+  ]);
   const ALLOWED_RELEASE_MODULE_CODES = new Set([100, 200]);
   const COLUMN_LABELS = {
     ipAddress: 'ip address',
@@ -446,6 +455,14 @@
     || (normalizeText(license?.moduleId) ? `Модуль ${normalizeText(license.moduleId)}` : 'Неизвестный модуль')
   );
 
+  const normalizeLicenseDisplayKey = (value) => normalizeText(value).toUpperCase();
+
+  const isStaleTrackedLicense = (license) => [
+    license?.moduleDisplayName,
+    license?.displayName,
+    license?.moduleName
+  ].some((value) => STALE_TRACKED_LICENSE_NAMES.has(normalizeLicenseDisplayKey(value)));
+
   const getPrimaryLicensePriority = (license) => {
     const moduleId = normalizeText(license?.moduleId);
     if (PRIMARY_LICENSE_MODULE_PRIORITY.has(moduleId)) {
@@ -489,12 +506,15 @@
 
         const lastActivityTime = parseLastActivityTime(license.lastActivity);
         const ageMs = lastActivityTime === null ? null : Math.max(0, now - lastActivityTime);
+        const displayName = getLicenseDisplayName(license);
+        const isStaleTracked = isStaleTrackedLicense({ ...license, displayName });
         result.push({
           ...license,
-          displayName: getLicenseDisplayName(license),
+          displayName,
           ageLabel: formatAgeLabel(license.lastActivity),
+          isStaleTracked,
           isActive: ageMs !== null && ageMs < getStaleThresholdMs(),
-          isStale: ageMs !== null && ageMs >= getStaleThresholdMs()
+          isStale: isStaleTracked && ageMs !== null && ageMs >= getStaleThresholdMs()
         });
       });
     });

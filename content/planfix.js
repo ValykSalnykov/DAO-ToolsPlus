@@ -4493,6 +4493,295 @@ const ensureCardLicenseModalStyles = () => {
         }
     `;
 
+    style.textContent += `
+        #${CARD_LICENSE_MODAL_ID}[data-surface='connections'] {
+            --connections-bg: #fff;
+            --connections-subtle: #f6f7f9;
+            --connections-line: #e6e9ee;
+            --connections-text: #202936;
+            --connections-muted: #697586;
+            background: rgba(15, 23, 42, .48);
+            backdrop-filter: blur(3px);
+        }
+        #${CARD_LICENSE_MODAL_ID}[data-surface='connections'][data-theme='dark'] {
+            --connections-bg: #18212e;
+            --connections-subtle: #202c3b;
+            --connections-line: #344153;
+            --connections-text: #e4eaf2;
+            --connections-muted: #a6b3c5;
+        }
+        #${CARD_LICENSE_MODAL_ID}[data-surface='connections'] .dao-license-modal__frame { width: min(calc(820px + var(--dao-license-modal-controls-total-width)), 100%); }
+        #${CARD_LICENSE_MODAL_ID}[data-surface='connections'] .dao-license-modal__dialog {
+            height: min(85dvh, 800px);
+            background: var(--connections-bg); border-radius: 14px; color: var(--connections-text);
+        }
+        #${CARD_LICENSE_MODAL_ID}[data-surface='connections'] .dao-license-modal__dialog::before { display: none; }
+        #${CARD_LICENSE_MODAL_ID}[data-surface='connections'] .dao-license-modal__title-wrap { padding: 22px 24px 18px; }
+        #${CARD_LICENSE_MODAL_ID}[data-surface='connections'] .dao-license-modal__title { font-size: 20px; font-weight: 650; }
+        #${CARD_LICENSE_MODAL_ID}[data-surface='connections'] .dao-license-modal__subtitle { font-size: 12px; color: var(--connections-muted); overflow-wrap: anywhere; }
+        #${CARD_LICENSE_MODAL_ID}[data-surface='connections'] .dao-license-modal__viewport { padding: 0 24px 20px; background: var(--connections-bg); }
+        #${CARD_LICENSE_MODAL_ID}[data-surface='connections'] .dao-license-modal__body { gap: 0; }
+        #${CARD_LICENSE_MODAL_ID}[data-surface='connections'] .dao-license-modal__panel { padding: 0; border: 0; border-radius: 0; background: transparent; box-shadow: none; }
+        #${CARD_LICENSE_MODAL_ID}[data-surface='connections'] .dao-license-modal__connections-heading { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 12px; padding: 0 0 16px; }
+        #${CARD_LICENSE_MODAL_ID}[data-surface='connections'] .dao-license-modal__connections-alert-count { color: #c45a20; font-size: 11px; font-weight: 600; white-space: nowrap; margin-left: 8px; }
+        #${CARD_LICENSE_MODAL_ID}[data-surface='connections'][data-theme='dark'] .dao-license-modal__connections-alert-count { color: #ffb87d; }
+        #${CARD_LICENSE_MODAL_ID}[data-surface='connections'] .dao-license-modal__connections-grouping-select { border: 1px solid var(--connections-line); background: var(--connections-bg); color: var(--connections-text); border-radius: 7px; font-weight: 500; font-size: 12px; padding: 8px 28px 8px 10px; }
+        #${CARD_LICENSE_MODAL_ID}[data-surface='connections'] .dao-license-modal__connections-terminal-list { display: block; border: 1px solid var(--connections-line); border-radius: 9px; overflow: hidden; }
+        #${CARD_LICENSE_MODAL_ID}[data-surface='connections'] .dao-license-modal__connections-terminal { border: 0; border-bottom: 1px solid var(--connections-line); border-radius: 0; background: var(--connections-bg); }
+        #${CARD_LICENSE_MODAL_ID}[data-surface='connections'] .dao-license-modal__connections-terminal:last-child { border-bottom: 0; }
+        #${CARD_LICENSE_MODAL_ID}[data-surface='connections'] .dao-license-modal__connections-terminal-summary { padding: 13px 14px; gap: 10px; background: var(--connections-bg); }
+        #${CARD_LICENSE_MODAL_ID}[data-surface='connections'] .dao-license-modal__connections-terminal-summary:hover,
+        #${CARD_LICENSE_MODAL_ID}[data-surface='connections'] details[open] > .dao-license-modal__connections-terminal-summary { background: var(--connections-subtle); }
+        #${CARD_LICENSE_MODAL_ID}[data-surface='connections'] .dao-license-modal__connections-terminal-summary::before { color: var(--connections-muted); font-weight: 400; }
+        #${CARD_LICENSE_MODAL_ID}[data-surface='connections'] .dao-license-modal__connections-terminal-title { font-size: 13px; font-weight: 600; color: var(--connections-text); white-space: normal; overflow-wrap: anywhere; }
+        #${CARD_LICENSE_MODAL_ID}[data-surface='connections'] .dao-license-modal__connections-terminal-count { background: transparent; color: var(--connections-text); font-size: 13px; font-weight: 600; padding: 0; min-width: 20px; font-variant-numeric: tabular-nums; }
+        #${CARD_LICENSE_MODAL_ID}[data-surface='connections'] .dao-license-modal__connections-table-wrap { background: var(--connections-bg); border: 0; border-radius: 0; }
+        #${CARD_LICENSE_MODAL_ID}[data-surface='connections'] .dao-license-modal__connections-table { min-width: 480px; table-layout: fixed; color: var(--connections-text); }
+        #${CARD_LICENSE_MODAL_ID}[data-surface='connections'] .dao-license-modal__connections-table th { position: static; background: var(--connections-bg); border: 0; color: var(--connections-muted); text-transform: none; letter-spacing: 0; font-weight: 400; font-size: 11px; padding: 10px 14px 4px; }
+        #${CARD_LICENSE_MODAL_ID}[data-surface='connections'] .dao-license-modal__connections-table td { padding: 7px 14px 12px; border-color: var(--connections-line); overflow-wrap: anywhere; vertical-align: middle; background: transparent; }
+        #${CARD_LICENSE_MODAL_ID}[data-surface='connections'] [data-column='status'] { width: 100px; }
+        #${CARD_LICENSE_MODAL_ID}[data-surface='connections'] [data-column='activity'] { width: 90px; }
+        #${CARD_LICENSE_MODAL_ID}[data-surface='connections'] .dao-license-modal__connections-primary { color: var(--connections-text); font-weight: 500; font-size: 12px; }
+        #${CARD_LICENSE_MODAL_ID}[data-surface='connections'] .dao-license-modal__connections-secondary { color: var(--connections-muted); font-size: 10px; }
+        #${CARD_LICENSE_MODAL_ID}[data-surface='connections'] .dao-license-modal__connections-status { padding: 0; background: transparent; font-size: 11px; font-weight: 500; }
+        #${CARD_LICENSE_MODAL_ID}[data-surface='connections'][data-theme='dark'] .dao-license-modal__connections-status--active { color: #78d6a4; }
+        #${CARD_LICENSE_MODAL_ID}[data-surface='connections'][data-theme='dark'] .dao-license-modal__connections-status--stale { color: #ffaaa4; }
+        #${CARD_LICENSE_MODAL_ID}[data-surface='connections'][data-theme='dark'] .dao-license-modal__connections-status--unknown { color: #a6b3c5; }
+        #${CARD_LICENSE_MODAL_ID}[data-surface='connections'] .dao-license-modal__connections-status::before { width: 5px; height: 5px; }
+        #${CARD_LICENSE_MODAL_ID}[data-surface='connections'] .dao-license-modal__connections-action { margin-top: 16px; padding: 12px 14px; border-radius: 8px; box-shadow: none; background: var(--connections-subtle); border: 1px solid var(--connections-line); }
+        #${CARD_LICENSE_MODAL_ID}[data-surface='connections'] .dao-license-modal__connections-action-title { font-size: 12px; color: var(--connections-text); }
+        #${CARD_LICENSE_MODAL_ID}[data-surface='connections'] .dao-license-modal__connections-action-status { color: var(--connections-muted); font-weight: 400; }
+        #${CARD_LICENSE_MODAL_ID}[data-surface='connections'] .dao-license-modal__connections-action-status:empty { display: none; }
+        #${CARD_LICENSE_MODAL_ID}[data-surface='connections'] .dao-license-modal__footer { background: var(--connections-bg); border-top: 1px solid var(--connections-line); box-shadow: none; padding: 12px 24px; }
+        #${CARD_LICENSE_MODAL_ID}[data-surface='connections'] summary:focus-visible,
+        #${CARD_LICENSE_MODAL_ID}[data-surface='connections'] select:focus-visible { outline: 2px solid #5988c9; outline-offset: -2px; }
+        @media (max-width: 600px) {
+            #${CARD_LICENSE_MODAL_ID}[data-surface='connections'] .dao-license-modal__viewport { padding: 0 12px 12px; }
+            #${CARD_LICENSE_MODAL_ID}[data-surface='connections'] .dao-license-modal__title-wrap { padding: 16px 12px; }
+        }
+    `;
+
+    style.textContent += `
+        /* --- Зайняті ліцензії: заголовок і зведення --- */
+        #${CARD_LICENSE_MODAL_ID}[data-surface='connections'] {
+            --connections-accent: #b45309;
+            --connections-accent-soft: rgba(180, 83, 9, 0.09);
+            --connections-accent-row: rgba(180, 83, 9, 0.06);
+            --connections-ok: #15803d;
+        }
+        #${CARD_LICENSE_MODAL_ID}[data-surface='connections'][data-theme='dark'] {
+            --connections-accent: #fbbf24;
+            --connections-accent-soft: rgba(251, 191, 36, 0.12);
+            --connections-accent-row: rgba(251, 191, 36, 0.06);
+            --connections-ok: #6ee7a8;
+        }
+        #${CARD_LICENSE_MODAL_ID}[data-surface='connections'] .dao-license-modal__title-wrap { padding: 20px 24px 14px; }
+        #${CARD_LICENSE_MODAL_ID}[data-surface='connections'] .dao-license-modal__connections-heading {
+            align-items: flex-end;
+            gap: 16px;
+            padding: 0 0 14px;
+        }
+        #${CARD_LICENSE_MODAL_ID}[data-surface='connections'] .dao-license-modal__connections-stats {
+            display: flex;
+            align-items: stretch;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+        #${CARD_LICENSE_MODAL_ID}[data-surface='connections'] .dao-license-modal__connections-stat {
+            display: flex;
+            flex-direction: column;
+            gap: 1px;
+            min-width: 76px;
+            padding: 8px 12px;
+            border-radius: 9px;
+            border: 1px solid var(--connections-line);
+            background: var(--connections-subtle);
+        }
+        #${CARD_LICENSE_MODAL_ID}[data-surface='connections'] .dao-license-modal__connections-stat-value {
+            font-size: 22px;
+            font-weight: 650;
+            line-height: 1.1;
+            color: var(--connections-text);
+            font-variant-numeric: tabular-nums;
+        }
+        #${CARD_LICENSE_MODAL_ID}[data-surface='connections'] .dao-license-modal__connections-stat-label {
+            font-size: 11px;
+            color: var(--connections-muted);
+        }
+        #${CARD_LICENSE_MODAL_ID}[data-surface='connections'] .dao-license-modal__connections-stat--active .dao-license-modal__connections-stat-value { color: var(--connections-ok); }
+        #${CARD_LICENSE_MODAL_ID}[data-surface='connections'] .dao-license-modal__connections-stat--stale {
+            border-color: var(--connections-accent);
+            background: var(--connections-accent-soft);
+        }
+        #${CARD_LICENSE_MODAL_ID}[data-surface='connections'] .dao-license-modal__connections-stat--stale .dao-license-modal__connections-stat-value,
+        #${CARD_LICENSE_MODAL_ID}[data-surface='connections'] .dao-license-modal__connections-stat--stale .dao-license-modal__connections-stat-label { color: var(--connections-accent); }
+        #${CARD_LICENSE_MODAL_ID}[data-surface='connections'] .dao-license-modal__connections-stat--muted .dao-license-modal__connections-stat-value { color: var(--connections-muted); }
+        #${CARD_LICENSE_MODAL_ID}[data-surface='connections'] .dao-license-modal__connections-controls {
+            display: flex;
+            flex-direction: column;
+            align-items: flex-end;
+            gap: 6px;
+        }
+        #${CARD_LICENSE_MODAL_ID}[data-surface='connections'] .dao-license-modal__connections-updated {
+            font-size: 11px;
+            color: var(--connections-muted);
+            font-variant-numeric: tabular-nums;
+        }
+
+        /* --- Зайняті ліцензії: панель дії --- */
+        #${CARD_LICENSE_MODAL_ID}[data-surface='connections'] .dao-license-modal__connections-action {
+            margin: 0 0 14px;
+            padding: 11px 14px;
+            border-radius: 9px;
+            border: 1px solid var(--connections-accent);
+            background: var(--connections-accent-soft);
+        }
+        #${CARD_LICENSE_MODAL_ID}[data-surface='connections'] .dao-license-modal__connections-action-title {
+            font-size: 13px;
+            font-weight: 600;
+            color: var(--connections-accent);
+        }
+        #${CARD_LICENSE_MODAL_ID}[data-surface='connections'] .dao-license-modal__connections-action-button {
+            padding: 8px 14px;
+            border-radius: 7px;
+            font-size: 12px;
+            font-weight: 600;
+            background: var(--connections-accent);
+            box-shadow: none;
+            color: #fff;
+        }
+        #${CARD_LICENSE_MODAL_ID}[data-surface='connections'][data-theme='dark'] .dao-license-modal__connections-action-button { color: #1f1300; }
+
+        /* --- Зайняті ліцензії: групи і таблиця --- */
+        #${CARD_LICENSE_MODAL_ID}[data-surface='connections'] .dao-license-modal__connections-terminal--stale > .dao-license-modal__connections-terminal-summary {
+            box-shadow: inset 3px 0 0 var(--connections-accent);
+        }
+        #${CARD_LICENSE_MODAL_ID}[data-surface='connections'] .dao-license-modal__connections-alert-count {
+            padding: 2px 7px;
+            border-radius: 999px;
+            background: var(--connections-accent-soft);
+            color: var(--connections-accent);
+            margin-left: 0;
+        }
+        #${CARD_LICENSE_MODAL_ID}[data-surface='connections'] .dao-license-modal__connections-table th {
+            padding: 9px 14px 5px;
+            border-bottom: 1px solid var(--connections-line);
+        }
+        #${CARD_LICENSE_MODAL_ID}[data-surface='connections'] .dao-license-modal__connections-table td { padding: 8px 14px; }
+        #${CARD_LICENSE_MODAL_ID}[data-surface='connections'] .dao-license-modal__connections-row--stale td {
+            background: var(--connections-accent-row);
+        }
+        #${CARD_LICENSE_MODAL_ID}[data-surface='connections'] .dao-license-modal__connections-row--stale td:first-child {
+            box-shadow: inset 3px 0 0 var(--connections-accent);
+        }
+        #${CARD_LICENSE_MODAL_ID}[data-surface='connections'] .dao-license-modal__connections-row--stale [data-column='activity'] .dao-license-modal__connections-primary {
+            color: var(--connections-accent);
+            font-weight: 600;
+        }
+        #${CARD_LICENSE_MODAL_ID}[data-surface='connections'] .dao-license-modal__connections-status--stale { color: var(--connections-accent); font-weight: 600; }
+        #${CARD_LICENSE_MODAL_ID}[data-surface='connections'] .dao-license-modal__connections-status--active { color: var(--connections-ok); }
+
+        /* --- Зайняті ліцензії: стан завантаження --- */
+        #${CARD_LICENSE_MODAL_ID}[data-surface='connections'] .dao-license-modal__viewport:has(.dao-license-modal__connections-loading) {
+            display: flex;
+            overflow: hidden;
+        }
+        #${CARD_LICENSE_MODAL_ID}[data-surface='connections'] .dao-license-modal__viewport:has(.dao-license-modal__connections-loading) .dao-license-modal__body {
+            flex: 1 1 auto;
+            min-height: 0;
+        }
+        #${CARD_LICENSE_MODAL_ID}[data-surface='connections'] .dao-license-modal__connections-loading {
+            display: flex;
+            flex-direction: column;
+            flex: 1 1 auto;
+            min-height: 0;
+        }
+        #${CARD_LICENSE_MODAL_ID} .dao-license-modal__spinner--inline {
+            flex: 0 0 auto;
+            width: 20px;
+            height: 20px;
+            border-width: 2px;
+            box-shadow: none;
+            margin-top: 1px;
+        }
+        #${CARD_LICENSE_MODAL_ID}[data-surface='connections'] .dao-license-modal__connections-loading-head {
+            display: flex;
+            align-items: flex-start;
+            gap: 10px;
+            padding: 0 0 18px;
+        }
+        #${CARD_LICENSE_MODAL_ID}[data-surface='connections'] .dao-license-modal__connections-loading-title {
+            margin: 0;
+            font-size: 13px;
+            font-weight: 600;
+            color: var(--connections-text);
+        }
+        #${CARD_LICENSE_MODAL_ID}[data-surface='connections'] .dao-license-modal__connections-loading-caption {
+            margin: 3px 0 0;
+            font-size: 12px;
+            color: var(--connections-muted);
+            overflow-wrap: anywhere;
+        }
+        #${CARD_LICENSE_MODAL_ID}[data-surface='connections'] .dao-license-modal__connections-skeleton {
+            flex: 1 1 auto;
+            min-height: 0;
+            border: 1px solid var(--connections-line);
+            border-radius: 9px;
+            overflow: hidden;
+            -webkit-mask-image: linear-gradient(180deg, #000 62%, rgba(0, 0, 0, 0));
+            mask-image: linear-gradient(180deg, #000 62%, rgba(0, 0, 0, 0));
+        }
+        #${CARD_LICENSE_MODAL_ID}[data-surface='connections'] .dao-license-modal__connections-skeleton-group {
+            border-bottom: 1px solid var(--connections-line);
+        }
+        #${CARD_LICENSE_MODAL_ID}[data-surface='connections'] .dao-license-modal__connections-skeleton-group:last-child { border-bottom: 0; }
+        #${CARD_LICENSE_MODAL_ID}[data-surface='connections'] .dao-license-modal__connections-skeleton-head {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 13px 14px;
+            background: var(--connections-subtle);
+        }
+        #${CARD_LICENSE_MODAL_ID}[data-surface='connections'] .dao-license-modal__connections-skeleton-row {
+            display: grid;
+            grid-template-columns: minmax(0, 1fr) minmax(0, 0.7fr) 100px 90px;
+            align-items: center;
+            gap: 14px;
+            padding: 11px 14px;
+            border-top: 1px solid var(--connections-line);
+        }
+        #${CARD_LICENSE_MODAL_ID} .dao-license-modal__skeleton {
+            display: block;
+            height: 9px;
+            border-radius: 999px;
+            background: linear-gradient(90deg, var(--connections-line) 25%, var(--connections-subtle) 50%, var(--connections-line) 75%);
+            background-size: 240% 100%;
+            animation: dao-license-modal-skeleton 1.4s ease-in-out infinite;
+        }
+        #${CARD_LICENSE_MODAL_ID} .dao-license-modal__skeleton--title { width: 132px; height: 11px; }
+        #${CARD_LICENSE_MODAL_ID} .dao-license-modal__skeleton--count { width: 16px; height: 11px; }
+        #${CARD_LICENSE_MODAL_ID} .dao-license-modal__skeleton--cell-a { width: 74%; }
+        #${CARD_LICENSE_MODAL_ID} .dao-license-modal__skeleton--cell-b { width: 60%; }
+        #${CARD_LICENSE_MODAL_ID} .dao-license-modal__skeleton--cell-c { width: 52px; }
+        #${CARD_LICENSE_MODAL_ID} .dao-license-modal__skeleton--cell-d { width: 40px; }
+
+        @keyframes dao-license-modal-skeleton {
+            0% { background-position: 130% 0; }
+            100% { background-position: -30% 0; }
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+            #${CARD_LICENSE_MODAL_ID} .dao-license-modal__skeleton { animation: none; }
+        }
+
+        @media (max-width: 600px) {
+            #${CARD_LICENSE_MODAL_ID}[data-surface='connections'] .dao-license-modal__connections-heading { align-items: flex-start; }
+            #${CARD_LICENSE_MODAL_ID}[data-surface='connections'] .dao-license-modal__connections-controls { align-items: flex-start; }
+            #${CARD_LICENSE_MODAL_ID}[data-surface='connections'] .dao-license-modal__connections-skeleton-row { grid-template-columns: minmax(0, 1fr) 70px; }
+            #${CARD_LICENSE_MODAL_ID} .dao-license-modal__skeleton--cell-b,
+            #${CARD_LICENSE_MODAL_ID} .dao-license-modal__skeleton--cell-c { display: none; }
+        }
+    `;
     document.head.appendChild(style);
 };
 
@@ -5206,7 +5495,8 @@ const renderCardLicenseModal = ({
     layout = CARD_LICENSE_MODAL_LAYOUTS.default,
     footerActions = null,
     onClose = null,
-    preserveScroll = false
+    preserveScroll = false,
+    surface = 'default'
 }) => {
     const { modal, titleWrapNode, titleNode, subtitleNode, viewportNode, bodyNode, actionsNode } = ensureCardLicenseModalShell();
     const previousScrollTop = preserveScroll && viewportNode ? viewportNode.scrollTop : 0;
@@ -5218,6 +5508,7 @@ const renderCardLicenseModal = ({
         ? CARD_LICENSE_MODAL_LAYOUTS.compact
         : CARD_LICENSE_MODAL_LAYOUTS.default;
 
+    modal.dataset.surface = surface;
     modal.dataset.displayMode = resolvedDisplayMode;
     modal.dataset.layout = resolvedLayout;
     titleNode.textContent = title || '';
@@ -5317,7 +5608,9 @@ const normalizeCardConnectionsSnapshot = (snapshot) => {
             lastActivity: normalizeValue(row?.lastActivity),
             ageLabel: normalizeValue(row?.ageLabel),
             isActive: row?.isActive === true,
-            isStale: row?.isStale === true
+            isStale: row?.isStale === true,
+            // Старі снапшоти без прапорця вважаємо відстежуваними.
+            isStaleTracked: row?.isStaleTracked !== false
         }))
         : [];
     const rawGroups = Array.isArray(snapshot?.summary?.groups) ? snapshot.summary.groups : [];
@@ -5395,12 +5688,21 @@ const buildCardConnectionsModuleNode = (group) => {
 
 const buildCardConnectionsStatusNode = (row) => {
     const status = row.isActive ? 'active' : row.isStale ? 'stale' : 'unknown';
-    const label = status === 'active' ? 'Активна' : status === 'stale' ? 'Зависла' : 'Невідомо';
-    return createCardLicenseModalNode(
+    const isUntracked = status === 'unknown' && row.isStaleTracked === false;
+    const label = status === 'active'
+        ? 'Активна'
+        : status === 'stale'
+            ? 'Зависла'
+            : isUntracked ? 'Не відстеж.' : 'Невідомо';
+    const node = createCardLicenseModalNode(
         'span',
         `dao-license-modal__connections-status dao-license-modal__connections-status--${status}`,
         label
     );
+    if (isUntracked) {
+        node.title = 'Зависання не відстежується для цього модуля';
+    }
+    return node;
 };
 
 const appendCardConnectionsTextPair = (cell, primary, secondary = '') => {
@@ -5411,6 +5713,7 @@ const appendCardConnectionsTextPair = (cell, primary, secondary = '') => {
 };
 
 const buildCardConnectionsTable = (rows, columns) => {
+    columns = columns.filter((column) => column !== 'login' || rows.some((row) => row.login));
     const wrap = createCardLicenseModalNode('div', 'dao-license-modal__connections-table-wrap');
     const table = createCardLicenseModalNode('table', 'dao-license-modal__connections-table');
     const head = document.createElement('thead');
@@ -5420,10 +5723,13 @@ const buildCardConnectionsTable = (rows, columns) => {
         login: 'Логін',
         module: 'Модуль',
         status: 'Стан',
-        activity: 'Остання активність'
+        activity: 'Активність'
     };
     columns.forEach((column) => {
-        headRow.appendChild(createCardLicenseModalNode('th', '', columnLabels[column] || column));
+        const header = createCardLicenseModalNode('th', '', columnLabels[column] || column);
+        header.scope = 'col';
+        header.dataset.column = column;
+        headRow.appendChild(header);
     });
     head.appendChild(headRow);
     table.appendChild(head);
@@ -5437,13 +5743,14 @@ const buildCardConnectionsTable = (rows, columns) => {
 
         columns.forEach((column) => {
             const cell = document.createElement('td');
+            cell.dataset.column = column;
             if (column === 'terminal') {
                 appendCardConnectionsTextPair(
                     cell,
                     row.terminalName || row.computerName || row.ipAddress,
                     [
-                        row.computerName && row.computerName !== row.terminalName ? row.computerName : '',
-                        row.ipAddress
+                        row.terminalName && row.computerName !== row.terminalName ? row.computerName : '',
+                        (row.terminalName || row.computerName) && row.ipAddress !== row.computerName ? row.ipAddress : ''
                     ].filter(Boolean).join(' · ')
                 );
             } else if (column === 'login') {
@@ -5452,8 +5759,9 @@ const buildCardConnectionsTable = (rows, columns) => {
                 appendCardConnectionsTextPair(
                     cell,
                     row.displayName || row.moduleDisplayName || row.moduleName,
-                    [row.moduleId ? `ID ${row.moduleId}` : '', row.moduleName].filter(Boolean).join(' · ')
+                    ''
                 );
+                cell.title = [row.moduleId, row.moduleName].filter(Boolean).join(' · ');
             } else if (column === 'status') {
                 cell.appendChild(buildCardConnectionsStatusNode(row));
             } else if (column === 'activity') {
@@ -5520,7 +5828,7 @@ const groupCardConnectionsRows = (rows) => {
             return {
                 ...group,
                 title: statusTitle,
-                meta: `${group.rows.length} підключень`,
+                meta: '',
                 hasStale: statusKey === 'stale',
                 columns: ['terminal', 'login', 'module', 'activity'],
                 statusPriority: statusKey === 'stale' ? 0 : statusKey === 'active' ? 1 : 2
@@ -5646,7 +5954,7 @@ const buildCardConnectionsGroup = (group) => {
         'dao-license-modal__connections-terminal-title',
         group.title
     ));
-    if (group.meta) {
+    if (group.meta && cardConnectionsGroupingMode !== CARD_CONNECTIONS_GROUPING_MODES.license) {
         identity.appendChild(createCardLicenseModalNode(
             'div',
             'dao-license-modal__connections-terminal-meta',
@@ -5654,6 +5962,10 @@ const buildCardConnectionsGroup = (group) => {
         ));
     }
     summary.appendChild(identity);
+    const staleCount = group.rows.filter((row) => row.isStale).length;
+    if (staleCount && cardConnectionsGroupingMode !== CARD_CONNECTIONS_GROUPING_MODES.status) {
+        summary.appendChild(createCardLicenseModalNode('span', 'dao-license-modal__connections-alert-count', `${staleCount} зависл.`));
+    }
     summary.appendChild(createCardLicenseModalNode(
         'span',
         'dao-license-modal__connections-terminal-count',
@@ -5701,22 +6013,51 @@ const buildCardConnectionsStaleAction = (snapshot) => {
     return panel;
 };
 
+const buildCardConnectionsStatNode = (value, label, tone) => {
+    const node = createCardLicenseModalNode('div', `dao-license-modal__connections-stat dao-license-modal__connections-stat--${tone}`);
+    node.appendChild(createCardLicenseModalNode('span', 'dao-license-modal__connections-stat-value', String(value)));
+    node.appendChild(createCardLicenseModalNode('span', 'dao-license-modal__connections-stat-label', label));
+    return node;
+};
+
+const buildCardConnectionsStatsNode = (snapshot) => {
+    const stats = createCardLicenseModalNode('div', 'dao-license-modal__connections-stats');
+    const staleCount = snapshot.rows.filter((row) => row.isStale).length;
+    const activeCount = snapshot.rows.filter((row) => row.isActive).length;
+    const unknownCount = snapshot.rows.length - staleCount - activeCount;
+
+    stats.appendChild(buildCardConnectionsStatNode(snapshot.rows.length, 'зайнято', 'total'));
+    stats.appendChild(buildCardConnectionsStatNode(activeCount, 'активні', 'active'));
+    stats.appendChild(buildCardConnectionsStatNode(staleCount, 'завислі', staleCount ? 'stale' : 'muted'));
+    if (unknownCount > 0) {
+        stats.appendChild(buildCardConnectionsStatNode(unknownCount, 'інші', 'muted'));
+    }
+
+    return stats;
+};
+
 const buildCardConnectionsResultContent = (context, rawSnapshot) => {
     const snapshot = normalizeCardConnectionsSnapshot(rawSnapshot);
     const fragment = document.createDocumentFragment();
     const overview = createCardLicenseModalNode('section', 'dao-license-modal__panel dao-license-modal__connections-overview');
     const heading = createCardLicenseModalNode('div', 'dao-license-modal__connections-heading');
-    heading.appendChild(buildCardConnectionsGroupingControl());
-    const count = createCardLicenseModalNode('span', 'dao-license-modal__connections-source', `Усього: ${snapshot.rows.length}`);
-    count.title = `Оновлено: ${formatCardConnectionsCapturedAt(snapshot.capturedAt)}`;
-    heading.appendChild(count);
+    heading.appendChild(buildCardConnectionsStatsNode(snapshot));
+
+    const controls = createCardLicenseModalNode('div', 'dao-license-modal__connections-controls');
+    const updatedNode = createCardLicenseModalNode(
+        'span',
+        'dao-license-modal__connections-updated',
+        `Оновлено ${formatCardConnectionsCapturedAt(snapshot.capturedAt)}`
+    );
+    updatedNode.title = `Поріг «зависла»: ${snapshot.thresholdMinutes} хв`;
+    controls.appendChild(updatedNode);
+    controls.appendChild(buildCardConnectionsGroupingControl());
+    heading.appendChild(controls);
     overview.appendChild(heading);
 
     const staleAction = buildCardConnectionsStaleAction(snapshot);
-    if (staleAction) {
-        overview.appendChild(staleAction);
-    }
     fragment.appendChild(overview);
+    if (staleAction) fragment.appendChild(staleAction);
 
     const details = createCardLicenseModalNode('section', 'dao-license-modal__panel');
     if (snapshot.rows.length) {
@@ -5799,24 +6140,70 @@ const openCardConnectionsServicePage = (context) => {
     });
 };
 
+const buildCardConnectionsSkeletonGroup = (rowCount) => {
+    const group = createCardLicenseModalNode('div', 'dao-license-modal__connections-skeleton-group');
+    const head = createCardLicenseModalNode('div', 'dao-license-modal__connections-skeleton-head');
+    head.appendChild(createCardLicenseModalNode('span', 'dao-license-modal__skeleton dao-license-modal__skeleton--title'));
+    head.appendChild(createCardLicenseModalNode('span', 'dao-license-modal__skeleton dao-license-modal__skeleton--count'));
+    group.appendChild(head);
+
+    for (let index = 0; index < rowCount; index += 1) {
+        const row = createCardLicenseModalNode('div', 'dao-license-modal__connections-skeleton-row');
+        ['a', 'b', 'c', 'd'].forEach((cell) => {
+            row.appendChild(createCardLicenseModalNode('span', `dao-license-modal__skeleton dao-license-modal__skeleton--cell-${cell}`));
+        });
+        group.appendChild(row);
+    }
+
+    return group;
+};
+
+const buildCardConnectionsLoadingContent = (context) => {
+    const panel = createCardLicenseModalNode('section', 'dao-license-modal__panel dao-license-modal__connections-loading');
+
+    const head = createCardLicenseModalNode('div', 'dao-license-modal__connections-loading-head');
+    head.appendChild(createCardLicenseModalNode('span', 'dao-license-modal__spinner dao-license-modal__spinner--inline'));
+    const text = createCardLicenseModalNode('div', 'dao-license-modal__connections-loading-text');
+    text.appendChild(createCardLicenseModalNode(
+        'p',
+        'dao-license-modal__connections-loading-title',
+        'Читаємо таблицю підключень'
+    ));
+    text.appendChild(createCardLicenseModalNode(
+        'p',
+        'dao-license-modal__connections-loading-caption',
+        context?.server
+            ? `Фоново авторизуємося на ${context.server} — це займає кілька секунд.`
+            : 'Фоново авторизуємося на сервері — це займає кілька секунд.'
+    ));
+    head.appendChild(text);
+    panel.appendChild(head);
+
+    const skeleton = createCardLicenseModalNode('div', 'dao-license-modal__connections-skeleton');
+    skeleton.setAttribute('aria-hidden', 'true');
+    [5, 3, 4, 3, 4, 3].forEach((rowCount) => {
+        skeleton.appendChild(buildCardConnectionsSkeletonGroup(rowCount));
+    });
+    panel.appendChild(skeleton);
+
+    return panel;
+};
+
 const showCardConnectionsLoadingModal = (context) => {
-    const content = buildCardLicenseLoadingContent();
-    const title = content.querySelector('.dao-license-modal__section-title');
-    const caption = content.querySelector('.dao-license-modal__section-caption');
-    if (title) title.textContent = 'Завантажуємо зайняті ліцензії...';
-    if (caption) caption.textContent = 'Фоново авторизуємося на сервері та читаємо актуальну таблицю.';
     renderCardLicenseModal({
-        title: 'Зайняті ліцензії Syrve',
-        subtitle: '',
-        content,
+        title: 'Зайняті ліцензії',
+        subtitle: context?.server || '',
+        surface: 'connections',
+        content: buildCardConnectionsLoadingContent(context),
         onClose: cancelActiveCardConnectionsSnapshot
     });
 };
 
 const showCardConnectionsErrorModal = (context, errorMessage) => {
     renderCardLicenseModal({
-        title: 'Зайняті ліцензії Syrve',
-        subtitle: '',
+        title: 'Зайняті ліцензії',
+        subtitle: context?.server || '',
+        surface: 'connections',
         content: buildCardLicenseErrorContent(errorMessage),
         footerActions: [
             { label: 'Закрити', onClick: closeCardLicenseCheckModal },
@@ -5831,8 +6218,9 @@ const showCardConnectionsResultModal = (context, snapshot) => {
         captureCardConnectionsDisclosureState();
     }
     renderCardLicenseModal({
-        title: 'Зайняті ліцензії Syrve',
-        subtitle: '',
+        title: 'Зайняті ліцензії',
+        subtitle: context?.server || '',
+        surface: 'connections',
         content: buildCardConnectionsResultContent(context, snapshot),
         footerActions: [
             { label: 'Закрити', onClick: closeCardLicenseCheckModal },
