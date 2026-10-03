@@ -1,0 +1,2429 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Калькулятор ліцензій · DAO Tools+</title>
+  <link rel="icon" href="../icons/icon48.png">
+  <script src="license-calculator-theme.js"></script>
+  <style>
+    /* Палітра калькулятора Syrve (червоний бренд, синя перевірка, жовті примітки, темна відповідь)
+       на візуальній системі модалки ліцензій Planfix (slate, градієнтні картки, темна панель сервера). */
+    :root {
+      color-scheme: light;
+      --page-bg: #eef1f5;
+      --card-bg: #ffffff;
+      --card-bg-end: #f8fafc;
+      --card-border: rgba(148, 163, 184, 0.24);
+      --card-shadow: 0 12px 28px rgba(15, 23, 42, 0.05), inset 0 1px 0 rgba(255, 255, 255, 0.9);
+      --card-line: linear-gradient(90deg, rgba(148, 163, 184, 0.44), rgba(148, 163, 184, 0));
+      --divider: rgba(148, 163, 184, 0.22);
+      --text: #0f172a;
+      --text-2: #334155;
+      --muted: #64748b;
+      --soft: #94a3b8;
+      --track: #f1f5f9;
+      --track-border: rgba(148, 163, 184, 0.18);
+      --option-active: #ffffff;
+      --field-bg: #ffffff;
+      --field-border: rgba(148, 163, 184, 0.42);
+      --brand: #dc2626;
+      --brand-hover: #b91c1c;
+      --brand-text: #dc2626;
+      --brand-soft: #fef2f2;
+      --brand-border: rgba(220, 38, 38, 0.28);
+      --blue: #2563eb;
+      --blue-hover: #1d4ed8;
+      --blue-text: #1d4ed8;
+      --blue-soft: #eff6ff;
+      --blue-border: rgba(37, 99, 235, 0.22);
+      --purple-text: #9333ea;
+      --success-text: #3f6f1f;
+      --success-soft: rgba(98, 158, 53, 0.12);
+      --success-border: rgba(98, 158, 53, 0.22);
+      --warning-text: #854d0e;
+      --warning-soft: rgba(202, 138, 4, 0.12);
+      --warning-border: rgba(202, 138, 4, 0.24);
+      --danger-text: #dc2626;
+      --danger-soft: rgba(220, 38, 38, 0.08);
+      --danger-border: rgba(220, 38, 38, 0.2);
+      --dark-surface: linear-gradient(135deg, rgba(15, 23, 42, 0.97), rgba(30, 41, 59, 0.95));
+      --dark-border: rgba(255, 255, 255, 0.08);
+      --dark-shadow: 0 14px 30px rgba(15, 23, 42, 0.18);
+      --tooltip-bg: #0f172a;
+      --tooltip-text: #f8fafc;
+      --minus-bg: #f3f4f6;
+      --minus-hover: #e5e7eb;
+      --minus-text: #4b5563;
+      --plus-bg: #fef2f2;
+      --plus-hover: #fee2e2;
+      --plus-text: #dc2626;
+      --note-bg: linear-gradient(135deg, rgba(245, 158, 11, 0.16), rgba(245, 158, 11, 0.07));
+      --note-border: rgba(217, 119, 6, 0.24);
+      --note-text: #713f12;
+      --note-title: #92400e;
+      --font: "Inter", "Segoe UI", -apple-system, BlinkMacSystemFont, Arial, sans-serif;
+      --font-mono: ui-monospace, "SF Mono", SFMono-Regular, Menlo, Consolas, monospace;
+    }
+
+    :root[data-theme="dark"] {
+      color-scheme: dark;
+      --page-bg: #070b16;
+      --card-bg: #0f172a;
+      --card-bg-end: #0f172a;
+      --card-border: rgba(148, 163, 184, 0.16);
+      --card-shadow: 0 16px 32px rgba(2, 6, 23, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.03);
+      --card-line: linear-gradient(90deg, rgba(148, 163, 184, 0.34), rgba(148, 163, 184, 0));
+      --divider: rgba(148, 163, 184, 0.16);
+      --text: #f8fafc;
+      --text-2: #e2e8f0;
+      --muted: #94a3b8;
+      --soft: #6b7a93;
+      --track: rgba(30, 41, 59, 0.8);
+      --track-border: rgba(148, 163, 184, 0.14);
+      --option-active: #1e293b;
+      --field-bg: #0b1222;
+      --field-border: rgba(148, 163, 184, 0.26);
+      --brand: #dc2626;
+      --brand-hover: #ef4444;
+      --brand-text: #f87171;
+      --brand-soft: rgba(248, 113, 113, 0.1);
+      --brand-border: rgba(248, 113, 113, 0.34);
+      --blue: #2563eb;
+      --blue-hover: #3b82f6;
+      --blue-text: #93c5fd;
+      --blue-soft: rgba(96, 165, 250, 0.1);
+      --blue-border: rgba(96, 165, 250, 0.28);
+      --purple-text: #c4b5fd;
+      --success-text: #86efac;
+      --success-soft: rgba(134, 239, 172, 0.1);
+      --success-border: rgba(74, 222, 128, 0.26);
+      --warning-text: #fcd34d;
+      --warning-soft: rgba(251, 191, 36, 0.1);
+      --warning-border: rgba(251, 191, 36, 0.26);
+      --danger-text: #fca5a5;
+      --danger-soft: rgba(248, 113, 113, 0.1);
+      --danger-border: rgba(248, 113, 113, 0.28);
+      --dark-surface: linear-gradient(135deg, #111c33, #1e293b);
+      --dark-border: rgba(148, 163, 184, 0.16);
+      --dark-shadow: 0 16px 34px rgba(2, 6, 23, 0.42);
+      --tooltip-bg: #e2e8f0;
+      --tooltip-text: #0f172a;
+      --minus-bg: rgba(51, 65, 85, 0.6);
+      --minus-hover: rgba(71, 85, 105, 0.72);
+      --minus-text: #e2e8f0;
+      --plus-bg: rgba(220, 38, 38, 0.18);
+      --plus-hover: rgba(220, 38, 38, 0.3);
+      --plus-text: #fca5a5;
+      --note-bg: linear-gradient(135deg, rgba(120, 53, 15, 0.46), rgba(120, 53, 15, 0.24));
+      --note-border: rgba(251, 191, 36, 0.22);
+      --note-text: #fde68a;
+      --note-title: #fbbf24;
+    }
+
+    *,
+    *::before,
+    *::after {
+      box-sizing: border-box;
+    }
+
+    html {
+      background: var(--page-bg);
+    }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      background: var(--page-bg);
+      color: var(--text);
+      font-family: var(--font);
+      font-size: 14px;
+      line-height: 1.4;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    button,
+    input {
+      font: inherit;
+      color: inherit;
+    }
+
+    button {
+      margin: 0;
+    }
+
+    [hidden] {
+      display: none !important;
+    }
+
+    .sr-only {
+      position: absolute;
+      width: 1px;
+      height: 1px;
+      padding: 0;
+      margin: -1px;
+      overflow: hidden;
+      clip: rect(0, 0, 0, 0);
+      white-space: nowrap;
+      border: 0;
+    }
+
+    .icon-sprite {
+      position: absolute;
+      width: 0;
+      height: 0;
+      overflow: hidden;
+      pointer-events: none;
+    }
+
+    :focus-visible {
+      outline: 2px solid var(--blue);
+      outline-offset: 2px;
+    }
+
+    /* ---------- Top bar ---------- */
+
+    .topbar {
+      border-bottom: 1px solid var(--card-border);
+      background: var(--card-bg);
+    }
+
+    .topbar__inner {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      width: min(1920px, 100%);
+      margin: 0 auto;
+      padding: 10px 24px;
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      min-width: 0;
+    }
+
+    .brand__mark {
+      display: grid;
+      place-items: center;
+      width: 38px;
+      height: 38px;
+      flex-shrink: 0;
+      border-radius: 12px;
+      background: linear-gradient(180deg, #ef4444, #dc2626);
+      color: #ffffff;
+      box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.2), 0 8px 16px rgba(220, 38, 38, 0.2);
+    }
+
+    .brand__mark svg {
+      width: 21px;
+      height: 21px;
+    }
+
+    .brand__title {
+      margin: 0;
+      font-size: 22px;
+      line-height: 1.05;
+      font-weight: 800;
+      letter-spacing: -0.03em;
+    }
+
+    .brand__accent {
+      color: var(--brand-text);
+      font-size: 15px;
+      font-weight: 500;
+      letter-spacing: 0;
+    }
+
+
+    .topbar__actions {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .topbar__meta {
+      display: inline-flex;
+      align-items: center;
+      gap: 7px;
+      margin: 0;
+      padding: 6px 12px 6px 10px;
+      border: 1px solid var(--warning-border);
+      border-radius: 999px;
+      background: var(--warning-soft);
+      color: var(--warning-text);
+      font-size: 12px;
+      font-weight: 600;
+      white-space: nowrap;
+    }
+
+    .topbar__meta svg {
+      width: 15px;
+      height: 15px;
+      flex-shrink: 0;
+    }
+
+    .topbar__date {
+      color: var(--note-title);
+      font-size: 13px;
+      font-weight: 800;
+      font-variant-numeric: tabular-nums;
+    }
+
+    /* Дата прайсу відкриває нотатку «що змінилось», якщо SLM її надіслав. */
+    .price-meta {
+      position: relative;
+    }
+
+    button.topbar__meta {
+      font-family: inherit;
+      line-height: inherit;
+      cursor: pointer;
+      transition: border-color 0.15s ease, box-shadow 0.15s ease;
+    }
+
+    button.topbar__meta:disabled {
+      cursor: default;
+    }
+
+    button.topbar__meta:not(:disabled):hover,
+    button.topbar__meta[aria-expanded="true"] {
+      border-color: var(--note-border);
+      box-shadow: 0 0 0 3px var(--warning-soft);
+    }
+
+    .topbar__meta svg.topbar__meta-more {
+      width: 13px;
+      height: 13px;
+      margin-left: -2px;
+      transition: transform 0.15s ease;
+    }
+
+    .topbar__meta:disabled .topbar__meta-more {
+      display: none;
+    }
+
+    .topbar__meta[aria-expanded="true"] .topbar__meta-more {
+      transform: rotate(180deg);
+    }
+
+    .price-changes {
+      position: absolute;
+      top: calc(100% + 8px);
+      right: 0;
+      z-index: 40;
+      width: 420px;
+      max-width: calc(100vw - 32px);
+      padding: 12px 12px 12px 14px;
+      border: 1px solid var(--card-border);
+      border-radius: 14px;
+      background: var(--card-bg);
+      color: var(--text);
+      box-shadow: 0 18px 40px rgba(15, 23, 42, 0.18);
+    }
+
+    .price-changes:focus {
+      outline: none;
+    }
+
+    .price-changes__head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+      margin-bottom: 8px;
+    }
+
+    .price-changes__title {
+      margin: 0;
+      font-size: 13px;
+      font-weight: 800;
+    }
+
+    .price-changes__close {
+      display: grid;
+      place-items: center;
+      width: 28px;
+      height: 28px;
+      padding: 0;
+      border: 0;
+      border-radius: 8px;
+      background: transparent;
+      color: var(--muted);
+      cursor: pointer;
+    }
+
+    .price-changes__close:hover {
+      background: var(--card-bg-end);
+      color: var(--text);
+    }
+
+    .price-changes__close svg {
+      width: 16px;
+      height: 16px;
+    }
+
+    .price-changes__list {
+      display: grid;
+      gap: 4px;
+      max-height: min(60vh, 420px);
+      margin: 0;
+      padding: 0;
+      overflow-y: auto;
+      list-style: none;
+    }
+
+    .price-changes__item {
+      display: flex;
+      align-items: baseline;
+      justify-content: space-between;
+      gap: 12px;
+      padding: 7px 10px;
+      border-radius: 10px;
+      background: var(--card-bg-end);
+      font-size: 12.5px;
+      line-height: 1.35;
+    }
+
+    .price-changes__name {
+      min-width: 0;
+      font-weight: 600;
+    }
+
+    .price-changes__value {
+      flex-shrink: 0;
+      color: var(--muted);
+      font-weight: 600;
+      font-variant-numeric: tabular-nums;
+      white-space: nowrap;
+    }
+
+    .price-changes__value strong {
+      color: var(--text);
+      font-weight: 800;
+    }
+
+    .price-changes__value--up strong,
+    .price-changes__value--removed {
+      color: var(--danger-text);
+    }
+
+    .price-changes__value--down strong,
+    .price-changes__value--added {
+      color: var(--success-text);
+    }
+
+    .icon-button {
+      display: grid;
+      place-items: center;
+      width: 36px;
+      height: 36px;
+      padding: 0;
+      border: 1px solid var(--card-border);
+      border-radius: 12px;
+      background: linear-gradient(180deg, var(--card-bg), var(--card-bg-end));
+      color: var(--muted);
+      cursor: pointer;
+      transition: color 0.15s ease, border-color 0.15s ease, transform 0.15s ease;
+    }
+
+    .icon-button:hover {
+      color: var(--text);
+      border-color: var(--field-border);
+      transform: translateY(-1px);
+    }
+
+    .icon-button svg {
+      width: 18px;
+      height: 18px;
+    }
+
+    /* ---------- Page layout ---------- */
+
+    .page {
+      display: grid;
+      gap: 16px;
+      grid-template-columns: minmax(0, 1fr);
+      align-items: start;
+      width: min(1920px, 100%);
+      margin: 0 auto;
+      padding: 16px 24px 28px;
+    }
+
+    .page__main {
+      display: grid;
+      gap: 16px;
+      min-width: 0;
+    }
+
+    .workspace {
+      display: grid;
+      gap: 16px;
+      grid-template-columns: minmax(0, 1fr);
+      grid-template-areas:
+        "settings"
+        "pos"
+        "popular"
+        "other";
+      align-items: start;
+    }
+
+    .workspace__settings {
+      grid-area: settings;
+    }
+
+    .workspace__pos {
+      grid-area: pos;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+      min-width: 0;
+    }
+
+    .workspace__popular {
+      grid-area: popular;
+    }
+
+    .workspace__other {
+      grid-area: other;
+    }
+
+    .page__summary {
+      min-width: 0;
+    }
+
+    .summary {
+      display: grid;
+      gap: 16px;
+      align-items: start;
+    }
+
+    /* Широкі налаштування, POS і популярні порівну, решта на всю ширину. */
+    @media (min-width: 960px) {
+      .workspace {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        grid-template-areas: "settings settings" "pos popular" "other other";
+        align-items: stretch;
+      }
+      .workspace__settings { flex-wrap: nowrap; }
+      .workspace__settings > .card__head { flex: 0 1 210px; }
+      .workspace__settings .params { justify-content: flex-start; }
+      .workspace__popular .addon-grid { grid-template-columns: repeat(auto-fill, minmax(min(100%, 230px), 1fr)); }
+      .summary { grid-template-columns: minmax(0, 1fr) minmax(0, 1.5fr); }
+    }
+
+    /* Підсумок — окрема колонка на всю висоту, щоб сума й текст клієнту завжди були на екрані. */
+    @media (min-width: 1360px) {
+      .page {
+        grid-template-columns: minmax(0, 1fr) 340px;
+      }
+
+      .page__summary {
+        align-self: stretch;
+      }
+
+      .summary {
+        position: sticky;
+        top: 16px;
+        grid-template-columns: minmax(0, 1fr);
+      }
+
+      .message {
+        max-height: max(200px, calc(100vh - 330px));
+      }
+    }
+
+    @media (min-width: 1680px) {
+      .page {
+        grid-template-columns: minmax(0, 1fr) 380px;
+      }
+
+    }
+
+    /* ---------- Cards ---------- */
+
+    .card {
+      position: relative;
+      min-width: 0;
+      padding: 14px 16px 16px;
+      border: 1px solid var(--card-border);
+      border-radius: 18px;
+      background: linear-gradient(180deg, var(--card-bg), var(--card-bg-end));
+      box-shadow: var(--card-shadow);
+    }
+
+    .card::before {
+      content: '';
+      position: absolute;
+      inset: 0 18px auto 18px;
+      height: 1px;
+      background: var(--card-line);
+      pointer-events: none;
+    }
+
+    .card__head {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 12px;
+      min-height: 28px;
+    }
+
+    .card__heading {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      min-width: 0;
+    }
+
+    .card__step,
+    .card__icon {
+      display: grid;
+      place-items: center;
+      width: 28px;
+      height: 28px;
+      flex-shrink: 0;
+      border-radius: 9px;
+      background: var(--brand-soft);
+      color: var(--brand-text);
+      font-size: 13px;
+      font-weight: 800;
+    }
+
+    .card__icon--blue {
+      background: var(--blue-soft);
+      color: var(--blue-text);
+    }
+
+    .card__icon svg {
+      width: 17px;
+      height: 17px;
+    }
+
+    .card__title {
+      margin: 0;
+      font-size: 16px;
+      line-height: 1.2;
+      font-weight: 800;
+      letter-spacing: -0.01em;
+    }
+
+
+    .card__aside {
+      margin-left: auto;
+    }
+
+    /* ---------- Chips, pills, status ---------- */
+
+    .chip {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      padding: 3px 8px;
+      border: 1px solid var(--divider);
+      border-radius: 999px;
+      background: var(--track);
+      color: var(--text-2);
+      font-size: 11px;
+      line-height: 1.3;
+      font-weight: 700;
+      white-space: nowrap;
+    }
+
+    .chip svg {
+      width: 12px;
+      height: 12px;
+    }
+
+    .chip--blue {
+      border-color: var(--blue-border);
+      background: var(--blue-soft);
+      color: var(--blue-text);
+    }
+
+    .chip--success {
+      border-color: var(--success-border);
+      background: var(--success-soft);
+      color: var(--success-text);
+    }
+
+    .chip--warning {
+      border-color: var(--warning-border);
+      background: var(--warning-soft);
+      color: var(--warning-text);
+    }
+
+    .chip--error {
+      border-color: var(--danger-border);
+      background: var(--danger-soft);
+      color: var(--danger-text);
+    }
+
+    .chip--brand {
+      border-color: var(--brand-border);
+      background: var(--brand-soft);
+      color: var(--brand-text);
+    }
+
+    .status-box {
+      margin: 12px 0 0;
+      padding: 10px 14px 10px 16px;
+      position: relative;
+      overflow: hidden;
+      border: 1px solid var(--divider);
+      border-radius: 14px;
+      background: var(--track);
+      color: var(--text-2);
+      font-size: 13px;
+      line-height: 1.5;
+      white-space: pre-wrap;
+      overflow-wrap: anywhere;
+    }
+
+    .status-box::before {
+      content: '';
+      position: absolute;
+      inset: 0 auto 0 0;
+      width: 4px;
+      background: currentColor;
+      opacity: 0.35;
+    }
+
+    .status-box__title {
+      display: block;
+      margin-bottom: 2px;
+      font-size: 11px;
+      font-weight: 800;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+    }
+
+    .status-box--warning {
+      border-color: var(--warning-border);
+      background: var(--warning-soft);
+      color: var(--warning-text);
+    }
+
+    .status-box--error {
+      border-color: var(--danger-border);
+      background: var(--danger-soft);
+      color: var(--danger-text);
+    }
+
+    .status-box--success {
+      border-color: var(--success-border);
+      background: var(--success-soft);
+      color: var(--success-text);
+    }
+
+    /* ---------- Buttons & fields ---------- */
+
+    .button {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      min-height: 40px;
+      padding: 0 16px;
+      border: 1px solid var(--field-border);
+      border-radius: 12px;
+      background: linear-gradient(180deg, var(--card-bg), var(--card-bg-end));
+      color: var(--text-2);
+      font-size: 13px;
+      font-weight: 700;
+      line-height: 1.2;
+      white-space: nowrap;
+      cursor: pointer;
+      transition: transform 0.15s ease, background 0.15s ease, border-color 0.15s ease, box-shadow 0.15s ease, opacity 0.15s ease;
+    }
+
+    .button:hover:not(:disabled) {
+      transform: translateY(-1px);
+      border-color: var(--soft);
+    }
+
+    .button:disabled {
+      opacity: 0.55;
+      cursor: not-allowed;
+    }
+
+    .button svg {
+      width: 16px;
+      height: 16px;
+      flex-shrink: 0;
+    }
+
+    .button--blue {
+      border-color: rgba(37, 99, 235, 0.3);
+      background: linear-gradient(180deg, #3b82f6, #2563eb);
+      color: #ffffff;
+      box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.18), 0 10px 18px rgba(37, 99, 235, 0.2);
+    }
+
+    .button--blue:hover:not(:disabled) {
+      border-color: rgba(29, 78, 216, 0.4);
+      background: linear-gradient(180deg, #2f76f0, #1d4ed8);
+    }
+
+    .button--brand {
+      border-color: rgba(220, 38, 38, 0.28);
+      background: linear-gradient(180deg, #ef4444, #dc2626);
+      color: #ffffff;
+      box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.18), 0 10px 18px rgba(220, 38, 38, 0.2);
+    }
+
+    .button--brand:hover:not(:disabled) {
+      border-color: rgba(185, 28, 28, 0.36);
+      background: linear-gradient(180deg, #e53e3e, #b91c1c);
+    }
+
+    .button--ghost {
+      border-color: transparent;
+      background: transparent;
+      color: var(--muted);
+    }
+
+    .button--ghost:hover:not(:disabled) {
+      border-color: var(--divider);
+      background: var(--track);
+      color: var(--text);
+    }
+
+    .button--small {
+      min-height: 30px;
+      padding: 0 10px;
+      border-radius: 10px;
+      font-size: 12px;
+    }
+
+    .button--on-dark {
+      border-color: rgba(255, 255, 255, 0.14);
+      background: rgba(255, 255, 255, 0.1);
+      color: #f8fafc;
+    }
+
+    .button--on-dark:hover:not(:disabled) {
+      border-color: rgba(255, 255, 255, 0.24);
+      background: rgba(255, 255, 255, 0.16);
+    }
+
+    .spinner {
+      width: 15px;
+      height: 15px;
+      flex-shrink: 0;
+      border: 2px solid currentColor;
+      border-right-color: transparent;
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+    }
+
+    @keyframes spin {
+      to {
+        transform: rotate(360deg);
+      }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      .spinner {
+        animation-duration: 2.4s;
+      }
+
+      .button:hover:not(:disabled),
+      .icon-button:hover,
+      .addon:hover {
+        transform: none;
+      }
+    }
+
+    .input-shell {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      min-height: 40px;
+      padding: 0 12px;
+      border: 1px solid var(--field-border);
+      border-radius: 12px;
+      background: var(--field-bg);
+      transition: border-color 0.15s ease, box-shadow 0.15s ease;
+    }
+
+    .input-shell:focus-within {
+      border-color: var(--blue);
+      box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.14);
+    }
+
+    .input-shell svg {
+      width: 16px;
+      height: 16px;
+      flex-shrink: 0;
+      color: var(--soft);
+    }
+
+    .input-shell input {
+      flex: 1;
+      width: 100%;
+      min-width: 0;
+      padding: 0;
+      border: 0;
+      outline: 0;
+      background: transparent;
+      font-size: 13px;
+      font-weight: 600;
+    }
+
+    .input-shell input::placeholder {
+      color: var(--soft);
+      font-weight: 500;
+    }
+
+    /* ---------- License check band ---------- */
+
+    .check {
+      border-color: var(--blue-border);
+    }
+
+    .check__head {
+      display: flex;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 12px 20px;
+    }
+
+    .check__form {
+      display: grid;
+      grid-template-columns: minmax(180px, 1fr) 96px auto;
+      gap: 8px;
+      flex: 1 1 480px;
+      max-width: 720px;
+    }
+
+    /* Кнопка на всю ширину, щоб було очевидно, що список ліцензій розгортається. */
+    .licenses-toggle {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-wrap: wrap;
+      gap: 6px 10px;
+      width: 100%;
+      min-height: 40px;
+      padding: 6px 14px;
+      border: 1px dashed var(--blue-border);
+      border-radius: 12px;
+      background: var(--blue-soft);
+      color: var(--blue-text);
+      font-size: 13px;
+      font-weight: 800;
+      cursor: pointer;
+      transition: background 0.15s ease, border-color 0.15s ease;
+    }
+
+    .licenses-toggle:hover {
+      border-style: solid;
+      border-color: var(--blue);
+    }
+
+    .licenses-panel {
+      display: grid;
+      gap: 10px;
+    }
+
+    .licenses-panel.is-expanded {
+      padding: 10px;
+      border: 1px solid var(--blue-border);
+      border-radius: 16px;
+      background: linear-gradient(180deg, var(--card-bg), var(--blue-soft));
+    }
+
+    .licenses-toggle[aria-expanded="true"] {
+      min-height: 36px;
+      border-style: solid;
+      border-color: var(--blue-border);
+      background: var(--card-bg);
+    }
+
+    .licenses-toggle__summary {
+      display: inline-flex;
+      flex-wrap: wrap;
+      gap: 6px;
+    }
+
+    .licenses-toggle__summary .chip {
+      font-size: 11px;
+    }
+
+    .licenses-toggle__icon {
+      display: grid;
+      place-items: center;
+      width: 24px;
+      height: 24px;
+      border-radius: 50%;
+      background: var(--blue);
+      color: #ffffff;
+    }
+
+    .licenses-toggle__icon .chevron {
+      margin: 0 0 3px;
+      transform: rotate(45deg);
+    }
+
+    .licenses-toggle[aria-expanded="true"] .licenses-toggle__icon .chevron {
+      margin: 3px 0 0;
+      transform: rotate(225deg);
+    }
+
+    .check__result {
+      display: grid;
+      gap: 12px;
+      margin-top: 14px;
+    }
+
+    .check__result .status-box {
+      margin: 0;
+    }
+
+    .server-bar {
+      position: relative;
+      overflow: hidden;
+      display: flex;
+      align-items: center;
+      align-items: flex-end;
+      flex-wrap: wrap;
+      gap: 8px 10px;
+      padding: 10px 12px;
+      border: 1px solid var(--dark-border);
+      border-radius: 16px;
+      background: var(--dark-surface);
+      box-shadow: var(--dark-shadow);
+      color: #f8fafc;
+    }
+
+    .server-bar::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      pointer-events: none;
+      background: linear-gradient(135deg, rgba(255, 255, 255, 0.08), transparent 42%);
+    }
+
+    .server-bar > * {
+      position: relative;
+    }
+
+    .server-bar__main {
+      display: grid;
+      gap: 3px;
+      min-width: 0;
+    }
+
+    .server-bar__label,
+    .server-fact__label {
+      margin: 0;
+      color: rgba(226, 232, 240, 0.66);
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+    }
+
+    .server-bar__value {
+      display: inline-flex;
+      align-items: center;
+      min-height: 30px;
+      margin: 0;
+      padding: 4px 10px;
+      line-height: 1.2;
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 11px;
+      background: linear-gradient(180deg, rgba(255, 255, 255, 0.14), rgba(255, 255, 255, 0.08));
+      font-size: 14px;
+      font-weight: 800;
+      overflow-wrap: anywhere;
+    }
+
+    .status-pill,
+    .subscription-chip {
+      display: inline-flex;
+      align-items: center;
+      min-height: 30px;
+      padding: 5px 10px;
+      border: 1px solid transparent;
+      border-radius: 999px;
+      font-size: 12px;
+      font-weight: 800;
+      letter-spacing: 0.02em;
+      white-space: nowrap;
+      box-shadow: 0 10px 18px rgba(15, 23, 42, 0.18), inset 0 1px 0 rgba(255, 255, 255, 0.16);
+    }
+
+    .status-pill {
+      cursor: help;
+    }
+
+    .status-pill--success {
+      border-color: rgba(154, 230, 116, 0.42);
+      background: linear-gradient(180deg, #7ac943, #5ea72f);
+      color: #ffffff;
+    }
+
+    .status-pill--warning {
+      border-color: rgba(255, 219, 128, 0.38);
+      background: linear-gradient(180deg, #f0b74a, #cf8a1f);
+      color: #ffffff;
+    }
+
+    .status-pill--error {
+      border-color: rgba(255, 166, 166, 0.36);
+      background: linear-gradient(180deg, #ef5b5b, #d53a3a);
+      color: #ffffff;
+    }
+
+    .subscription-chip {
+      letter-spacing: 0.03em;
+      text-transform: uppercase;
+      border-color: rgba(191, 219, 254, 0.38);
+      background: linear-gradient(180deg, rgba(96, 165, 250, 0.32), rgba(37, 99, 235, 0.2));
+      color: #eff6ff;
+    }
+
+    .subscription-chip--unknown {
+      border-color: rgba(203, 213, 225, 0.24);
+      background: rgba(255, 255, 255, 0.08);
+      color: rgba(226, 232, 240, 0.86);
+      text-transform: none;
+      letter-spacing: 0.01em;
+      cursor: help;
+    }
+
+    .server-bar__facts {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      margin-left: auto;
+    }
+
+    .server-fact {
+      display: grid;
+      gap: 2px;
+      min-width: 0;
+      max-width: 280px;
+      padding: 4px 9px;
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-radius: 11px;
+      background: rgba(255, 255, 255, 0.06);
+    }
+
+    .server-fact__value {
+      overflow: hidden;
+      font-size: 13px;
+      font-weight: 700;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .server-bar__time {
+      color: rgba(226, 232, 240, 0.5);
+      font-weight: 600;
+      letter-spacing: 0.02em;
+      text-transform: none;
+    }
+
+    .license-groups {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+      gap: 10px;
+      align-items: start;
+    }
+
+    .group {
+      --g-accent: #475569;
+      --g-soft: rgba(71, 85, 105, 0.12);
+      --g-border: rgba(71, 85, 105, 0.18);
+      --g-surface: rgba(71, 85, 105, 0.05);
+      display: grid;
+      gap: 6px;
+      padding: 8px;
+      border: 1px solid var(--g-border);
+      border-radius: 16px;
+      background: linear-gradient(180deg, var(--card-bg), var(--g-surface));
+    }
+
+    .group--pos {
+      --g-accent: #4f7f2a;
+      --g-soft: rgba(98, 158, 53, 0.12);
+      --g-border: rgba(98, 158, 53, 0.22);
+      --g-surface: rgba(98, 158, 53, 0.06);
+    }
+
+    .group--api {
+      --g-accent: #2563eb;
+      --g-soft: rgba(37, 99, 235, 0.12);
+      --g-border: rgba(37, 99, 235, 0.2);
+      --g-surface: rgba(37, 99, 235, 0.05);
+    }
+
+    .group--mobile {
+      --g-accent: #c2410c;
+      --g-soft: rgba(201, 115, 22, 0.12);
+      --g-border: rgba(201, 115, 22, 0.22);
+      --g-surface: rgba(201, 115, 22, 0.06);
+    }
+
+    :root[data-theme="dark"] .group {
+      --g-accent: #cbd5e1;
+      --g-soft: rgba(203, 213, 225, 0.1);
+      --g-border: rgba(148, 163, 184, 0.22);
+      --g-surface: rgba(15, 23, 42, 0.24);
+    }
+
+    :root[data-theme="dark"] .group--pos {
+      --g-accent: #86efac;
+      --g-soft: rgba(134, 239, 172, 0.12);
+      --g-border: rgba(74, 222, 128, 0.26);
+    }
+
+    :root[data-theme="dark"] .group--api {
+      --g-accent: #93c5fd;
+      --g-soft: rgba(147, 197, 253, 0.12);
+      --g-border: rgba(96, 165, 250, 0.24);
+    }
+
+    :root[data-theme="dark"] .group--mobile {
+      --g-accent: #fdba74;
+      --g-soft: rgba(253, 186, 116, 0.12);
+      --g-border: rgba(251, 146, 60, 0.24);
+    }
+
+    .group__head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+      padding: 0 4px 6px;
+      border-bottom: 1px solid var(--g-border);
+    }
+
+    .group__title {
+      margin: 0;
+      color: var(--g-accent);
+      font-size: 14px;
+      font-weight: 800;
+    }
+
+    .group__count {
+      border-color: var(--g-border);
+      background: var(--g-soft);
+      color: var(--g-accent);
+    }
+
+    .group__list {
+      display: grid;
+      gap: 4px;
+    }
+
+    .lic {
+      cursor: default;
+      position: relative;
+      overflow: hidden;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+      padding: 5px 6px 5px 11px;
+      border: 1px solid var(--g-border);
+      border-radius: 10px;
+      background: var(--card-bg);
+    }
+
+    .lic::before {
+      content: '';
+      position: absolute;
+      inset: 0 auto 0 0;
+      width: 3px;
+      background: var(--g-accent);
+    }
+
+    .lic__name {
+      flex: 1;
+      min-width: 0;
+      margin: 0;
+      overflow: hidden;
+      font-size: 13px;
+      font-weight: 800;
+      line-height: 1.25;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .lic__meta {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      flex-shrink: 0;
+    }
+
+    .lic__count,
+    .lic__date {
+      padding: 2px 7px;
+      border: 1px solid var(--g-border);
+      border-radius: 999px;
+      font-size: 11px;
+      font-weight: 800;
+      white-space: nowrap;
+    }
+
+    .lic__count {
+      border-color: var(--g-accent);
+      background: var(--g-accent);
+      color: var(--card-bg);
+    }
+
+    .lic__date {
+      background: var(--g-soft);
+      color: var(--g-accent);
+    }
+
+    .lic__date--permanent {
+      border-color: rgba(255, 255, 255, 0.08);
+      background: linear-gradient(180deg, rgba(15, 23, 42, 0.92), rgba(30, 41, 59, 0.94));
+      color: #f8fafc;
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+    }
+
+    .lic__date--expired {
+      border-color: var(--danger-border);
+      background: var(--danger-soft);
+      color: var(--danger-text);
+    }
+
+    /* Як у темній темі модалки ліцензій Planfix. */
+    :root[data-theme="dark"] .lic__count {
+      border-color: var(--g-border);
+      background: rgba(2, 6, 23, 0.92);
+      color: var(--g-accent);
+    }
+
+    :root[data-theme="dark"] .lic__date {
+      background: rgba(30, 41, 59, 0.92);
+    }
+
+    :root[data-theme="dark"] .lic__date--permanent {
+      border-color: rgba(148, 163, 184, 0.16);
+      background: rgba(2, 6, 23, 0.92);
+      color: #f8fafc;
+    }
+
+    :root[data-theme="dark"] .lic__date--expired {
+      border-color: var(--danger-border);
+      background: var(--danger-soft);
+      color: var(--danger-text);
+    }
+
+    .empty-state {
+      margin: 0;
+      padding: 12px 14px;
+      border: 1px solid var(--divider);
+      border-radius: 14px;
+      background: var(--track);
+      color: var(--muted);
+    }
+
+    .pos-description { margin: -4px 0 14px; color: var(--muted); font-size: 12px; }
+    .consultation-dialog {
+      width: min(480px, calc(100% - 32px));
+      padding: 24px; border: 1px solid var(--card-border); border-radius: 18px;
+      background: var(--card-bg); color: var(--text); box-shadow: var(--dark-shadow);
+    }
+    .consultation-dialog::backdrop { background: rgba(2, 6, 23, 0.6); }
+    .consultation-dialog p { line-height: 1.6; }
+    .consultation-dialog form { display: flex; justify-content: flex-end; }
+    /* ---------- Parameters & POS ---------- */
+
+    .params {
+      display: grid;
+      gap: 12px;
+    }
+
+    .param__label {
+      display: block;
+      margin-bottom: 6px;
+      font-size: 12px;
+      font-weight: 700;
+      color: var(--text-2);
+    }
+
+    .param__hint {
+      margin: 5px 0 0;
+      font-size: 11px;
+      line-height: 1.35;
+      color: var(--soft);
+    }
+
+    /* Лічильники фронтів — по центру картки, крупніше за лічильники ліцензій. */
+    .counter-field {
+      display: grid;
+      justify-items: center;
+      gap: 8px;
+      padding: 10px 8px 12px;
+      border: 1px solid var(--track-border);
+      border-radius: 14px;
+      background: var(--track);
+      text-align: center;
+    }
+
+    .counter-field .param__label,
+    .counter-field__label {
+      margin: 0;
+      font-size: 12px;
+      font-weight: 700;
+      color: var(--text-2);
+    }
+
+    .counter-field__hint {
+      margin: 0;
+      font-size: 11px;
+      line-height: 1.4;
+      color: var(--muted);
+    }
+
+    .pos-order-row {
+      display: flex;
+      align-items: center;
+      justify-content: flex-start;
+      gap: 16px;
+      width: 100%;
+    }
+    .pos-order-counter { display: grid; justify-items: center; gap: 8px; flex-shrink: 0; }
+    .pos-order-row > .counter-field__hint {
+      min-width: 0;
+      margin-inline: auto;
+      text-align: left;
+      white-space: pre-line;
+      font-size: 13px;
+      line-height: 1.6;
+      font-weight: 600;
+      color: var(--text-2);
+    }
+
+    .stepper--large {
+      gap: 8px;
+    }
+
+    .stepper--large .stepper__btn {
+      width: 36px;
+      height: 36px;
+      font-size: 20px;
+      background: var(--card-bg);
+      box-shadow: 0 1px 3px rgba(15, 23, 42, 0.1);
+    }
+
+    .stepper--large .stepper__btn--plus {
+      background: var(--plus-bg);
+    }
+
+    .stepper--large .stepper__input {
+      width: 56px;
+      height: 36px;
+      font-size: 22px;
+    }
+
+    .segmented {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 3px;
+      padding: 3px;
+      border: 1px solid var(--track-border);
+      border-radius: 11px;
+      background: var(--track);
+    }
+
+    .segmented__option {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      min-height: 32px;
+      padding: 0 10px;
+      border: 0;
+      border-radius: 8px;
+      background: transparent;
+      color: var(--muted);
+      font-size: 12px;
+      font-weight: 700;
+      cursor: pointer;
+      transition: background 0.15s ease, color 0.15s ease;
+    }
+
+    .segmented__option svg {
+      width: 15px;
+      height: 15px;
+    }
+
+    .segmented__option:hover:not(:disabled) {
+      color: var(--text);
+    }
+
+    .segmented__option[aria-pressed="true"] {
+      background: var(--option-active);
+      color: var(--text);
+      box-shadow: 0 1px 3px rgba(15, 23, 42, 0.12);
+    }
+
+    .segmented__option[data-deployment="CLOUD"][aria-pressed="true"] {
+      color: var(--blue-text);
+    }
+
+    .segmented__option[data-deployment="LT"][aria-pressed="true"] {
+      color: var(--purple-text);
+    }
+
+    .segmented__option:disabled {
+      cursor: not-allowed;
+    }
+
+    .segmented.is-disabled {
+      opacity: 0.5;
+    }
+
+    .stepper {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      flex-shrink: 0;
+    }
+
+    .stepper__btn {
+      display: grid;
+      place-items: center;
+      width: 30px;
+      height: 30px;
+      padding: 0;
+      border: 0;
+      border-radius: 50%;
+      background: var(--minus-bg);
+      color: var(--minus-text);
+      font-size: 17px;
+      font-weight: 700;
+      line-height: 1;
+      cursor: pointer;
+      transition: background 0.15s ease, opacity 0.15s ease;
+    }
+
+    .stepper__btn:hover {
+      background: var(--minus-hover);
+    }
+
+    .stepper__btn--plus {
+      background: var(--plus-bg);
+      color: var(--plus-text);
+    }
+
+    .stepper__btn--plus:hover {
+      background: var(--plus-hover);
+    }
+
+    .stepper__btn[aria-disabled="true"] {
+      opacity: 0.4;
+      cursor: default;
+    }
+
+    .stepper__input {
+      width: 38px;
+      height: 30px;
+      padding: 0;
+      border: 1px solid transparent;
+      border-radius: 8px;
+      outline: 0;
+      background: transparent;
+      text-align: center;
+      font-size: 16px;
+      font-weight: 800;
+      font-variant-numeric: tabular-nums;
+      -moz-appearance: textfield;
+      appearance: textfield;
+    }
+
+    .stepper__input:hover {
+      border-color: var(--divider);
+    }
+
+    .stepper__input:focus {
+      border-color: var(--brand-border);
+      background: var(--field-bg);
+    }
+
+    .stepper__input::-webkit-outer-spin-button,
+    .stepper__input::-webkit-inner-spin-button {
+      margin: 0;
+      -webkit-appearance: none;
+    }
+
+
+    .chevron {
+      width: 7px;
+      height: 7px;
+      margin: 0 3px 3px 0;
+      border-right: 2px solid currentColor;
+      border-bottom: 2px solid currentColor;
+      transform: rotate(45deg);
+      transition: transform 0.18s ease;
+    }
+
+    .front-info {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 8px;
+    }
+
+    .front-info__item {
+      display: grid;
+      align-content: start;
+      gap: 6px;
+      min-width: 0;
+      padding: 10px;
+      border: 1px solid var(--divider);
+      border-radius: 12px;
+      background: var(--card-bg);
+      overflow-wrap: anywhere;
+    }
+
+    .front-info__title {
+      margin: 14px 0 8px;
+      font-size: 12px;
+      font-weight: 700;
+      color: var(--text-2);
+    }
+
+    .front-info__name {
+      margin: 0;
+      font-size: 12px;
+      font-weight: 700;
+    }
+
+    .front-info__module {
+      margin: 1px 0 0;
+      font-size: 11px;
+      color: var(--muted);
+    }
+
+    .supply {
+      margin: 1px 0 0;
+      font-size: 11px;
+      color: var(--muted);
+    }
+
+    .supply--included {
+      color: var(--success-text);
+      font-weight: 700;
+    }
+
+    .supply--blocked {
+      color: var(--danger-text);
+      font-weight: 700;
+    }
+
+    /* Компактна смуга без вкладеної картки лічильника й додаткових рядків підказок. */
+    .workspace__settings {
+      display: flex;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 8px 16px;
+      padding: 8px 14px;
+      box-shadow: none;
+      background: var(--card-bg);
+    }
+    .workspace__settings::before { display: none; }
+    .workspace__settings > .card__head { margin: 0; }
+    .workspace__settings .params { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 16px; }
+    .workspace__settings .params > div { display: flex; align-items: center; gap: 8px; }
+    .workspace__settings .params > div + div {
+      border-left: 1px solid var(--divider);
+      padding-left: 12px;
+    }
+    .workspace__settings .param__label { margin: 0; }
+    .workspace__settings .param__hint,
+    .workspace__settings .counter-field__hint { display: none; }
+    .workspace__settings .counter-field { padding: 0; border: 0; background: none; text-align: left; }
+    .workspace__settings .stepper__btn { width: 28px; height: 28px; }
+    .workspace__settings .stepper__input { width: 32px; height: 28px; font-size: 17px; }
+    .workspace__settings .segmented__option { min-height: 28px; padding: 0 8px; }
+    .summary__response { display: grid; gap: 16px; min-width: 0; }
+    @media (min-width: 960px) {
+      .workspace__settings { flex-wrap: nowrap; }
+      .workspace__settings .params { flex-wrap: nowrap; gap: 12px; }
+      .workspace__settings .param__label,
+      .workspace__settings .counter-field__label { font-size: 11px; }
+    }
+
+    /* ---------- Add-on licenses ---------- */
+
+    .addon-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(min(100%, 320px), 1fr));
+      gap: 8px;
+    }
+
+    .addon {
+      position: relative;
+      overflow: visible;
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) auto;
+      grid-template-rows: 1fr auto;
+      grid-template-areas:
+        "body control"
+        "footer footer";
+      gap: 8px 10px;
+      min-width: 0;
+      padding: 9px 10px 8px 13px;
+      border: 1px solid var(--divider);
+      border-radius: 14px;
+      background: var(--card-bg);
+      transition: border-color 0.15s ease, background 0.15s ease, box-shadow 0.15s ease;
+    }
+
+    .addon:hover {
+      border-color: var(--brand-border);
+    }
+
+    .addon.is-selected {
+      border-color: var(--brand-border);
+      background: linear-gradient(180deg, var(--card-bg), var(--brand-soft));
+      box-shadow: inset 3px 0 0 var(--brand), 0 8px 16px rgba(220, 38, 38, 0.06);
+    }
+
+    .addon__body {
+      grid-area: body;
+      display: grid;
+      align-content: start;
+      gap: 1px;
+      min-width: 0;
+    }
+
+    .addon__control {
+      grid-area: control;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 3px;
+    }
+
+    .addon__stock {
+      margin: 0;
+      font-size: 11px;
+      color: var(--muted);
+      white-space: nowrap;
+    }
+
+    .addon__stock-value {
+      color: var(--text-2);
+      font-weight: 800;
+    }
+
+    .addon__stock--present .addon__stock-value {
+      color: var(--blue-text);
+    }
+
+    .addon__footer {
+      grid-area: footer;
+      display: flex;
+      align-items: baseline;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 2px 10px;
+      padding-top: 6px;
+      border-top: 1px dashed var(--divider);
+      font-size: 11px;
+      color: var(--muted);
+    }
+
+    .addon.is-selected .addon__footer {
+      border-top-color: var(--brand-border);
+    }
+
+    .addon__head {
+      display: flex;
+      align-items: flex-start;
+      gap: 5px;
+      min-width: 0;
+    }
+
+    .addon__head .info-tip {
+      margin-top: 2px;
+    }
+
+    .addon__title {
+      margin: 0;
+      font-size: 14px;
+      font-weight: 800;
+      line-height: 1.25;
+    }
+
+    .addon__code {
+      min-width: 0;
+      margin: 0;
+      overflow: hidden;
+      font-size: 11px;
+      color: var(--muted);
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .addon__price {
+      color: var(--text);
+      font-size: 13px;
+      font-weight: 800;
+      white-space: nowrap;
+    }
+
+    .addon__setup {
+      white-space: nowrap;
+    }
+
+    .addon__note,
+    .addon__warning {
+      margin: 1px 0 0;
+      font-size: 11px;
+      font-weight: 700;
+      color: var(--blue-text);
+    }
+
+    .addon__warning {
+      color: var(--warning-text);
+    }
+
+    .front-info__stock {
+      flex-shrink: 0;
+    }
+
+    .info-tip {
+      position: relative;
+      display: inline-grid;
+      place-items: center;
+      flex-shrink: 0;
+      width: 16px;
+      height: 16px;
+      border-radius: 50%;
+      color: var(--soft);
+      cursor: help;
+    }
+
+    .info-tip:hover,
+    .info-tip:focus-visible {
+      color: var(--blue-text);
+    }
+
+    .info-tip svg {
+      width: 14px;
+      height: 14px;
+    }
+
+    .info-tip__bubble {
+      position: absolute;
+      bottom: calc(100% + 8px);
+      left: 50%;
+      z-index: 20;
+      width: 240px;
+      padding: 8px 10px;
+      border-radius: 10px;
+      background: var(--tooltip-bg);
+      color: var(--tooltip-text);
+      box-shadow: 0 12px 24px rgba(15, 23, 42, 0.24);
+      font-size: 12px;
+      line-height: 1.4;
+      font-weight: 500;
+      white-space: normal;
+      opacity: 0;
+      visibility: hidden;
+      pointer-events: none;
+      transform: translateX(-50%);
+      transition: opacity 0.15s ease, visibility 0.15s ease;
+    }
+
+    .info-tip:hover .info-tip__bubble,
+    .info-tip:focus-visible .info-tip__bubble {
+      opacity: 1;
+      visibility: visible;
+    }
+
+    /* ---------- Important note ---------- */
+
+    .note {
+      position: relative;
+      overflow: hidden;
+      padding: 12px 14px 12px 17px;
+      border: 1px solid var(--note-border);
+      border-radius: 16px;
+      background: var(--note-bg);
+      color: var(--note-text);
+    }
+
+    .note::before {
+      content: '';
+      position: absolute;
+      inset: 0 auto 0 0;
+      width: 4px;
+      background: var(--note-title);
+      opacity: 0.4;
+    }
+
+    .note__title {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      margin: 0 0 8px;
+      color: var(--note-title);
+      font-size: 11px;
+      font-weight: 800;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+    }
+
+    .note__title svg {
+      width: 14px;
+      height: 14px;
+    }
+
+    .note__body {
+      display: grid;
+      gap: 8px;
+      font-size: 12px;
+      line-height: 1.45;
+    }
+
+    .note__body p,
+    .note__body ul {
+      margin: 0;
+    }
+
+    .note__body ul {
+      padding-left: 16px;
+    }
+
+    /* ---------- Summary ---------- */
+
+    .totals__label-top {
+      margin: 0 0 10px;
+      color: var(--muted);
+      font-size: 11px;
+      font-weight: 800;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+    }
+
+    .totals__row {
+      display: flex;
+      align-items: baseline;
+      justify-content: space-between;
+      gap: 12px;
+    }
+
+    .totals__row + .totals__row {
+      margin-top: 8px;
+      padding-top: 8px;
+      border-top: 1px dashed var(--divider);
+    }
+
+    .totals__label {
+      font-size: 13px;
+      color: var(--muted);
+    }
+
+    .totals__value {
+      font-size: 24px;
+      font-weight: 800;
+      letter-spacing: -0.02em;
+      font-variant-numeric: tabular-nums;
+      white-space: nowrap;
+    }
+
+    .totals__value--secondary {
+      font-size: 19px;
+    }
+
+    .totals__actions {
+      display: flex;
+      justify-content: flex-end;
+      margin-top: 8px;
+    }
+
+    .message-card {
+      position: relative;
+      overflow: hidden;
+      padding: 14px 16px 16px;
+      border: 1px solid var(--dark-border);
+      border-radius: 18px;
+      background: var(--dark-surface);
+      box-shadow: var(--dark-shadow);
+      color: #f8fafc;
+    }
+
+    .message-card::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      pointer-events: none;
+      background: linear-gradient(135deg, rgba(255, 255, 255, 0.06), transparent 40%);
+    }
+
+    .message-card > * {
+      position: relative;
+    }
+
+    .message-card .card__title {
+      color: #f8fafc;
+    }
+
+    .message {
+      max-height: 420px;
+      margin: 0;
+      padding: 12px 14px;
+      overflow: auto;
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-radius: 12px;
+      background: rgba(2, 6, 23, 0.42);
+      color: #cbd5e1;
+      font: 12px/1.55 var(--font-mono);
+      white-space: pre-wrap;
+      overflow-wrap: anywhere;
+    }
+
+    .footnote {
+      margin: 10px 0 0;
+      color: rgba(226, 232, 240, 0.55);
+      font-size: 11px;
+      line-height: 1.4;
+    }
+
+    #messagePanel {
+      scroll-margin-top: 16px;
+    }
+
+    /* ---------- Pricing notice ---------- */
+
+    .pricing-notice {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      border-color: var(--blue-border);
+    }
+
+    .pricing-notice[data-state="error"] {
+      border-color: var(--danger-border);
+      background: linear-gradient(180deg, var(--card-bg), var(--danger-soft));
+    }
+
+    .pricing-notice .spinner {
+      width: 20px;
+      height: 20px;
+      color: var(--blue-text);
+    }
+
+    .pricing-notice__text {
+      flex: 1;
+      min-width: 0;
+    }
+
+    .pricing-notice__copy {
+      margin: 3px 0 0;
+      color: var(--muted);
+      font-size: 13px;
+    }
+
+    .pricing-notice[data-state="error"] .pricing-notice__copy {
+      color: var(--danger-text);
+    }
+
+    /* ---------- Bottom bar (< 1360px) ---------- */
+
+    .bottom-bar {
+      position: fixed;
+      right: 0;
+      bottom: 0;
+      left: 0;
+      z-index: 30;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      padding: 10px 24px;
+      border-top: 1px solid var(--card-border);
+      background: var(--card-bg);
+      box-shadow: 0 -8px 24px rgba(15, 23, 42, 0.1);
+    }
+
+    .bottom-bar__totals {
+      display: flex;
+      gap: 24px;
+      min-width: 0;
+    }
+
+    .bottom-bar__label {
+      display: block;
+      color: var(--soft);
+      font-size: 10px;
+      font-weight: 800;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+    }
+
+    .bottom-bar__value {
+      display: block;
+      font-size: 18px;
+      font-weight: 800;
+      font-variant-numeric: tabular-nums;
+      white-space: nowrap;
+    }
+
+    @media (max-width: 1359px) {
+      body {
+        padding-bottom: 72px;
+      }
+    }
+
+    @media (min-width: 1360px) {
+      .bottom-bar {
+        display: none;
+      }
+    }
+
+    @media (max-width: 719px) {
+      .topbar__inner,
+      .page {
+        padding-left: 16px;
+        padding-right: 16px;
+      }
+
+      .topbar__meta-label {
+        display: none;
+      }
+
+      .price-changes {
+        position: fixed;
+        top: 60px;
+        right: 16px;
+        left: 16px;
+        width: auto;
+        max-width: none;
+      }
+
+      .check__form {
+        grid-template-columns: minmax(0, 1fr) 84px;
+        flex-basis: 100%;
+      }
+
+      .check__form .button {
+        grid-column: 1 / -1;
+      }
+
+      .bottom-bar {
+        padding: 10px 16px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <svg class="icon-sprite" aria-hidden="true" focusable="false">
+    <symbol id="i-calculator" viewBox="0 0 24 24">
+      <rect x="5" y="3" width="14" height="18" rx="2.5" fill="none" stroke="currentColor" stroke-width="2" />
+      <rect x="8" y="6" width="8" height="3.5" rx="1" fill="none" stroke="currentColor" stroke-width="1.8" />
+      <circle cx="9" cy="13.5" r="1.1" fill="currentColor" />
+      <circle cx="12" cy="13.5" r="1.1" fill="currentColor" />
+      <circle cx="15" cy="13.5" r="1.1" fill="currentColor" />
+      <circle cx="9" cy="17" r="1.1" fill="currentColor" />
+      <circle cx="12" cy="17" r="1.1" fill="currentColor" />
+      <circle cx="15" cy="17" r="1.1" fill="currentColor" />
+    </symbol>
+    <symbol id="i-server" viewBox="0 0 24 24">
+      <rect x="3" y="4" width="18" height="6" rx="1.75" fill="none" stroke="currentColor" stroke-width="2" />
+      <rect x="3" y="14" width="18" height="6" rx="1.75" fill="none" stroke="currentColor" stroke-width="2" />
+      <circle cx="7" cy="7" r="1" fill="currentColor" />
+      <circle cx="7" cy="17" r="1" fill="currentColor" />
+      <path d="M11 7h6M11 17h6" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" />
+    </symbol>
+    <symbol id="i-port" viewBox="0 0 24 24">
+      <rect x="9" y="3" width="6" height="6" rx="1" fill="none" stroke="currentColor" stroke-width="2" />
+      <rect x="3" y="15" width="6" height="6" rx="1" fill="none" stroke="currentColor" stroke-width="2" />
+      <rect x="15" y="15" width="6" height="6" rx="1" fill="none" stroke="currentColor" stroke-width="2" />
+      <path d="M12 9v3m0 0H6v3m6-3h6v3" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+    </symbol>
+    <symbol id="i-cloud" viewBox="0 0 24 24">
+      <path d="M18 10h-1.26A8 8 0 1 0 9 20h9a5 5 0 0 0 0-10z" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+    </symbol>
+    <symbol id="i-search" viewBox="0 0 24 24">
+      <circle cx="11" cy="11" r="7" fill="none" stroke="currentColor" stroke-width="2" />
+      <path d="m20 20-3.6-3.6" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" />
+    </symbol>
+    <symbol id="i-copy" viewBox="0 0 24 24">
+      <rect x="9" y="9" width="12" height="12" rx="2" fill="none" stroke="currentColor" stroke-width="2" />
+      <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+    </symbol>
+    <symbol id="i-check" viewBox="0 0 24 24">
+      <path d="M20 6 9 17l-5-5" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" />
+    </symbol>
+    <symbol id="i-info" viewBox="0 0 24 24">
+      <circle cx="12" cy="12" r="9" fill="none" stroke="currentColor" stroke-width="2" />
+      <path d="M12 16v-4" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" />
+      <circle cx="12" cy="8" r="1.1" fill="currentColor" />
+    </symbol>
+    <symbol id="i-warning" viewBox="0 0 24 24">
+      <path d="M12 4.5 21 20H3L12 4.5Z" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round" />
+      <path d="M12 9.5v4.5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" />
+      <circle cx="12" cy="17.2" r="1.1" fill="currentColor" />
+    </symbol>
+    <symbol id="i-arrow-down" viewBox="0 0 24 24">
+      <path d="M12 5v14m0 0-6-6m6 6 6-6" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+    </symbol>
+    <symbol id="i-chevron-down" viewBox="0 0 24 24">
+      <path d="m6 9 6 6 6-6" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" />
+    </symbol>
+    <symbol id="i-close" viewBox="0 0 24 24">
+      <path d="M6 6l12 12M18 6 6 18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" />
+    </symbol>
+    <symbol id="i-calendar" viewBox="0 0 24 24">
+      <rect x="3.5" y="5" width="17" height="15.5" rx="2.5" fill="none" stroke="currentColor" stroke-width="2" />
+      <path d="M3.5 10h17M8 3v4M16 3v4" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" />
+    </symbol>
+    <symbol id="i-moon" viewBox="0 0 24 24">
+      <path d="M20 14.5A8 8 0 0 1 9.5 4 8 8 0 1 0 20 14.5Z" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round" />
+    </symbol>
+    <symbol id="i-sun" viewBox="0 0 24 24">
+      <circle cx="12" cy="12" r="4" fill="none" stroke="currentColor" stroke-width="2" />
+      <path d="M12 2.5v2.2M12 19.3v2.2M4.3 4.3l1.6 1.6M18.1 18.1l1.6 1.6M2.5 12h2.2M19.3 12h2.2M4.3 19.7l1.6-1.6M18.1 5.9l1.6-1.6" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" />
+    </symbol>
+  </svg>
+
+  <header class="topbar">
+    <div class="topbar__inner">
+      <div class="brand">
+        <span class="brand__mark"><svg aria-hidden="true"><use href="#i-calculator"></use></svg></span>
+        <div>
+          <h1 class="brand__title">syrve <span class="brand__accent">calculator</span></h1>
+        </div>
+      </div>
+      <div class="topbar__actions">
+        <div class="price-meta">
+          <button id="priceMetaButton" class="topbar__meta" type="button" aria-haspopup="dialog" aria-expanded="false" aria-controls="priceChangesPopover" title="Дата прайсу, за яким рахує калькулятор" disabled>
+            <svg aria-hidden="true"><use href="#i-calendar"></use></svg>
+            <span class="topbar__meta-label">Останнє оновлення прайсу:</span>
+            <span id="priceUpdatedAt" class="topbar__date"></span>
+            <svg class="topbar__meta-more" aria-hidden="true"><use href="#i-chevron-down"></use></svg>
+          </button>
+          <div id="priceChangesPopover" class="price-changes" role="dialog" aria-labelledby="priceChangesTitle" tabindex="-1" hidden>
+            <div class="price-changes__head">
+              <p id="priceChangesTitle" class="price-changes__title">Що змінилось</p>
+              <button id="priceChangesClose" class="price-changes__close" type="button" aria-label="Закрити">
+                <svg aria-hidden="true"><use href="#i-close"></use></svg>
+              </button>
+            </div>
+            <ul id="priceChangesList" class="price-changes__list"></ul>
+          </div>
+        </div>
+        <button id="themeToggle" class="icon-button" type="button">
+          <svg id="themeToggleIcon" aria-hidden="true"><use href="#i-moon"></use></svg>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <main class="page">
+    <div class="page__main">
+      <section class="card check" aria-labelledby="checkTitle">
+        <div class="check__head">
+          <div class="card__heading">
+            <span class="card__icon card__icon--blue"><svg aria-hidden="true"><use href="#i-server"></use></svg></span>
+            <h2 id="checkTitle" class="card__title">Перевірка ліцензій</h2>
+          </div>
+
+          <form id="checkForm" class="check__form" novalidate>
+            <label class="sr-only" for="serverInput">Адреса сервера</label>
+            <div class="input-shell">
+              <svg aria-hidden="true"><use href="#i-server"></use></svg>
+              <input id="serverInput" type="text" placeholder="Адреса сервера, напр. 123-456-789.syrve.online" autocomplete="off" spellcheck="false">
+            </div>
+            <label class="sr-only" for="portInput">Порт</label>
+            <div class="input-shell">
+              <svg aria-hidden="true"><use href="#i-port"></use></svg>
+              <input id="portInput" type="text" inputmode="numeric" placeholder="Порт" autocomplete="off">
+            </div>
+            <button id="checkButton" class="button button--blue" type="submit">
+              <svg id="checkButtonIcon" aria-hidden="true"><use href="#i-search"></use></svg>
+              <span id="checkButtonSpinner" class="spinner" hidden></span>
+              <span id="checkButtonLabel">Перевірити ліцензії</span>
+            </button>
+          </form>
+
+        </div>
+
+        <p id="accessNotice" class="status-box status-box--warning" hidden><span class="status-box__title">Потрібен персональний доступ</span>Активуйте доступ пристрою в popup розширення, щоб перевіряти ліцензії.</p>
+        <p id="checkError" class="status-box status-box--error" role="alert" hidden></p>
+        <div id="checkResult" class="check__result" aria-live="polite" hidden></div>
+      </section>
+
+      <section class="card pricing-notice" id="pricingNotice" data-state="loading" role="status" aria-live="polite">
+        <span class="spinner" id="pricingNoticeSpinner"></span>
+        <div class="pricing-notice__text">
+          <p class="card__title" id="pricingNoticeTitle">Завантажую прайс…</p>
+          <p class="pricing-notice__copy" id="pricingNoticeText">Ціни отримуються з SLM для цього пристрою.</p>
+        </div>
+        <button class="button button--blue button--small" id="pricingRetryButton" type="button" hidden>Спробувати ще</button>
+      </section>
+
+      <div class="workspace" hidden>
+        <section class="card workspace__settings" aria-labelledby="settingsTitle">
+          <div class="card__head">
+            <span class="card__step" aria-hidden="true">1</span>
+            <h2 id="settingsTitle" class="card__title">Налаштування поточного закладу</h2>
+          </div>
+
+          <div class="params">
+            <div>
+              <span class="param__label" id="deploymentLabel">Тип розміщення</span>
+              <div class="segmented" role="group" aria-labelledby="deploymentLabel">
+                <button class="segmented__option" type="button" data-deployment="CLOUD" aria-pressed="true">
+                  <svg aria-hidden="true"><use href="#i-cloud"></use></svg>Cloud
+                </button>
+                <button class="segmented__option" type="button" data-deployment="LT" aria-pressed="false">
+                  <svg aria-hidden="true"><use href="#i-server"></use></svg>LT
+                </button>
+              </div>
+              <p id="deploymentHint" class="param__hint"></p>
+            </div>
+
+            <div>
+              <span class="param__label" id="planLabel">Тип підписки</span>
+              <div id="planGroup" class="segmented" role="group" aria-labelledby="planLabel">
+                <button class="segmented__option" type="button" data-plan="PRO" aria-pressed="true">PRO</button>
+                <button class="segmented__option" type="button" data-plan="ENTERPRISE" aria-pressed="false">Enterprise</button>
+              </div>
+              <p id="planHint" class="param__hint" hidden></p>
+            </div>
+
+            <div id="currentFrontsField" class="counter-field">
+              <span class="counter-field__label" id="currentFrontsLabel">Поточні фронти</span>
+              <p id="currentFrontsUnit" class="counter-field__hint"></p>
+            </div>
+          </div>
+        </section>
+
+        <div class="workspace__pos">
+          <section id="posSection" class="card" aria-labelledby="posTitle">
+            <div class="card__head">
+              <span class="card__step" aria-hidden="true">2</span>
+              <h2 id="posTitle" class="card__title">Дозамовлення POS фронт</h2>
+            </div>
+
+            <p class="pos-description">PRO — фронт · Enterprise — фронт / колл-центр</p>
+            <p id="posLtNotice" class="status-box status-box--warning" hidden><span class="status-box__title">Недоступне для LT</span>Дозамовлення фронтів для LT не можливо.</p>
+
+            <div id="posControls" class="counter-field">
+              <div class="pos-order-row">
+                <div class="pos-order-counter">
+                  <span class="counter-field__label" id="addedFrontsLabel">Кількість нових фронтів</span>
+                  <div id="addedFrontsField"></div>
+                </div>
+                <p id="posTariffHint" class="counter-field__hint"></p>
+              </div>
+            </div>
+
+            <h3 id="frontInfoTitle" class="front-info__title">Детальна інформація про ліцензії POS</h3>
+            <div id="frontInfoList" class="front-info" aria-labelledby="frontInfoTitle"></div>
+          </section>
+
+
+        </div>
+
+        <section class="card workspace__popular" aria-labelledby="popularTitle">
+          <div class="card__head">
+            <span class="card__step" aria-hidden="true">3</span>
+            <h2 id="popularTitle" class="card__title">Найпопулярніші ліцензії</h2>
+          </div>
+          <div id="popularAddonList" class="addon-grid"></div>
+        </section>
+
+        <section class="card workspace__other" aria-labelledby="otherTitle">
+          <div class="card__head">
+            <span class="card__step" aria-hidden="true">4</span>
+            <h2 id="otherTitle" class="card__title">Інші ліцензії та інтеграції</h2>
+            <span class="chip card__aside">Integration</span>
+          </div>
+          <div id="otherAddonList" class="addon-grid"></div>
+        </section>
+      </div>
+    </div>
+
+    <aside class="page__summary" aria-label="Підсумок" hidden>
+      <div class="summary">
+        <section class="card" aria-labelledby="totalsTitle">
+          <h2 id="totalsTitle" class="totals__label-top">Разом до сплати</h2>
+          <div class="totals__row">
+            <span class="totals__label">Щомісячний платіж</span>
+            <span id="totalMonthly" class="totals__value"></span>
+          </div>
+          <div class="totals__row">
+            <span class="totals__label">Разове впровадження</span>
+            <span id="totalSetup" class="totals__value totals__value--secondary"></span>
+          </div>
+          <div class="totals__actions">
+            <button id="resetButton" class="button button--ghost button--small" type="button">Очистити вибір</button>
+          </div>
+        </section>
+
+        <div class="summary__response">
+        <section id="messagePanel" class="message-card" aria-labelledby="messageTitle">
+          <div class="card__head">
+            <h2 id="messageTitle" class="card__title">Відповідь клієнту</h2>
+            <button id="copyButton" class="button button--on-dark button--small card__aside" type="button">
+              <svg id="copyButtonIcon" aria-hidden="true"><use href="#i-copy"></use></svg>
+              <span id="copyButtonLabel">Копіювати</span>
+            </button>
+          </div>
+          <pre id="messageText" class="message"></pre>
+          <p class="footnote">* Перевірте відповідність обраного плану (PRO/Enterprise) до додаткових модулів (CallCenter/Loyalty).</p>
+        </section>
+          <section class="note" aria-labelledby="importantTitle">
+            <h2 id="importantTitle" class="note__title">
+              <svg aria-hidden="true"><use href="#i-warning"></use></svg>Важливо!
+            </h2>
+            <div class="note__body">
+              <p>*Вартість впровадження розраховується на 1 * РМС. У 99% випадків вона дійсно складає $100, але якщо ТЗ вам здається геть закрученим — варто порадитися по вартості з відділом впровадження \ керівником технічної підтримки.</p>
+              <div>
+                <p><strong>Для замовлення ліцензії Delivery (CallCenter)</strong> клієнт має бути на підписці "Cloud Enterprise". Перевірити підписку можна в BackOffice за наявністю ліцензії Delivery (CallCenter) — або перевіркою ліцензій угорі сторінки:</p>
+                <ul>
+                  <li>якщо її немає = у клієнта Cloud PRO</li>
+                  <li>якщо вона є = у клієнта Cloud Enterprise</li>
+                </ul>
+              </div>
+            </div>
+          </section>
+        </div>
+      </div>
+    </aside>
+  </main>
+
+  <div class="bottom-bar" aria-label="Підсумок" hidden>
+    <div class="bottom-bar__totals">
+      <div>
+        <span class="bottom-bar__label">Всього / міс</span>
+        <span id="bottomMonthly" class="bottom-bar__value"></span>
+      </div>
+      <div>
+        <span class="bottom-bar__label">Впровадження</span>
+        <span id="bottomSetup" class="bottom-bar__value"></span>
+      </div>
+    </div>
+    <button id="scrollToMessageButton" class="button button--brand" type="button">
+      <svg aria-hidden="true"><use href="#i-arrow-down"></use></svg>Текст клієнту
+    </button>
+  </div>
+
+  <dialog id="consultationDialog" class="consultation-dialog" aria-labelledby="consultationTitle" aria-describedby="consultationText">
+    <h2 id="consultationTitle" class="card__title">Потрібна консультація</h2>
+    <p id="consultationText"></p>
+    <form method="dialog"><button class="button button--blue" autofocus>Зрозуміло</button></form>
+  </dialog>
+  <script src="license-calculator.js"></script>
+</body>
+</html>
