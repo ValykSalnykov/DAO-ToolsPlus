@@ -843,7 +843,7 @@
     return `Вітаю!
 
 Прошу погодити вартість:
-- ліцензія + ${calculation.monthlyUah} грн/міс до поточного рахунку з урахуванням знижки 50% до кінця воєнного положення
+- ліцензія + ${calculation.monthlyUah} грн/міс до поточного рахунку
 - впровадження: ${totalSetupLabel}
 
 Деталізація:
@@ -1207,10 +1207,9 @@ ${calculation.details.map((detail) => `- ${detail}`).join('\n')}`;
 
   const renderPriceChanges = () => {
     const changes = DATA?.priceChanges || [];
-    priceMetaButton.disabled = changes.length === 0;
-    priceMetaButton.title = changes.length > 0
-      ? 'Показати, що змінилось у прайсі'
-      : 'Дата прайсу, за яким рахує калькулятор';
+    // Вікно змін прайсу вимкнене; дату оновлення залишаємо видимою.
+    priceMetaButton.disabled = true;
+    priceMetaButton.title = 'Дата прайсу, за яким рахує калькулятор';
     priceChangesTitle.textContent = `Зміни прайсу від ${formatPriceDate(DATA?.priceUpdatedAt)}`;
     priceChangesList.replaceChildren(...changes.map((change) => {
       const item = createNode('li', 'price-changes__item');
@@ -1218,7 +1217,7 @@ ${calculation.details.map((detail) => `- ${detail}`).join('\n')}`;
       return item;
     }));
 
-    if (changes.length === 0 && !priceChangesPopover.hidden) {
+    if (!priceChangesPopover.hidden) {
       setPriceChangesOpen(false);
     }
   };
