@@ -2,7 +2,7 @@
   "manifest_version": 3,
   "name": "DAO Tools+",
   "description": "DAO Tools+ для Planfix/Syrve: автологін, перевірка й калькулятор ліцензій, PiP та заявки HelpDesk зі скріншотом.",
-  "version": "1.6.0",
+  "version": "1.6.1",
   "minimum_chrome_version": "116",
   "action": {
     "default_title": "DAO Tools+",

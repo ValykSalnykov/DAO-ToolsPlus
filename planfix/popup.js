@@ -1021,6 +1021,29 @@ const persistCurrentServerContext = async () => {
 };
 
 // Історія серверів: останні адреси, з якими успішно відкривали Backoffice / Chain
+const SERVER_HISTORY_NAME_MAX_LENGTH = 120;
+const PLANFIX_ORIGIN = "https://dao.planfix.ua";
+
+const normalizeServerHistoryName = (value) => String(value || "")
+  .replace(/\s+/g, " ")
+  .trim()
+  .slice(0, SERVER_HISTORY_NAME_MAX_LENGTH);
+
+// Відкриваємо лише сторінки Planfix: значення приходить зі storage, куди пише content script
+const normalizePlanfixCardUrl = (value) => {
+  try {
+    const url = new URL(String(value || "").trim());
+    if (url.origin !== PLANFIX_ORIGIN) {
+      return "";
+    }
+
+    url.hash = "";
+    return url.toString();
+  } catch (error) {
+    return "";
+  }
+};
+
 const normalizeServerHistory = (value) => {
   if (!Array.isArray(value)) {
     return [];
@@ -1038,13 +1061,50 @@ const normalizeServerHistory = (value) => {
     }
 
     seen.add(key);
-    entries.push({ server, port });
+    entries.push({
+      server,
+      port,
+      name: normalizeServerHistoryName(entry?.name),
+      cardUrl: normalizePlanfixCardUrl(entry?.cardUrl)
+    });
   });
 
   return entries.slice(0, MAX_SERVER_HISTORY_ITEMS);
 };
 
 const formatServerHistoryLabel = ({ server, port }) => (port && port !== "443" ? `${server}:${port}` : server);
+
+const openServerHistoryCard = async (entry) => {
+  const cardUrl = normalizePlanfixCardUrl(entry?.cardUrl);
+  if (!cardUrl) {
+    return;
+  }
+
+  try {
+    // Картка вже відкрита — перемикаємось на неї, щоб не плодити дублікати вкладок
+    const planfixTabs = await chrome.tabs.query({ url: `${PLANFIX_ORIGIN}/*` });
+    const existingTab = planfixTabs.find((tab) => normalizePlanfixCardUrl(tab.url) === cardUrl);
+    if (existingTab?.id) {
+      await chrome.tabs.update(existingTab.id, { active: true });
+      await chrome.windows.update(existingTab.windowId, { focused: true });
+    } else {
+      await chrome.tabs.create({ url: cardUrl });
+    }
+    window.close();
+  } catch (error) {
+    console.error("Failed to open Planfix card:", error);
+    setInlineServerError("Не вдалося відкрити картку в Planfix.");
+  }
+};
+
+const createServerHistoryOpenIcon = () => {
+  const svg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
+  const use = document.createElementNS("http://www.w3.org/2000/svg", "use");
+  svg.setAttribute("aria-hidden", "true");
+  use.setAttribute("href", "#i-external-link");
+  svg.append(use);
+  return svg;
+};
 
 const applyServerHistoryEntry = (entry) => {
   restoreServerContext(entry);
@@ -1059,14 +1119,31 @@ const renderServerHistory = () => {
   }
 
   serverHistoryList.replaceChildren(...serverHistoryEntries.map((entry) => {
-    const label = formatServerHistoryLabel(entry);
+    const address = entry.port ? `${entry.server}:${entry.port}` : entry.server;
+    const item = document.createElement("div");
+    item.className = "server-history__entry";
+
+    // Назва закладу (з картки Planfix) впізнається швидше за адресу; адреса лишається в підказці
     const button = document.createElement("button");
     button.type = "button";
     button.className = "server-history__item";
-    button.textContent = label;
-    button.title = `Підставити ${entry.port ? `${entry.server}:${entry.port}` : entry.server}`;
+    button.textContent = entry.name || formatServerHistoryLabel(entry);
+    button.title = entry.name ? `${entry.name}\n${address}\nНатисніть, щоб підставити сервер` : `Підставити ${address}`;
     button.addEventListener("click", () => applyServerHistoryEntry(entry));
-    return button;
+    item.append(button);
+
+    if (entry.cardUrl) {
+      const openButton = document.createElement("button");
+      openButton.type = "button";
+      openButton.className = "server-history__open";
+      openButton.title = "Відкрити картку в Planfix";
+      openButton.setAttribute("aria-label", `Відкрити картку ${entry.name || address} в Planfix`);
+      openButton.append(createServerHistoryOpenIcon());
+      openButton.addEventListener("click", () => openServerHistoryCard(entry));
+      item.append(openButton);
+    }
+
+    return item;
   }));
 
   serverHistory.classList.toggle("is-hidden", serverHistoryEntries.length === 0);
@@ -1077,7 +1154,11 @@ const rememberServerInHistory = async (context) => {
     return;
   }
 
-  serverHistoryEntries = normalizeServerHistory([context, ...serverHistoryEntries]);
+  // Вхід із popup не знає назви закладу — зберігаємо назву й посилання, що вже були для цього сервера
+  const server = normalizeServer(context.server);
+  const port = String(context.port || "").trim();
+  const previousEntry = serverHistoryEntries.find((entry) => entry.server === server && entry.port === port);
+  serverHistoryEntries = normalizeServerHistory([{ ...previousEntry, server, port }, ...serverHistoryEntries]);
   renderServerHistory();
   await storageSet({ [STORAGE_KEYS.serverHistory]: serverHistoryEntries });
 };

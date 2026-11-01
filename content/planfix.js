@@ -9493,10 +9493,21 @@ const readSendDataResponseMessage = async (response) => {
 // Історія «Останні сервери» в popup: кнопка «Увійти в бекофіс» додає сервер так само, як сам popup
 const POPUP_SERVER_HISTORY_STORAGE_KEY = 'popupServerHistory';
 const POPUP_SERVER_HISTORY_MAX_ITEMS = 6;
+const POPUP_SERVER_HISTORY_NAME_MAX_LENGTH = 120;
 
-const rememberServerInPopupHistory = ({ server, port } = {}) => new Promise((resolve) => {
+// Посилання для кнопки «Відкрити в Planfix»: сторінка задачі або запис довідника з ?key=
+const getPopupHistoryCardUrl = () => {
+    const url = new URL(window.location.href);
+    url.hash = '';
+    const isCardUrl = /^\/task\/\d+(?:\/|$)/.test(url.pathname) || url.searchParams.has('key');
+    return isCardUrl ? url.toString() : '';
+};
+
+const rememberServerInPopupHistory = ({ server, port, name, cardUrl } = {}) => new Promise((resolve) => {
     const normalizedServer = normalizeServerHost(server);
     const normalizedPort = String(port || '').trim();
+    const normalizedName = String(name || '').replace(/\s+/g, ' ').trim().slice(0, POPUP_SERVER_HISTORY_NAME_MAX_LENGTH);
+    const normalizedCardUrl = String(cardUrl || '').trim();
     if (!normalizedServer) {
         resolve();
         return;
@@ -9512,11 +9523,19 @@ const rememberServerInPopupHistory = ({ server, port } = {}) => new Promise((res
             const storedEntries = Array.isArray(result?.[POPUP_SERVER_HISTORY_STORAGE_KEY])
                 ? result[POPUP_SERVER_HISTORY_STORAGE_KEY]
                 : [];
+            const isSameServer = (entry) => (
+                entry?.server === normalizedServer && String(entry?.port || '').trim() === normalizedPort
+            );
+            // Якщо в картці немає назви, лишаємо ту, що вже була збережена для цього сервера
+            const previousEntry = storedEntries.find(isSameServer);
             const nextEntries = [
-                { server: normalizedServer, port: normalizedPort },
-                ...storedEntries.filter((entry) => (
-                    entry?.server !== normalizedServer || String(entry?.port || '').trim() !== normalizedPort
-                ))
+                {
+                    server: normalizedServer,
+                    port: normalizedPort,
+                    name: normalizedName || String(previousEntry?.name || ''),
+                    cardUrl: normalizedCardUrl || String(previousEntry?.cardUrl || '')
+                },
+                ...storedEntries.filter((entry) => !isSameServer(entry))
             ].slice(0, POPUP_SERVER_HISTORY_MAX_ITEMS);
 
             chrome.storage.local.set({ [POPUP_SERVER_HISTORY_STORAGE_KEY]: nextEntries }, () => {
@@ -9715,7 +9734,12 @@ const rememberServerInPopupHistory = ({ server, port } = {}) => new Promise((res
 
                         if (response.ok) {
                             console.log(responseMessage || 'Дані успішно надіслано.', response.status);
-                            void rememberServerInPopupHistory(finalServerContext);
+                            void rememberServerInPopupHistory({
+                                ...finalServerContext,
+                                name: readCardFieldValue(scopeRoot.querySelector('.field-target[f-id="106"] .ObjectEditFieldBase__view__value__text'))
+                                    || readCardFieldValue(scopeRoot.querySelector('.field-target[f-id="80"] .ObjectEditFieldBase__view__value__text')),
+                                cardUrl: getPopupHistoryCardUrl()
+                            });
 
                             if (responseMessage && !isSendDataSuccessMessage(responseMessage)) {
                                 resetCardLoginStatus();

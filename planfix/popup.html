@@ -506,13 +506,27 @@
       gap: 6px;
     }
 
-    .server-history__item {
+    .server-history__entry {
+      display: flex;
       min-width: 0;
       min-height: 28px;
-      padding: 0 12px;
       border: 1px solid var(--field-border);
       border-radius: 999px;
       background: #ffffff;
+      overflow: hidden;
+      transition: border-color 0.18s ease;
+    }
+
+    .server-history__entry:hover {
+      border-color: rgba(75, 73, 245, 0.42);
+    }
+
+    .server-history__item {
+      flex: 1 1 auto;
+      min-width: 0;
+      padding: 0 12px;
+      border: none;
+      background: transparent;
       color: var(--text-main);
       font-size: 0.78rem;
       font-weight: 600;
@@ -520,11 +534,30 @@
       overflow: hidden;
       text-overflow: ellipsis;
       cursor: pointer;
-      transition: border-color 0.18s ease, background 0.18s ease, color 0.18s ease;
+      transition: background 0.18s ease, color 0.18s ease;
     }
 
-    .server-history__item:hover {
-      border-color: rgba(75, 73, 245, 0.42);
+    .server-history__open {
+      display: inline-flex;
+      flex: 0 0 28px;
+      align-items: center;
+      justify-content: center;
+      padding: 0;
+      border: none;
+      border-left: 1px solid var(--field-border);
+      background: transparent;
+      color: var(--text-soft);
+      cursor: pointer;
+      transition: background 0.18s ease, color 0.18s ease;
+    }
+
+    .server-history__open svg {
+      width: 13px;
+      height: 13px;
+    }
+
+    .server-history__item:hover,
+    .server-history__open:hover {
       background: var(--accent-soft);
       color: var(--accent);
     }
