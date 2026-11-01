@@ -13,9 +13,15 @@ const accessStatusTitle = document.getElementById("accessStatusTitle");
 const accessHelpText = document.getElementById("accessHelpText");
 const accessMessage = document.getElementById("accessMessage");
 const mainContent = document.getElementById("mainContent");
+const settingsContent = document.getElementById("settingsContent");
+const openSettingsButton = document.getElementById("openSettingsButton");
+const settingsBackButton = document.getElementById("settingsBackButton");
 const serverField = document.getElementById("serverField");
 const portField = document.getElementById("portField");
 const sendDataButton = document.getElementById("sendDataButton");
+const serverHistory = document.getElementById("serverHistory");
+const serverHistoryList = document.getElementById("serverHistoryList");
+const clearServerHistoryButton = document.getElementById("clearServerHistoryButton");
 const modeInfo = document.getElementById("modeInfo");
 const modeSelect = document.getElementById("modeSelect");
 const licenseDisplaySelect = document.getElementById("licenseDisplayMode");
@@ -27,6 +33,7 @@ const taskHighlightSettings = document.getElementById("taskHighlightSettings");
 const taskHighlightToggle = document.getElementById("taskHighlightToggle");
 const taskHighlightColorInput = document.getElementById("taskHighlightColor");
 const taskOverdueBlinkToggle = document.getElementById("taskOverdueBlinkToggle");
+const pipScaleSelect = document.getElementById("pipScalePercent");
 const inlineServerError = document.getElementById("inlineServerError");
 const clientStatus = document.getElementById("clientStatus");
 const clientIdBadge = document.getElementById("clientIdBadge");
@@ -43,19 +50,22 @@ const STORAGE_KEYS = {
   accessNotice: "extensionAccessNotice",
   daoServiceStatus: "daoServiceStatus",
   serverContext: "lastServerContext",
+  serverHistory: "popupServerHistory",
   lastManualErrorRequestAt: "planfixLastManualErrorRequestAt",
   modeDescriptions: "modeDescriptions",
   licenseDisplayMode: "planfixLicenseDisplayMode",
   staleLicenseThresholdMinutes: "syrveConnectionsStaleLicenseThresholdMinutes",
   taskHighlightEnabled: "pipTimeTrackerTaskHighlightEnabled",
   taskHighlightColor: "pipTimeTrackerTaskHighlightColor",
-  taskOverdueBlinkEnabled: "pipTimeTrackerTaskOverdueBlinkEnabled"
+  taskOverdueBlinkEnabled: "pipTimeTrackerTaskOverdueBlinkEnabled",
+  pipScalePercent: "pipWindowScalePercent"
 };
 
 const KNOWN_443_DOMAINS = ["syrve.online", "daocloud.it"];
 const HTTP_ONLY_DOMAINS = ["daocloud.fun"];
 const SEND_DATA_SUCCESS_MESSAGE = "Користувач вже має обліковку, все гуд";
 const LAST_ERROR_REQUEST_COOLDOWN_MS = 30 * 1000;
+const MAX_SERVER_HISTORY_ITEMS = 6;
 const STATUS_BOX_TONES = ["neutral", "warning", "success", "error"];
 const STATUS_PILL_TONES = ["neutral", "warning", "success", "error"];
 const MODE_TOGGLE_OPTION_VALUE = "__toggle__";
@@ -77,10 +87,20 @@ const DEFAULT_TASK_HIGHLIGHT_SETTINGS = Object.freeze({
 const DEFAULT_STALE_LICENSE_THRESHOLD_MINUTES = 20;
 const MIN_STALE_LICENSE_THRESHOLD_MINUTES = 1;
 const MAX_STALE_LICENSE_THRESHOLD_MINUTES = 1440;
+const DEFAULT_PIP_SCALE_PERCENT = 100;
+const MIN_PIP_SCALE_PERCENT = 80;
+const MAX_PIP_SCALE_PERCENT = 150;
+const PIP_SCALE_STEP_PERCENT = 10;
+const POPUP_SCREENS = Object.freeze({
+  main: "main",
+  settings: "settings"
+});
 
 let popupAccessState = null;
 let isAccessSetupForced = false;
+let activePopupScreen = POPUP_SCREENS.main;
 let knownModeDescriptions = [];
+let serverHistoryEntries = [];
 let currentModeDescription = "";
 let isSyncingModeSelect = false;
 let daoServiceStatusRequest = null;
@@ -246,6 +266,39 @@ const persistStaleLicenseThresholdMinutes = async (minutes) => {
     [STORAGE_KEYS.staleLicenseThresholdMinutes]: nextMinutes
   });
   return nextMinutes;
+};
+
+const normalizePipScalePercent = (value) => {
+  const normalizedValue = Number(value);
+  if (!Number.isFinite(normalizedValue)) {
+    return DEFAULT_PIP_SCALE_PERCENT;
+  }
+
+  const percent = Math.round(normalizedValue / PIP_SCALE_STEP_PERCENT) * PIP_SCALE_STEP_PERCENT;
+  return percent >= MIN_PIP_SCALE_PERCENT && percent <= MAX_PIP_SCALE_PERCENT
+    ? percent
+    : DEFAULT_PIP_SCALE_PERCENT;
+};
+
+const getStoredPipScalePercent = (storageState = {}) => (
+  normalizePipScalePercent(storageState[STORAGE_KEYS.pipScalePercent])
+);
+
+const applyPipScaleState = (percent) => {
+  if (!pipScaleSelect) {
+    return;
+  }
+
+  pipScaleSelect.value = String(normalizePipScalePercent(percent));
+};
+
+const persistPipScalePercent = async (percent) => {
+  const nextPercent = normalizePipScalePercent(percent);
+  applyPipScaleState(nextPercent);
+  await storageSet({
+    [STORAGE_KEYS.pipScalePercent]: nextPercent
+  });
+  return nextPercent;
 };
 
 const normalizeHexColor = (value, fallback = DEFAULT_TASK_HIGHLIGHT_SETTINGS.color) => {
@@ -967,6 +1020,74 @@ const persistCurrentServerContext = async () => {
   await storageSet({ [STORAGE_KEYS.serverContext]: context });
 };
 
+// Історія серверів: останні адреси, з якими успішно відкривали Backoffice / Chain
+const normalizeServerHistory = (value) => {
+  if (!Array.isArray(value)) {
+    return [];
+  }
+
+  const seen = new Set();
+  const entries = [];
+
+  value.forEach((entry) => {
+    const server = normalizeServer(entry?.server);
+    const port = String(entry?.port || "").trim();
+    const key = `${server}:${port}`;
+    if (!server || seen.has(key)) {
+      return;
+    }
+
+    seen.add(key);
+    entries.push({ server, port });
+  });
+
+  return entries.slice(0, MAX_SERVER_HISTORY_ITEMS);
+};
+
+const formatServerHistoryLabel = ({ server, port }) => (port && port !== "443" ? `${server}:${port}` : server);
+
+const applyServerHistoryEntry = (entry) => {
+  restoreServerContext(entry);
+  clearInlineServerError();
+  persistCurrentServerContext();
+  sendDataButton?.focus();
+};
+
+const renderServerHistory = () => {
+  if (!serverHistory || !serverHistoryList) {
+    return;
+  }
+
+  serverHistoryList.replaceChildren(...serverHistoryEntries.map((entry) => {
+    const label = formatServerHistoryLabel(entry);
+    const button = document.createElement("button");
+    button.type = "button";
+    button.className = "server-history__item";
+    button.textContent = label;
+    button.title = `Підставити ${entry.port ? `${entry.server}:${entry.port}` : entry.server}`;
+    button.addEventListener("click", () => applyServerHistoryEntry(entry));
+    return button;
+  }));
+
+  serverHistory.classList.toggle("is-hidden", serverHistoryEntries.length === 0);
+};
+
+const rememberServerInHistory = async (context) => {
+  if (!context?.server) {
+    return;
+  }
+
+  serverHistoryEntries = normalizeServerHistory([context, ...serverHistoryEntries]);
+  renderServerHistory();
+  await storageSet({ [STORAGE_KEYS.serverHistory]: serverHistoryEntries });
+};
+
+const clearServerHistory = async () => {
+  serverHistoryEntries = [];
+  renderServerHistory();
+  await storageSet({ [STORAGE_KEYS.serverHistory]: [] });
+};
+
 const fetchLastError = async (clientId) => {
   const response = await fetch("https://planfix-to-syrve.com:8000/get_last_error/", {
     method: "POST",
@@ -997,6 +1118,13 @@ const updateClientIdUI = (value) => {
   }
 };
 
+// Показує картку доступу або один з екранів popup: головний чи налаштування
+const syncPopupScreens = (shouldShowSetup) => {
+  accessSetupCard?.classList.toggle("is-hidden", !shouldShowSetup);
+  mainContent?.classList.toggle("is-hidden", shouldShowSetup || activePopupScreen !== POPUP_SCREENS.main);
+  settingsContent?.classList.toggle("is-hidden", shouldShowSetup || activePopupScreen !== POPUP_SCREENS.settings);
+};
+
 const renderAccessState = () => {
   const state = popupAccessState || {
     status: "needs-user",
@@ -1014,8 +1142,7 @@ const renderAccessState = () => {
   updateClientIdUI(state.userId || "");
   inputField.value = state.userId || "";
 
-  accessSetupCard?.classList.toggle("is-hidden", !shouldShowSetup);
-  mainContent?.classList.toggle("is-hidden", shouldShowSetup);
+  syncPopupScreens(shouldShowSetup);
 
   if (accessStatusBadge) {
     accessStatusBadge.textContent = viewModel.badge;
@@ -1092,21 +1219,25 @@ const persistUserId = async () => {
   const result = await storageGet([
     STORAGE_KEYS.daoServiceStatus,
     STORAGE_KEYS.serverContext,
+    STORAGE_KEYS.serverHistory,
     STORAGE_KEYS.lastManualErrorRequestAt,
     STORAGE_KEYS.modeDescriptions,
     STORAGE_KEYS.licenseDisplayMode,
     STORAGE_KEYS.staleLicenseThresholdMinutes,
     STORAGE_KEYS.taskHighlightEnabled,
     STORAGE_KEYS.taskHighlightColor,
-    STORAGE_KEYS.taskOverdueBlinkEnabled
+    STORAGE_KEYS.taskOverdueBlinkEnabled,
+    STORAGE_KEYS.pipScalePercent
   ]);
   const serverContext = result[STORAGE_KEYS.serverContext] || null;
   const daoServiceStatus = result[STORAGE_KEYS.daoServiceStatus] || null;
   lastManualErrorRequestAt = Number(result[STORAGE_KEYS.lastManualErrorRequestAt]) || 0;
   knownModeDescriptions = getStoredModeDescriptions(result);
+  serverHistoryEntries = normalizeServerHistory(result[STORAGE_KEYS.serverHistory]);
   const licenseDisplayMode = getStoredLicenseDisplayMode(result);
   const staleLicenseThresholdMinutes = getStoredStaleLicenseThresholdMinutes(result);
   const highlightSettings = getTaskHighlightSettings(result);
+  const pipScalePercent = getStoredPipScalePercent(result);
 
   updateDaoServiceStatusUI(daoServiceStatus || { state: DAO_SERVICE_STATUS_STATES.checking });
 
@@ -1147,9 +1278,11 @@ const persistUserId = async () => {
   renderAccessState();
 
   restoreServerContext(serverContext);
+  renderServerHistory();
   applyLicenseDisplayModeState(licenseDisplayMode);
   applyStaleLicenseThresholdState(staleLicenseThresholdMinutes);
   applyTaskHighlightSettingsState(highlightSettings);
+  applyPipScaleState(pipScalePercent);
   syncShowErrorButtonCooldownState();
 
   await refreshDaoServiceStatus(true);
@@ -1185,6 +1318,26 @@ licenseDisplaySelect?.addEventListener("change", async () => {
 
 staleLicenseThresholdInput?.addEventListener("change", async () => {
   await persistStaleLicenseThresholdMinutes(staleLicenseThresholdInput.value);
+});
+
+pipScaleSelect?.addEventListener("change", async () => {
+  await persistPipScalePercent(pipScaleSelect.value);
+});
+
+// Перемикання між головним екраном і екраном налаштувань у межах одного popup
+const showPopupScreen = (screen) => {
+  activePopupScreen = screen === POPUP_SCREENS.settings ? POPUP_SCREENS.settings : POPUP_SCREENS.main;
+  syncPopupScreens(popupAccessState?.status !== "granted" || isAccessSetupForced);
+};
+
+openSettingsButton?.addEventListener("click", () => {
+  showPopupScreen(POPUP_SCREENS.settings);
+  settingsBackButton?.focus();
+});
+
+settingsBackButton?.addEventListener("click", () => {
+  showPopupScreen(POPUP_SCREENS.main);
+  openSettingsButton?.focus();
 });
 
 editClientBtn?.addEventListener("click", () => {
@@ -1294,6 +1447,11 @@ portField.addEventListener("input", () => {
   persistCurrentServerContext();
 });
 
+clearServerHistoryButton?.addEventListener("click", async () => {
+  await clearServerHistory();
+  serverField.focus();
+});
+
 // Калькулятор ліцензій: окрема вкладка без підстановки збереженого сервера з popup
 openLicenseCalculatorButton?.addEventListener("click", async () => {
   try {
@@ -1344,6 +1502,7 @@ sendDataButton.addEventListener("click", async () => {
 
     if (response.ok) {
       console.log(responseMessage || "Data sent successfully!", response.status);
+      await rememberServerInHistory(context);
 
       if (responseMessage && !isSendDataSuccessMessage(responseMessage)) {
         setInlineServerError(responseMessage);

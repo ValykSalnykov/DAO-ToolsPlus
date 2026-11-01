@@ -9490,6 +9490,46 @@ const readSendDataResponseMessage = async (response) => {
     }
 };
 
+// Історія «Останні сервери» в popup: кнопка «Увійти в бекофіс» додає сервер так само, як сам popup
+const POPUP_SERVER_HISTORY_STORAGE_KEY = 'popupServerHistory';
+const POPUP_SERVER_HISTORY_MAX_ITEMS = 6;
+
+const rememberServerInPopupHistory = ({ server, port } = {}) => new Promise((resolve) => {
+    const normalizedServer = normalizeServerHost(server);
+    const normalizedPort = String(port || '').trim();
+    if (!normalizedServer) {
+        resolve();
+        return;
+    }
+
+    try {
+        chrome.storage.local.get([POPUP_SERVER_HISTORY_STORAGE_KEY], (result) => {
+            if (chrome.runtime.lastError) {
+                resolve();
+                return;
+            }
+
+            const storedEntries = Array.isArray(result?.[POPUP_SERVER_HISTORY_STORAGE_KEY])
+                ? result[POPUP_SERVER_HISTORY_STORAGE_KEY]
+                : [];
+            const nextEntries = [
+                { server: normalizedServer, port: normalizedPort },
+                ...storedEntries.filter((entry) => (
+                    entry?.server !== normalizedServer || String(entry?.port || '').trim() !== normalizedPort
+                ))
+            ].slice(0, POPUP_SERVER_HISTORY_MAX_ITEMS);
+
+            chrome.storage.local.set({ [POPUP_SERVER_HISTORY_STORAGE_KEY]: nextEntries }, () => {
+                void chrome.runtime.lastError;
+                resolve();
+            });
+        });
+    } catch (error) {
+        // Після перезавантаження розширення старий content script втрачає доступ до storage — історію просто пропускаємо.
+        resolve();
+    }
+});
+
 // Основна логіка
 (async () => {
     ensureCardButtonThemeObserver();
@@ -9675,6 +9715,7 @@ const readSendDataResponseMessage = async (response) => {
 
                         if (response.ok) {
                             console.log(responseMessage || 'Дані успішно надіслано.', response.status);
+                            void rememberServerInPopupHistory(finalServerContext);
 
                             if (responseMessage && !isSendDataSuccessMessage(responseMessage)) {
                                 resetCardLoginStatus();

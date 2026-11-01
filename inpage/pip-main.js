@@ -47,6 +47,10 @@
     color: '#2fd212',
     overdueBlinkEnabled: false
   });
+  const PIP_SCALE_ATTRIBUTE = 'data-pipx-pip-scale';
+  const DEFAULT_PIP_SCALE_PERCENT = 100;
+  const MIN_PIP_SCALE_PERCENT = 80;
+  const MAX_PIP_SCALE_PERCENT = 150;
 
   let lastKnownSize = null;
 
@@ -60,6 +64,7 @@
     titleObserver: null,
     mirrorObserver: null,
     taskHighlightSettingsObserver: null,
+    pipScaleObserver: null,
     pipHideHandler: null,
     pipResizeHandler: null,
     elementResizeObserver: null,
@@ -860,6 +865,7 @@
         }
 
         attachTaskHighlightSettingsObserver();
+        attachPipScaleObserver();
 
         post({ type: 'PIP_STATE', state: 'open', trigger, mode });
         logger.info('PiP window initialised', { trigger, mode });
@@ -1242,7 +1248,9 @@
   }
 
   function applyTaskHighlightTheme(pipDoc) {
-    if (!(pipDoc?.documentElement instanceof Element)) {
+    // Без instanceof Element: вузли PiP-вікна належать його власному realm, і перевірка завжди хибна
+    const pipRoot = pipDoc?.documentElement;
+    if (!pipRoot?.style) {
       return;
     }
 
@@ -1250,9 +1258,9 @@
     const fillColor = normalizeTaskHighlightColor(activeSettings.color);
     const { r, g, b } = hexToRgbChannels(fillColor);
 
-    pipDoc.documentElement.style.setProperty('--pipx-task-highlight-fill', fillColor);
-    pipDoc.documentElement.style.setProperty('--pipx-task-highlight-text', getTaskHighlightTextColor(fillColor));
-    pipDoc.documentElement.style.setProperty('--pipx-task-highlight-rgb', `${r} ${g} ${b}`);
+    pipRoot.style.setProperty('--pipx-task-highlight-fill', fillColor);
+    pipRoot.style.setProperty('--pipx-task-highlight-text', getTaskHighlightTextColor(fillColor));
+    pipRoot.style.setProperty('--pipx-task-highlight-rgb', `${r} ${g} ${b}`);
   }
 
   function handleTaskHighlightSettingsMutation() {
@@ -1311,6 +1319,59 @@
     if (state.taskHighlightSettingsObserver) {
       state.taskHighlightSettingsObserver.disconnect();
       state.taskHighlightSettingsObserver = null;
+    }
+  }
+
+  function readPipScalePercentFromDocument() {
+    const value = Number(document.documentElement?.dataset?.pipxPipScale);
+    if (!Number.isFinite(value) || value < MIN_PIP_SCALE_PERCENT || value > MAX_PIP_SCALE_PERCENT) {
+      return DEFAULT_PIP_SCALE_PERCENT;
+    }
+    return value;
+  }
+
+  // Масштабує весь вміст PiP-вікна разом: стилі TimeTracker задані в px, тому font-size кореня не підходить
+  function applyPipScale(pipDoc) {
+    const pipRoot = pipDoc?.documentElement;
+    if (!pipRoot?.style) {
+      return;
+    }
+
+    const percent = readPipScalePercentFromDocument();
+    if (percent === DEFAULT_PIP_SCALE_PERCENT) {
+      pipRoot.style.removeProperty('zoom');
+    } else {
+      pipRoot.style.setProperty('zoom', String(percent / 100));
+    }
+    logger.debug('Applied PiP scale', { percent });
+  }
+
+  function attachPipScaleObserver() {
+    disconnectPipScaleObserver();
+
+    const root = document.documentElement;
+    if (!(root instanceof Element)) {
+      return;
+    }
+
+    const observer = new MutationObserver(() => {
+      if (state.pipWindow && !state.pipWindow.closed) {
+        applyPipScale(state.pipWindow.document);
+      }
+    });
+
+    observer.observe(root, {
+      attributes: true,
+      attributeFilter: [PIP_SCALE_ATTRIBUTE]
+    });
+
+    state.pipScaleObserver = observer;
+  }
+
+  function disconnectPipScaleObserver() {
+    if (state.pipScaleObserver) {
+      state.pipScaleObserver.disconnect();
+      state.pipScaleObserver = null;
     }
   }
 
@@ -1997,6 +2058,7 @@
     copyStylesheets(pipDoc);
     mirrorTitle(pipDoc);
     applyTaskHighlightTheme(pipDoc);
+    applyPipScale(pipDoc);
     injectPipStyles(pipDoc, siteRule);
 
     pipDoc.body.appendChild(fragment);
@@ -2621,6 +2683,7 @@ ${getSiteSpecificPipStyles(siteRule)}
     disconnectElementResizeObserver();
     disconnectMirrorObserver();
     disconnectTaskHighlightSettingsObserver();
+    disconnectPipScaleObserver();
     resetTaskHighlights();
     if (state.styleObserver) {
       state.styleObserver.disconnect();

@@ -88,6 +88,9 @@
     }
 
     .popup {
+      display: flex;
+      flex-direction: column;
+      max-height: 584px;
       background: var(--panel-bg);
       border: 1px solid var(--panel-border);
       border-radius: 18px;
@@ -100,6 +103,7 @@
       align-items: center;
       justify-content: flex-start;
       gap: 10px;
+      flex-shrink: 0;
       padding: 14px 16px 15px;
       border-bottom: 1px solid var(--divider);
     }
@@ -198,6 +202,9 @@
     .popup__main {
       display: grid;
       gap: 0;
+      min-height: 0;
+      overflow-y: auto;
+      scrollbar-width: thin;
     }
 
     .card {
@@ -460,6 +467,68 @@
       gap: 10px;
     }
 
+    .server-history {
+      display: grid;
+      gap: 8px;
+    }
+
+    .server-history__header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+    }
+
+    .server-history__title {
+      font-size: 0.75rem;
+      font-weight: 600;
+      color: var(--text-muted);
+    }
+
+    .server-history__clear {
+      padding: 0;
+      border: none;
+      background: transparent;
+      color: var(--text-soft);
+      font-size: 0.72rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: color 0.18s ease;
+    }
+
+    .server-history__clear:hover {
+      color: var(--danger);
+    }
+
+    .server-history__list {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 6px;
+    }
+
+    .server-history__item {
+      min-width: 0;
+      min-height: 28px;
+      padding: 0 12px;
+      border: 1px solid var(--field-border);
+      border-radius: 999px;
+      background: #ffffff;
+      color: var(--text-main);
+      font-size: 0.78rem;
+      font-weight: 600;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      cursor: pointer;
+      transition: border-color 0.18s ease, background 0.18s ease, color 0.18s ease;
+    }
+
+    .server-history__item:hover {
+      border-color: rgba(75, 73, 245, 0.42);
+      background: var(--accent-soft);
+      color: var(--accent);
+    }
+
     .input-shell {
       display: flex;
       align-items: center;
@@ -546,6 +615,65 @@
       display: grid;
     }
 
+    .popup__settings {
+      display: flex;
+      flex-direction: column;
+      min-height: 0;
+      padding: 10px 16px 6px;
+    }
+
+    .settings-screen__header {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex-shrink: 0;
+      padding-bottom: 10px;
+    }
+
+    .settings-screen__back {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      min-height: 36px;
+      padding: 0 12px 0 10px;
+      border: 1px solid var(--field-border);
+      border-radius: 12px;
+      background: #ffffff;
+      color: var(--text-main);
+      font-size: 0.82rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background 0.18s ease, border-color 0.18s ease, transform 0.18s ease;
+    }
+
+    .settings-screen__back:hover {
+      background: #fafbff;
+      border-color: #cfd5ec;
+      transform: translateY(-1px);
+    }
+
+    .settings-screen__back .row-action__chevron {
+      transform: rotate(135deg);
+    }
+
+    .settings-screen__title {
+      margin: 0 0 0 4px;
+      font-size: 1rem;
+      line-height: 1.12;
+      letter-spacing: -0.04em;
+      font-weight: 700;
+      color: var(--text-main);
+    }
+
+    .settings-screen__body {
+      min-height: 0;
+      margin-right: -10px;
+      padding-right: 10px;
+      overflow-y: auto;
+      overscroll-behavior: contain;
+      scrollbar-width: thin;
+    }
+
     .setting-row {
       display: flex;
       align-items: center;
@@ -591,6 +719,10 @@
 
     .setting-row__icon--calculator {
       color: var(--accent);
+    }
+
+    .setting-row__icon--settings {
+      color: #68708d;
     }
 
     .setting-row__tail-icon {
@@ -718,6 +850,14 @@
       transform: rotate(45deg);
     }
 
+    .row-action__chevron--right {
+      transform: rotate(-45deg);
+    }
+
+    .mode-picker--compact {
+      min-width: 96px;
+    }
+
     .mode-picker__chevron {
       position: absolute;
       top: 50%;
@@ -832,6 +972,8 @@
     }
 
     .collapsible-card__body {
+      display: grid;
+      gap: 10px;
       padding: 0 0 14px 35px;
     }
 
@@ -992,6 +1134,11 @@
       <circle cx="12" cy="17" r="1.1" fill="currentColor" />
       <circle cx="15" cy="17" r="1.1" fill="currentColor" />
     </symbol>
+    <symbol id="i-settings" viewBox="0 0 24 24">
+      <path d="M4 7h9M17 7h3M4 17h3M11 17h9" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" />
+      <circle cx="15" cy="7" r="2.2" fill="none" stroke="currentColor" stroke-width="2" />
+      <circle cx="9" cy="17" r="2.2" fill="none" stroke="currentColor" stroke-width="2" />
+    </symbol>
     <symbol id="i-key" viewBox="0 0 24 24">
       <circle cx="8.5" cy="12" r="3.5" fill="none" stroke="currentColor" stroke-width="2" />
       <path d="M12 12h8m-3 0v3m-3-3v2" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
@@ -1078,6 +1225,14 @@
           </div>
         </div>
 
+        <div id="serverHistory" class="server-history is-hidden" role="group" aria-labelledby="serverHistoryTitle">
+          <div class="server-history__header">
+            <span id="serverHistoryTitle" class="server-history__title">Останні сервери</span>
+            <button id="clearServerHistoryButton" class="server-history__clear" type="button">Очистити</button>
+          </div>
+          <div id="serverHistoryList" class="server-history__list"></div>
+        </div>
+
         <button id="sendDataButton" class="button button--launch" type="button">
           <svg aria-hidden="true"><use href="#i-external-link"></use></svg>
           <span>Відкрити Backoffice / Chain</span>
@@ -1088,7 +1243,7 @@
 
       <div class="popup__section-divider" aria-hidden="true"></div>
 
-      <section class="settings-panel" aria-label="Налаштування">
+      <section class="settings-panel" aria-label="Інструменти">
         <div class="setting-row">
           <button id="openLicenseCalculatorButton" class="setting-row__trigger" type="button">
             <div class="setting-row__main">
@@ -1105,6 +1260,34 @@
           </button>
         </div>
 
+        <div class="setting-row">
+          <button id="openSettingsButton" class="setting-row__trigger" type="button" aria-controls="settingsContent">
+            <div class="setting-row__main">
+              <svg class="setting-row__icon setting-row__icon--settings" aria-hidden="true"><use href="#i-settings"></use></svg>
+              <div class="setting-row__copy">
+                <h2 class="setting-row__title">Налаштування</h2>
+              </div>
+            </div>
+
+            <span class="setting-row__tail">
+              <span class="row-action__chevron row-action__chevron--right" aria-hidden="true"></span>
+              <span class="sr-only">Відкрити налаштування</span>
+            </span>
+          </button>
+        </div>
+      </section>
+    </div>
+
+    <div id="settingsContent" class="popup__settings is-hidden">
+      <div class="settings-screen__header">
+        <button id="settingsBackButton" class="settings-screen__back" type="button">
+          <span class="row-action__chevron" aria-hidden="true"></span>
+          <span>Назад</span>
+        </button>
+        <h2 class="settings-screen__title">Налаштування</h2>
+      </div>
+
+      <section class="settings-panel settings-screen__body" aria-label="Налаштування">
         <div class="setting-row">
           <div class="setting-row__main">
             <svg class="setting-row__icon setting-row__icon--mode" aria-hidden="true"><use href="#i-globe"></use></svg>
@@ -1170,6 +1353,28 @@
           </summary>
 
           <div class="collapsible-card__body">
+            <div class="highlight-settings">
+              <label class="highlight-settings__toggle" for="pipScalePercent">
+                <span class="highlight-settings__copy">
+                  <span class="highlight-settings__title">Масштаб PiP-вікна</span>
+                  <span class="highlight-settings__hint">Збільшує або зменшує текст і елементи у PIP-вікні.</span>
+                </span>
+                <span class="mode-picker mode-picker--compact">
+                  <select id="pipScalePercent" class="mode-select" aria-label="Масштаб PiP-вікна">
+                    <option value="80">80%</option>
+                    <option value="90">90%</option>
+                    <option value="100" selected>100%</option>
+                    <option value="110">110%</option>
+                    <option value="120">120%</option>
+                    <option value="130">130%</option>
+                    <option value="140">140%</option>
+                    <option value="150">150%</option>
+                  </select>
+                  <span class="mode-picker__chevron" aria-hidden="true"></span>
+                </span>
+              </label>
+            </div>
+
             <div id="taskHighlightSettings" class="highlight-settings highlight-settings--disabled">
               <label class="highlight-settings__toggle" for="taskOverdueBlinkToggle">
                 <span class="highlight-settings__copy">

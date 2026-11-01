@@ -52,16 +52,23 @@
     color: '#2fd212',
     overdueBlinkEnabled: false
   });
+  const PIP_SCALE_STORAGE_KEY = 'pipWindowScalePercent';
+  const DEFAULT_PIP_SCALE_PERCENT = 100;
+  const MIN_PIP_SCALE_PERCENT = 80;
+  const MAX_PIP_SCALE_PERCENT = 150;
+  const PIP_SCALE_STEP_PERCENT = 10;
 
   const scriptUrl = chrome.runtime.getURL('inpage/pip-main.js');
   const styleUrl = chrome.runtime.getURL('inpage/pip-placeholder.css');
 
   applyTaskHighlightSettingsToDom(root, DEFAULT_TASK_HIGHLIGHT_SETTINGS);
+  applyPipScaleToDom(root, DEFAULT_PIP_SCALE_PERCENT);
   logger.info('Injecting PiP controller assets', { scriptUrl, styleUrl });
 
   injectStyle(styleUrl);
   injectMainScript(scriptUrl);
   syncTaskHighlightSettingsToDom(root);
+  syncPipScaleToDom(root);
 
   chrome.runtime.onMessage.addListener((message) => {
     if (!message || typeof message.command !== 'string') {
@@ -109,6 +116,10 @@
   chrome.storage.onChanged.addListener((changes, areaName) => {
     if (areaName !== 'local') {
       return;
+    }
+
+    if (PIP_SCALE_STORAGE_KEY in changes) {
+      applyPipScaleToDom(root, changes[PIP_SCALE_STORAGE_KEY].newValue);
     }
 
     if (
@@ -193,6 +204,34 @@
     target.dataset.pipxTaskHighlightColor = nextSettings.color;
     target.dataset.pipxTaskOverdueBlinkEnabled = nextSettings.overdueBlinkEnabled ? 'true' : 'false';
     logger.debug('Applied task highlight settings to DOM dataset', nextSettings);
+  }
+
+  function normalizePipScalePercent(value) {
+    const normalizedValue = Number(value);
+    if (!Number.isFinite(normalizedValue)) {
+      return DEFAULT_PIP_SCALE_PERCENT;
+    }
+
+    const percent = Math.round(normalizedValue / PIP_SCALE_STEP_PERCENT) * PIP_SCALE_STEP_PERCENT;
+    return percent >= MIN_PIP_SCALE_PERCENT && percent <= MAX_PIP_SCALE_PERCENT
+      ? percent
+      : DEFAULT_PIP_SCALE_PERCENT;
+  }
+
+  // Масштаб PiP-вікна передається in-page скрипту через data-атрибут, бо там немає chrome.storage
+  function applyPipScaleToDom(target, percent) {
+    if (!(target instanceof Element)) {
+      return;
+    }
+
+    target.dataset.pipxPipScale = String(normalizePipScalePercent(percent));
+    logger.debug('Applied PiP scale to DOM dataset', { percent: target.dataset.pipxPipScale });
+  }
+
+  function syncPipScaleToDom(target) {
+    chrome.storage.local.get([PIP_SCALE_STORAGE_KEY], (result) => {
+      applyPipScaleToDom(target, result?.[PIP_SCALE_STORAGE_KEY]);
+    });
   }
 
   function syncTaskHighlightSettingsToDom(target) {
