@@ -339,6 +339,11 @@
       : SUBSCRIPTIONS.pro;
   };
 
+  const isPermanentValidity = (validUntil) => String(validUntil || '').trim().toLowerCase().includes('перманент');
+
+  // Хоча б одна перманентна ліцензія означає, що клієнт на LT (Lifetime).
+  const hasPermanentLicense = (licenses) => licenses.some((license) => isPermanentValidity(license.validUntil));
+
   const buildServerSuggestion = (context, licenses) => {
     const suggestion = {};
 
@@ -347,6 +352,8 @@
       suggestion.plan = resolveSubscription(context, licenses) === SUBSCRIPTIONS.enterprise
         ? PLAN.enterprise
         : PLAN.pro;
+    } else if (hasPermanentLicense(licenses)) {
+      suggestion.deployment = DEPLOYMENT.lt;
     }
 
     const frontCount = sumLicenseCount(licenses, FRONT_MODULE_ID);
@@ -390,7 +397,7 @@
       return null;
     }
 
-    if (normalizedValue.toLowerCase().includes('перманент')) {
+    if (isPermanentValidity(normalizedValue)) {
       return createNode('span', 'lic__date lic__date--permanent', 'Перманентно');
     }
 
@@ -475,7 +482,7 @@
       return '';
     }
 
-    if (normalizedValue.toLowerCase().includes('перманент')) {
+    if (isPermanentValidity(normalizedValue)) {
       return 'Діє перманентно';
     }
 
