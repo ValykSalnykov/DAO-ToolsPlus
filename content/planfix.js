@@ -4864,6 +4864,529 @@ const ensureCardLicenseModalStyles = () => {
             #${CARD_LICENSE_MODAL_ID} .dao-license-modal__skeleton--cell-c { display: none; }
         }
     `;
+
+    style.textContent += `
+        /* --- Масове оновлення ліцензій: оболонка вікна --- */
+        #${CARD_LICENSE_MODAL_ID}[data-surface='license-update'] {
+            --upd-bg: #ffffff;
+            --upd-subtle: #f6f7f9;
+            --upd-line: #e6e9ee;
+            --upd-text: #202936;
+            --upd-muted: #697586;
+            --upd-success: #15803d;
+            --upd-success-soft: rgba(21, 128, 61, 0.09);
+            --upd-current: #0f766e;
+            --upd-current-soft: rgba(15, 118, 110, 0.09);
+            --upd-warning: #b45309;
+            --upd-warning-soft: rgba(180, 83, 9, 0.09);
+            --upd-error: #b91c1c;
+            --upd-error-soft: rgba(185, 28, 28, 0.08);
+            --upd-progress: #2563eb;
+            --upd-progress-soft: rgba(37, 99, 235, 0.08);
+            --upd-group-pos: #4f7f2a;
+            --upd-group-api: #2563eb;
+            --upd-group-mobile: #c2410c;
+            --upd-focus: #5988c9;
+            background: rgba(15, 23, 42, .48);
+            backdrop-filter: blur(3px);
+        }
+        #${CARD_LICENSE_MODAL_ID}[data-surface='license-update'][data-theme='dark'] {
+            --upd-bg: #18212e;
+            --upd-subtle: #202c3b;
+            --upd-line: #344153;
+            --upd-text: #e4eaf2;
+            --upd-muted: #a6b3c5;
+            --upd-success: #6ee7a8;
+            --upd-success-soft: rgba(110, 231, 168, 0.12);
+            --upd-current: #5eead4;
+            --upd-current-soft: rgba(94, 234, 212, 0.11);
+            --upd-warning: #fbbf24;
+            --upd-warning-soft: rgba(251, 191, 36, 0.12);
+            --upd-error: #fca5a5;
+            --upd-error-soft: rgba(248, 113, 113, 0.13);
+            --upd-progress: #93c5fd;
+            --upd-progress-soft: rgba(147, 197, 253, 0.12);
+            --upd-group-pos: #86efac;
+            --upd-group-api: #93c5fd;
+            --upd-group-mobile: #fdba74;
+        }
+        #${CARD_LICENSE_MODAL_ID}[data-surface='license-update'] .dao-license-modal__frame { width: min(calc(1040px + var(--dao-license-modal-controls-total-width)), 100%); }
+        #${CARD_LICENSE_MODAL_ID}[data-surface='license-update'] .dao-license-modal__dialog {
+            width: min(1040px, calc(100% - var(--dao-license-modal-controls-total-width)));
+            background: var(--upd-bg);
+            border-radius: 14px;
+            color: var(--upd-text);
+        }
+        #${CARD_LICENSE_MODAL_ID}[data-surface='license-update'] .dao-license-modal__dialog::before { display: none; }
+        #${CARD_LICENSE_MODAL_ID}[data-surface='license-update'] .dao-license-modal__title-wrap { padding: 20px 24px 14px; }
+        #${CARD_LICENSE_MODAL_ID}[data-surface='license-update'] .dao-license-modal__title { font-size: 20px; font-weight: 650; overflow-wrap: anywhere; }
+        #${CARD_LICENSE_MODAL_ID}[data-surface='license-update'] .dao-license-modal__subtitle { font-size: 12px; color: var(--upd-muted); overflow-wrap: anywhere; }
+        #${CARD_LICENSE_MODAL_ID}[data-surface='license-update'] .dao-license-modal__viewport { padding: 0 24px 20px; background: var(--upd-bg); }
+        #${CARD_LICENSE_MODAL_ID}[data-surface='license-update'] .dao-license-modal__body { gap: 14px; }
+        #${CARD_LICENSE_MODAL_ID}[data-surface='license-update'] .dao-license-modal__footer { background: var(--upd-bg); border-top: 1px solid var(--upd-line); box-shadow: none; padding: 12px 24px; }
+        #${CARD_LICENSE_MODAL_ID}[data-surface='license-update'] .dao-license-modal__footer-actions .dao-license-modal__button {
+            min-height: 34px;
+            padding: 7px 14px;
+            border-radius: 8px;
+            border-color: var(--upd-line);
+            background: var(--upd-bg);
+            box-shadow: none;
+            color: var(--upd-text);
+            font-size: 12.5px;
+            font-weight: 600;
+        }
+        #${CARD_LICENSE_MODAL_ID}[data-surface='license-update'] .dao-license-modal__footer-actions .dao-license-modal__button:hover:not(:disabled) {
+            transform: none;
+            background: var(--upd-subtle);
+            border-color: var(--upd-muted);
+        }
+        #${CARD_LICENSE_MODAL_ID}[data-surface='license-update'] .dao-license-modal__footer-actions .dao-license-modal__button--primary {
+            background: #0b8a84;
+            border-color: #0b8a84;
+            color: #ffffff;
+        }
+        #${CARD_LICENSE_MODAL_ID}[data-surface='license-update'] .dao-license-modal__footer-actions .dao-license-modal__button--primary:hover:not(:disabled) {
+            background: #09716c;
+            border-color: #09716c;
+        }
+        #${CARD_LICENSE_MODAL_ID}[data-surface='license-update'][data-theme='dark'] .dao-license-modal__footer-actions .dao-license-modal__button--primary {
+            background: #2dd4bf;
+            border-color: #2dd4bf;
+            color: #062420;
+        }
+        #${CARD_LICENSE_MODAL_ID}[data-surface='license-update'][data-theme='dark'] .dao-license-modal__footer-actions .dao-license-modal__button--primary:hover:not(:disabled) {
+            background: #5eead4;
+            border-color: #5eead4;
+        }
+        #${CARD_LICENSE_MODAL_ID}[data-surface='license-update'][data-layout='compact'] .dao-license-modal__frame { width: min(560px, 100%); }
+        #${CARD_LICENSE_MODAL_ID}[data-surface='license-update'][data-layout='compact'] .dao-license-modal__dialog {
+            width: min(560px, 100%);
+            max-width: min(560px, 100%);
+        }
+        #${CARD_LICENSE_MODAL_ID}[data-surface='license-update'][data-layout='compact'] .dao-license-modal__title-wrap { text-align: left; }
+        #${CARD_LICENSE_MODAL_ID}[data-surface='license-update'] .dao-license-modal__panel {
+            padding: 0;
+            border: 0;
+            border-radius: 0;
+            background: transparent;
+            box-shadow: none;
+            gap: 12px;
+        }
+        #${CARD_LICENSE_MODAL_ID}[data-surface='license-update'] .dao-license-modal__dialog-message { color: var(--upd-text); font-size: 13px; line-height: 1.55; }
+        #${CARD_LICENSE_MODAL_ID}[data-surface='license-update'] .dao-license-modal__dialog-label {
+            color: var(--upd-muted);
+            font-size: 11px;
+            font-weight: 600;
+            letter-spacing: 0;
+            text-transform: none;
+        }
+        #${CARD_LICENSE_MODAL_ID}[data-surface='license-update'] .dao-license-modal__dialog-input {
+            min-height: 40px;
+            padding: 9px 12px;
+            border-radius: 8px;
+            border-color: var(--upd-line);
+            background: var(--upd-bg);
+            box-shadow: none;
+            color: var(--upd-text);
+            font-size: 13.5px;
+            font-weight: 500;
+        }
+        #${CARD_LICENSE_MODAL_ID}[data-surface='license-update'] .dao-license-modal__dialog-input:focus {
+            border-color: var(--upd-focus);
+            box-shadow: 0 0 0 3px rgba(89, 136, 201, 0.18);
+        }
+        #${CARD_LICENSE_MODAL_ID}[data-surface='license-update'] .dao-license-modal__dialog-hint { color: var(--upd-muted); font-size: 11.5px; overflow-wrap: anywhere; }
+        #${CARD_LICENSE_MODAL_ID}[data-surface='license-update'] button:focus-visible,
+        #${CARD_LICENSE_MODAL_ID}[data-surface='license-update'] select:focus-visible { outline: 2px solid var(--upd-focus); outline-offset: 1px; }
+
+        /* --- Масове оновлення: прогрес і фільтри --- */
+        #${CARD_LICENSE_MODAL_ID} .dao-upd-progress { display: grid; gap: 8px; }
+        #${CARD_LICENSE_MODAL_ID} .dao-upd-progress__text {
+            display: flex;
+            flex-wrap: wrap;
+            align-items: baseline;
+            gap: 4px 10px;
+            margin: 0;
+            font-size: 13px;
+        }
+        #${CARD_LICENSE_MODAL_ID} .dao-upd-progress__text strong { font-weight: 650; font-variant-numeric: tabular-nums; }
+        #${CARD_LICENSE_MODAL_ID} .dao-upd-progress__text span { color: var(--upd-muted); font-size: 12px; overflow-wrap: anywhere; }
+        #${CARD_LICENSE_MODAL_ID} .dao-upd-progress__bar {
+            display: flex;
+            height: 6px;
+            border-radius: 999px;
+            overflow: hidden;
+            background: var(--upd-line);
+        }
+        #${CARD_LICENSE_MODAL_ID} .dao-upd-progress__segment { height: 100%; transition: width 0.3s ease; }
+        #${CARD_LICENSE_MODAL_ID} .dao-upd-progress__segment--ok { background: var(--upd-success); }
+        #${CARD_LICENSE_MODAL_ID} .dao-upd-progress__segment--attention { background: var(--upd-warning); }
+        #${CARD_LICENSE_MODAL_ID} .dao-upd-progress__segment--error { background: var(--upd-error); }
+        #${CARD_LICENSE_MODAL_ID} .dao-upd-progress__segment--processing {
+            background: repeating-linear-gradient(-45deg, var(--upd-progress) 0 6px, var(--upd-progress-soft) 6px 12px);
+            background-size: 17px 17px;
+            animation: dao-upd-stripes 0.8s linear infinite;
+        }
+        @keyframes dao-upd-stripes {
+            to { background-position: 17px 0; }
+        }
+        #${CARD_LICENSE_MODAL_ID} .dao-upd-notice {
+            margin: 0;
+            padding: 10px 14px;
+            border-radius: 9px;
+            border: 1px solid var(--upd-error);
+            background: var(--upd-error-soft);
+            color: var(--upd-error);
+            font-size: 12.5px;
+            font-weight: 600;
+            overflow-wrap: anywhere;
+        }
+        #${CARD_LICENSE_MODAL_ID} .dao-upd-toolbar {
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            justify-content: space-between;
+            gap: 10px 16px;
+        }
+        #${CARD_LICENSE_MODAL_ID} .dao-upd-switch {
+            display: inline-flex;
+            gap: 2px;
+            padding: 2px;
+            border: 1px solid var(--upd-line);
+            border-radius: 9px;
+            background: var(--upd-subtle);
+        }
+        #${CARD_LICENSE_MODAL_ID} .dao-upd-switch__option {
+            appearance: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 7px;
+            padding: 5px 12px;
+            border: 0;
+            border-radius: 7px;
+            background: transparent;
+            color: var(--upd-muted);
+            font: inherit;
+            font-size: 12.5px;
+            font-weight: 600;
+            cursor: pointer;
+        }
+        #${CARD_LICENSE_MODAL_ID} .dao-upd-switch__option:hover:not(:disabled) { color: var(--upd-text); }
+        #${CARD_LICENSE_MODAL_ID} .dao-upd-switch__option:disabled { cursor: default; opacity: 0.5; }
+        #${CARD_LICENSE_MODAL_ID} .dao-upd-switch__option.is-active {
+            background: var(--upd-bg);
+            color: var(--upd-text);
+            box-shadow: 0 0 0 1px var(--upd-line), 0 1px 2px rgba(15, 23, 42, 0.08);
+        }
+        #${CARD_LICENSE_MODAL_ID} .dao-upd-switch__count {
+            min-width: 20px;
+            padding: 0 6px;
+            border-radius: 999px;
+            background: var(--upd-line);
+            color: var(--upd-text);
+            font-size: 11px;
+            line-height: 18px;
+            text-align: center;
+            font-variant-numeric: tabular-nums;
+        }
+        #${CARD_LICENSE_MODAL_ID} .dao-upd-switch__option.has-attention .dao-upd-switch__count { background: var(--upd-warning-soft); color: var(--upd-warning); }
+        #${CARD_LICENSE_MODAL_ID} .dao-upd-select { display: inline-flex; align-items: center; gap: 8px; min-width: 0; color: var(--upd-muted); font-size: 12px; }
+        #${CARD_LICENSE_MODAL_ID} .dao-upd-select__control {
+            appearance: none;
+            width: 260px;
+            max-width: 100%;
+            height: 32px;
+            padding: 0 30px 0 10px;
+            border: 1px solid var(--upd-line);
+            border-radius: 8px;
+            background-color: var(--upd-bg);
+            background-image:
+                linear-gradient(45deg, transparent 50%, var(--upd-muted) 50%),
+                linear-gradient(135deg, var(--upd-muted) 50%, transparent 50%);
+            background-position: calc(100% - 15px) 50%, calc(100% - 10px) 50%;
+            background-size: 5px 5px, 5px 5px;
+            background-repeat: no-repeat;
+            color: var(--upd-text);
+            font: inherit;
+            font-size: 12.5px;
+            text-overflow: ellipsis;
+            cursor: pointer;
+        }
+        #${CARD_LICENSE_MODAL_ID} .dao-upd-select__control:hover { border-color: var(--upd-muted); }
+        #${CARD_LICENSE_MODAL_ID} .dao-upd-select__control.is-active { border-color: var(--upd-progress); box-shadow: inset 0 0 0 1px var(--upd-progress); }
+        #${CARD_LICENSE_MODAL_ID}[data-theme='dark'] .dao-upd-select__control { color-scheme: dark; }
+
+        /* --- Масове оновлення: таблиця серверів --- */
+        #${CARD_LICENSE_MODAL_ID} .dao-upd-grid {
+            border: 1px solid var(--upd-line);
+            border-radius: 10px;
+            background: var(--upd-bg);
+            overflow: hidden;
+        }
+        #${CARD_LICENSE_MODAL_ID} .dao-upd-grid__head,
+        #${CARD_LICENSE_MODAL_ID} .dao-upd-row {
+            display: grid;
+            grid-template-columns: 24px minmax(0, 1.3fr) 150px minmax(0, 1.5fr) 124px 10px;
+            gap: 14px;
+            align-items: center;
+            padding: 0 14px;
+        }
+        #${CARD_LICENSE_MODAL_ID} .dao-upd-grid__head {
+            min-height: 34px;
+            border-bottom: 1px solid var(--upd-line);
+            background: var(--upd-subtle);
+            color: var(--upd-muted);
+            font-size: 11px;
+            font-weight: 600;
+        }
+        #${CARD_LICENSE_MODAL_ID} .dao-upd-grid__head span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+        #${CARD_LICENSE_MODAL_ID} .dao-upd-row {
+            min-height: 50px;
+            padding-top: 8px;
+            padding-bottom: 8px;
+            border-top: 1px solid var(--upd-line);
+            transition: background 0.15s ease;
+        }
+        #${CARD_LICENSE_MODAL_ID} .dao-upd-grid__head + .dao-upd-row { border-top: 0; }
+        #${CARD_LICENSE_MODAL_ID} .dao-upd-row--interactive { cursor: pointer; }
+        #${CARD_LICENSE_MODAL_ID} .dao-upd-row--interactive:hover { background: var(--upd-subtle); }
+        #${CARD_LICENSE_MODAL_ID} .dao-upd-row:focus-visible { outline: 2px solid var(--upd-focus); outline-offset: -2px; }
+        #${CARD_LICENSE_MODAL_ID} .dao-upd-row--processing { background: var(--upd-progress-soft); }
+        #${CARD_LICENSE_MODAL_ID} .dao-upd-row--pending .dao-upd-cell--server .dao-upd-cell__main { color: var(--upd-muted); font-weight: 500; }
+        #${CARD_LICENSE_MODAL_ID} .dao-upd-cell { min-width: 0; display: grid; gap: 2px; }
+        #${CARD_LICENSE_MODAL_ID} .dao-upd-cell__main,
+        #${CARD_LICENSE_MODAL_ID} .dao-upd-cell__sub { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+        #${CARD_LICENSE_MODAL_ID} .dao-upd-cell__main { font-size: 13px; line-height: 1.4; }
+        #${CARD_LICENSE_MODAL_ID} .dao-upd-cell__sub { color: var(--upd-muted); font-size: 11.5px; line-height: 1.35; }
+        #${CARD_LICENSE_MODAL_ID} .dao-upd-cell__main--muted { color: var(--upd-muted); }
+        #${CARD_LICENSE_MODAL_ID} .dao-upd-cell__main--warning { color: var(--upd-warning); }
+        #${CARD_LICENSE_MODAL_ID} .dao-upd-cell__main--error { color: var(--upd-error); }
+        #${CARD_LICENSE_MODAL_ID} .dao-upd-cell__main--wrap {
+            display: -webkit-box;
+            -webkit-box-orient: vertical;
+            -webkit-line-clamp: 2;
+            font-size: 12.5px;
+            white-space: normal;
+            overflow-wrap: anywhere;
+        }
+        #${CARD_LICENSE_MODAL_ID} .dao-upd-cell--index { color: var(--upd-muted); font-size: 11px; font-variant-numeric: tabular-nums; }
+        #${CARD_LICENSE_MODAL_ID} .dao-upd-cell--server .dao-upd-cell__main { font-weight: 600; }
+        #${CARD_LICENSE_MODAL_ID} .dao-upd-cell--validity .dao-upd-cell__main { font-weight: 600; font-variant-numeric: tabular-nums; }
+        #${CARD_LICENSE_MODAL_ID} .dao-upd-days--warning { color: var(--upd-warning); }
+        #${CARD_LICENSE_MODAL_ID} .dao-upd-days--error { color: var(--upd-error); }
+        #${CARD_LICENSE_MODAL_ID} .dao-upd-cell--chevron { color: var(--upd-muted); font-size: 18px; line-height: 1; text-align: right; }
+        #${CARD_LICENSE_MODAL_ID} .dao-upd-cell--status {
+            --upd-status: var(--upd-muted);
+            display: flex;
+            align-items: center;
+            gap: 7px;
+            color: var(--upd-status);
+            font-size: 12.5px;
+            font-weight: 600;
+            white-space: nowrap;
+        }
+        #${CARD_LICENSE_MODAL_ID} .dao-upd-status--success { --upd-status: var(--upd-success); }
+        #${CARD_LICENSE_MODAL_ID} .dao-upd-status--current { --upd-status: var(--upd-current); }
+        #${CARD_LICENSE_MODAL_ID} .dao-upd-status--warning { --upd-status: var(--upd-warning); }
+        #${CARD_LICENSE_MODAL_ID} .dao-upd-status--error { --upd-status: var(--upd-error); }
+        #${CARD_LICENSE_MODAL_ID} .dao-upd-status--progress { --upd-status: var(--upd-progress); }
+        #${CARD_LICENSE_MODAL_ID} .dao-upd-status__dot { width: 7px; height: 7px; flex: 0 0 7px; border-radius: 999px; background: currentColor; }
+        #${CARD_LICENSE_MODAL_ID} .dao-upd-status--idle .dao-upd-status__dot { background: transparent; box-shadow: inset 0 0 0 1.5px currentColor; }
+        #${CARD_LICENSE_MODAL_ID} .dao-upd-status--idle { font-weight: 500; }
+        #${CARD_LICENSE_MODAL_ID} .dao-upd-status__label { overflow: hidden; text-overflow: ellipsis; }
+        #${CARD_LICENSE_MODAL_ID} .dao-upd-chips { display: flex; flex-wrap: wrap; gap: 5px; }
+        #${CARD_LICENSE_MODAL_ID} .dao-upd-chip,
+        #${CARD_LICENSE_MODAL_ID} .dao-upd-pill {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            border: 1px solid transparent;
+            border-radius: 999px;
+            background: var(--upd-subtle);
+            color: var(--upd-muted);
+            line-height: 1.35;
+            white-space: nowrap;
+        }
+        #${CARD_LICENSE_MODAL_ID} .dao-upd-chip { padding: 2px 8px; font-size: 11.5px; font-weight: 600; }
+        #${CARD_LICENSE_MODAL_ID} .dao-upd-pill { padding: 4px 10px; font-size: 12px; font-weight: 650; }
+        #${CARD_LICENSE_MODAL_ID} .dao-upd-pill--small { padding: 2px 8px; font-size: 11px; font-weight: 600; }
+        #${CARD_LICENSE_MODAL_ID} .dao-upd-chip--success,
+        #${CARD_LICENSE_MODAL_ID} .dao-upd-pill--success { background: var(--upd-success-soft); color: var(--upd-success); }
+        #${CARD_LICENSE_MODAL_ID} .dao-upd-chip--current,
+        #${CARD_LICENSE_MODAL_ID} .dao-upd-pill--current { background: var(--upd-current-soft); color: var(--upd-current); }
+        #${CARD_LICENSE_MODAL_ID} .dao-upd-chip--warning,
+        #${CARD_LICENSE_MODAL_ID} .dao-upd-pill--warning { background: var(--upd-warning-soft); color: var(--upd-warning); }
+        #${CARD_LICENSE_MODAL_ID} .dao-upd-chip--error,
+        #${CARD_LICENSE_MODAL_ID} .dao-upd-pill--error { background: var(--upd-error-soft); color: var(--upd-error); }
+        #${CARD_LICENSE_MODAL_ID} .dao-upd-chip--progress,
+        #${CARD_LICENSE_MODAL_ID} .dao-upd-pill--progress { background: var(--upd-progress-soft); color: var(--upd-progress); }
+        #${CARD_LICENSE_MODAL_ID} .dao-upd-pill--idle { border-color: var(--upd-line); }
+        #${CARD_LICENSE_MODAL_ID} .dao-upd-validity__value { font-size: 16px; font-weight: 600; font-variant-numeric: tabular-nums; }
+        #${CARD_LICENSE_MODAL_ID} .dao-upd-validity__old { color: var(--upd-muted); font-size: 11.5px; text-decoration: line-through; font-variant-numeric: tabular-nums; }
+        #${CARD_LICENSE_MODAL_ID} .dao-upd-empty {
+            display: grid;
+            justify-items: center;
+            gap: 10px;
+            padding: 28px 16px;
+            border: 1px dashed var(--upd-line);
+            border-radius: 10px;
+            color: var(--upd-muted);
+            font-size: 13px;
+            text-align: center;
+        }
+        #${CARD_LICENSE_MODAL_ID} .dao-upd-empty p { margin: 0; }
+        #${CARD_LICENSE_MODAL_ID} .dao-upd-link-button {
+            appearance: none;
+            padding: 6px 12px;
+            border: 1px solid var(--upd-line);
+            border-radius: 7px;
+            background: var(--upd-bg);
+            color: var(--upd-text);
+            font: inherit;
+            font-size: 12px;
+            font-weight: 600;
+            cursor: pointer;
+        }
+
+        /* --- Масове оновлення: деталі сервера --- */
+        #${CARD_LICENSE_MODAL_ID} .dao-upd-verdict {
+            --upd-tone: var(--upd-muted);
+            --upd-tone-soft: var(--upd-subtle);
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: space-between;
+            align-items: flex-start;
+            gap: 14px 24px;
+            padding: 14px 16px;
+            border: 1px solid var(--upd-tone);
+            border-radius: 10px;
+            background: var(--upd-tone-soft);
+        }
+        #${CARD_LICENSE_MODAL_ID} .dao-upd-verdict--success { --upd-tone: var(--upd-success); --upd-tone-soft: var(--upd-success-soft); }
+        #${CARD_LICENSE_MODAL_ID} .dao-upd-verdict--current { --upd-tone: var(--upd-current); --upd-tone-soft: var(--upd-current-soft); }
+        #${CARD_LICENSE_MODAL_ID} .dao-upd-verdict--warning { --upd-tone: var(--upd-warning); --upd-tone-soft: var(--upd-warning-soft); }
+        #${CARD_LICENSE_MODAL_ID} .dao-upd-verdict--error { --upd-tone: var(--upd-error); --upd-tone-soft: var(--upd-error-soft); }
+        #${CARD_LICENSE_MODAL_ID} .dao-upd-verdict--progress { --upd-tone: var(--upd-progress); --upd-tone-soft: var(--upd-progress-soft); }
+        #${CARD_LICENSE_MODAL_ID} .dao-upd-verdict__main { flex: 1 1 320px; min-width: 0; display: grid; gap: 6px; }
+        #${CARD_LICENSE_MODAL_ID} .dao-upd-verdict__eyebrow { margin: 0; color: var(--upd-muted); font-size: 11px; }
+        #${CARD_LICENSE_MODAL_ID} .dao-upd-verdict__title { margin: 0; color: var(--upd-tone); font-size: 18px; font-weight: 650; }
+        #${CARD_LICENSE_MODAL_ID} .dao-upd-verdict--idle .dao-upd-verdict__title { color: var(--upd-text); }
+        #${CARD_LICENSE_MODAL_ID} .dao-upd-verdict__text { margin: 0; font-size: 13px; line-height: 1.5; overflow-wrap: anywhere; }
+        #${CARD_LICENSE_MODAL_ID} .dao-upd-verdict__validity { display: grid; gap: 4px; justify-items: end; align-content: start; text-align: right; }
+        #${CARD_LICENSE_MODAL_ID} .dao-upd-verdict__validity-label { color: var(--upd-muted); font-size: 11px; }
+        #${CARD_LICENSE_MODAL_ID} .dao-upd-facts {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+            gap: 8px;
+            margin: 0;
+        }
+        #${CARD_LICENSE_MODAL_ID} .dao-upd-fact {
+            min-width: 0;
+            padding: 8px 12px;
+            border: 1px solid var(--upd-line);
+            border-radius: 9px;
+            background: var(--upd-subtle);
+        }
+        #${CARD_LICENSE_MODAL_ID} .dao-upd-fact dt { margin: 0 0 2px; color: var(--upd-muted); font-size: 11px; }
+        #${CARD_LICENSE_MODAL_ID} .dao-upd-fact dd { margin: 0; font-size: 12.5px; font-weight: 600; overflow-wrap: anywhere; }
+        #${CARD_LICENSE_MODAL_ID} .dao-upd-message {
+            margin: 0;
+            padding: 10px 14px;
+            border: 1px solid var(--upd-line);
+            border-radius: 9px;
+            background: var(--upd-subtle);
+            font-size: 12.5px;
+            white-space: pre-wrap;
+            overflow-wrap: anywhere;
+        }
+        #${CARD_LICENSE_MODAL_ID} .dao-upd-table-wrap { border: 1px solid var(--upd-line); border-radius: 10px; overflow-x: auto; }
+        #${CARD_LICENSE_MODAL_ID} .dao-upd-table { width: 100%; min-width: 620px; border-collapse: collapse; color: var(--upd-text); font-size: 12.5px; }
+        #${CARD_LICENSE_MODAL_ID} .dao-upd-table th,
+        #${CARD_LICENSE_MODAL_ID} .dao-upd-table td {
+            padding: 8px 12px;
+            border-bottom: 1px solid var(--upd-line);
+            text-align: left;
+            vertical-align: middle;
+        }
+        #${CARD_LICENSE_MODAL_ID} .dao-upd-table thead th { background: var(--upd-bg); color: var(--upd-muted); font-size: 11px; font-weight: 500; }
+        #${CARD_LICENSE_MODAL_ID} .dao-upd-table tbody:last-child tr:last-child td { border-bottom: 0; }
+        #${CARD_LICENSE_MODAL_ID} .dao-upd-table__group th {
+            background: var(--upd-subtle);
+            color: var(--upd-group-color, var(--upd-text));
+            font-size: 11.5px;
+            font-weight: 650;
+        }
+        #${CARD_LICENSE_MODAL_ID} .dao-upd-table__group--pos { --upd-group-color: var(--upd-group-pos); }
+        #${CARD_LICENSE_MODAL_ID} .dao-upd-table__group--api { --upd-group-color: var(--upd-group-api); }
+        #${CARD_LICENSE_MODAL_ID} .dao-upd-table__group--mobile { --upd-group-color: var(--upd-group-mobile); }
+        #${CARD_LICENSE_MODAL_ID} .dao-upd-table__group-count { margin-left: 6px; color: var(--upd-muted); font-weight: 500; }
+        #${CARD_LICENSE_MODAL_ID} .dao-upd-table__name { font-weight: 600; }
+        #${CARD_LICENSE_MODAL_ID} .dao-upd-table__subname { display: block; color: var(--upd-muted); font-size: 11px; font-weight: 400; }
+        #${CARD_LICENSE_MODAL_ID} .dao-upd-table td.is-numeric { white-space: nowrap; font-variant-numeric: tabular-nums; }
+        #${CARD_LICENSE_MODAL_ID} .dao-upd-table__old { color: var(--upd-muted); }
+        #${CARD_LICENSE_MODAL_ID} .dao-upd-table__after--changed { color: var(--upd-success); font-weight: 650; }
+        #${CARD_LICENSE_MODAL_ID} .dao-upd-table__days { display: block; color: var(--upd-muted); font-size: 11px; }
+        #${CARD_LICENSE_MODAL_ID} .dao-upd-table__days--warning { color: var(--upd-warning); }
+        #${CARD_LICENSE_MODAL_ID} .dao-upd-table__days--error { color: var(--upd-error); }
+        #${CARD_LICENSE_MODAL_ID} .dao-upd-table__row--new td { background: var(--upd-success-soft); }
+        #${CARD_LICENSE_MODAL_ID} .dao-upd-table__row--stale td { background: var(--upd-warning-soft); }
+        #${CARD_LICENSE_MODAL_ID} .dao-upd-table__row--stale td:first-child { box-shadow: inset 3px 0 0 var(--upd-warning); }
+        #${CARD_LICENSE_MODAL_ID} .dao-upd-table__row--expired td,
+        #${CARD_LICENSE_MODAL_ID} .dao-upd-table__row--removed td,
+        #${CARD_LICENSE_MODAL_ID} .dao-upd-table__row--shortened td { background: var(--upd-error-soft); }
+        #${CARD_LICENSE_MODAL_ID} .dao-upd-table__row--expired td:first-child,
+        #${CARD_LICENSE_MODAL_ID} .dao-upd-table__row--removed td:first-child,
+        #${CARD_LICENSE_MODAL_ID} .dao-upd-table__row--shortened td:first-child { box-shadow: inset 3px 0 0 var(--upd-error); }
+        #${CARD_LICENSE_MODAL_ID} .dao-upd-table__row--removed .dao-upd-table__name > span:first-child { text-decoration: line-through; }
+        #${CARD_LICENSE_MODAL_ID} .dao-upd-delta {
+            display: inline-block;
+            margin-left: 6px;
+            padding: 0 6px;
+            border-radius: 999px;
+            font-size: 11px;
+            font-weight: 650;
+        }
+        #${CARD_LICENSE_MODAL_ID} .dao-upd-delta--up { background: var(--upd-success-soft); color: var(--upd-success); }
+        #${CARD_LICENSE_MODAL_ID} .dao-upd-delta--down { background: var(--upd-error-soft); color: var(--upd-error); }
+
+        @media (prefers-reduced-motion: reduce) {
+            #${CARD_LICENSE_MODAL_ID} .dao-upd-progress__segment--processing { animation: none; }
+        }
+
+        @media (max-width: 760px) {
+            #${CARD_LICENSE_MODAL_ID} .dao-upd-grid__head { display: none; }
+            #${CARD_LICENSE_MODAL_ID} .dao-upd-row {
+                grid-template-columns: minmax(0, 1fr) auto;
+                grid-template-areas: 'server status' 'licenses validity';
+                gap: 6px 12px;
+                padding: 10px 12px;
+            }
+            #${CARD_LICENSE_MODAL_ID} .dao-upd-cell--index,
+            #${CARD_LICENSE_MODAL_ID} .dao-upd-cell--chevron { display: none; }
+            #${CARD_LICENSE_MODAL_ID} .dao-upd-cell--server { grid-area: server; }
+            #${CARD_LICENSE_MODAL_ID} .dao-upd-cell--status { grid-area: status; justify-content: flex-end; }
+            #${CARD_LICENSE_MODAL_ID} .dao-upd-cell--licenses { grid-area: licenses; }
+            #${CARD_LICENSE_MODAL_ID} .dao-upd-cell--validity { grid-area: validity; justify-items: end; text-align: right; }
+            #${CARD_LICENSE_MODAL_ID} .dao-upd-toolbar { align-items: stretch; }
+            #${CARD_LICENSE_MODAL_ID} .dao-upd-select { flex: 1 1 100%; }
+            #${CARD_LICENSE_MODAL_ID} .dao-upd-select__control { flex: 1 1 auto; width: auto; min-width: 0; }
+        }
+
+        @media (max-width: 640px) {
+            #${CARD_LICENSE_MODAL_ID}[data-surface='license-update'] .dao-license-modal__frame,
+            #${CARD_LICENSE_MODAL_ID}[data-surface='license-update'] .dao-license-modal__dialog {
+                width: 100%;
+                max-width: 100%;
+            }
+        }
+
+        @media (max-width: 600px) {
+            #${CARD_LICENSE_MODAL_ID}[data-surface='license-update'] .dao-license-modal__viewport { padding: 0 12px 12px; }
+            #${CARD_LICENSE_MODAL_ID}[data-surface='license-update'] .dao-license-modal__title-wrap { padding: 16px 12px; }
+            #${CARD_LICENSE_MODAL_ID}[data-surface='license-update'] .dao-license-modal__footer { padding: 12px; }
+            #${CARD_LICENSE_MODAL_ID} .dao-upd-verdict__validity { justify-items: start; text-align: left; }
+        }
+    `;
     document.head.appendChild(style);
 };
 
@@ -4882,13 +5405,6 @@ const createCardLicenseModalBadge = (label, value) => {
     const badge = createCardLicenseModalNode('div', 'dao-license-modal__badge');
     badge.appendChild(createCardLicenseModalNode('span', 'dao-license-modal__badge-label', label));
     badge.appendChild(createCardLicenseModalNode('span', 'dao-license-modal__badge-value', value));
-    return badge;
-};
-
-const createBulkLicenseSummaryBadge = (label, value, tone = 'total') => {
-    const badge = createCardLicenseModalNode('div', `dao-license-modal__summary-badge dao-license-modal__summary-badge--${tone}`);
-    badge.appendChild(createCardLicenseModalNode('span', 'dao-license-modal__summary-badge-label', `${label}:`));
-    badge.appendChild(createCardLicenseModalNode('span', 'dao-license-modal__summary-badge-value', value));
     return badge;
 };
 
@@ -6515,49 +7031,6 @@ const handleCardConnectionsStaleActionState = (message) => {
     showCardConnectionsResultModal(activeConnectionsSnapshotContext, nextSnapshot);
 };
 
-const buildBulkLicenseQueueItemLicenseResult = (item) => {
-    const server = item?.serverSnapshot && typeof item.serverSnapshot === 'object'
-        ? item.serverSnapshot
-        : {};
-    const licenses = Array.isArray(item?.licenseSnapshot) ? item.licenseSnapshot : [];
-
-    if (!licenses.length && !Object.keys(server).length) {
-        return null;
-    }
-
-    return {
-        server,
-        licenses
-    };
-};
-
-const hasBulkLicenseQueueItemResultDetails = (item) => Boolean(buildBulkLicenseQueueItemLicenseResult(item));
-
-const showBulkLicenseQueueItemResultModal = (run, item) => {
-    const licenseResult = buildBulkLicenseQueueItemLicenseResult(item);
-    if (!licenseResult) {
-        return;
-    }
-
-    const restoreQueueModal = () => {
-        removeCardLicenseModal();
-        if (run && activeBulkLicenseRun === run && !run.aborted) {
-            renderBulkLicenseQueueModal(run);
-        }
-    };
-
-    void getCardLicenseDisplayModeFromStorage().then((displayMode) => {
-        renderCardLicenseModal({
-            title: '',
-            subtitle: '',
-            displayMode,
-            content: buildCardLicenseResultContent(item.context, licenseResult),
-            onClose: restoreQueueModal,
-            footerActions: [{ label: 'Назад до черги', onClick: restoreQueueModal, autoFocus: true }]
-        });
-    });
-};
-
 const buildInlineBulkNoticeContent = (message, tone = 'warning') => {
     const fragment = document.createDocumentFragment();
     const panel = createCardLicenseModalNode('section', 'dao-license-modal__panel');
@@ -6578,7 +7051,7 @@ const showInlineBulkNoticeModal = ({ title, subtitle = '', message, tone = 'warn
     const finish = () => {
         removeCardLicenseModal();
         if (run && activeBulkLicenseRun === run && !run.aborted) {
-            renderBulkLicenseQueueModal(run);
+            renderLicenseUpdateQueueModal(run);
         }
         resolve();
     };
@@ -6642,26 +7115,6 @@ const createBulkLicenseBatchId = () => {
     return `${Date.now()}-${Math.random().toString(36).slice(2, 10)}`;
 };
 
-const resolveBulkLicenseQueueItemTone = (item) => {
-    if (!item || item.state === 'idle') {
-        return 'warning';
-    }
-
-    if (item.state === 'processing') {
-        return 'warning';
-    }
-
-    if (item.state === 'success') {
-        return 'success';
-    }
-
-    if (item.state === 'warning') {
-        return 'warning';
-    }
-
-    return 'error';
-};
-
 const formatBulkLicenseQueueItemStateLabel = (action, item) => {
     if (!item) {
         return 'Очікує';
@@ -6684,22 +7137,6 @@ const formatBulkLicenseQueueItemStateLabel = (action, item) => {
     }
 
     return 'Очікує';
-};
-
-const buildBulkLicenseResultStatusNode = (item, tone, resultLabel) => {
-    const statusNode = createCardLicenseModalNode(
-        'span',
-        `dao-license-modal__status-pill dao-license-modal__status-pill--${tone}`
-    );
-
-    if (item?.state === 'processing') {
-        statusNode.appendChild(createCardLicenseModalNode('span', 'dao-license-modal__queue-spinner'));
-        statusNode.appendChild(createCardLicenseModalNode('span', '', resultLabel));
-        return statusNode;
-    }
-
-    statusNode.textContent = resultLabel;
-    return statusNode;
 };
 
 const BULK_LICENSE_RESULT_LABELS = Object.freeze({
@@ -6728,118 +7165,6 @@ const BULK_LICENSE_RESULT_LABELS = Object.freeze({
     LICENSE_STATUS_NOT_VALID: 'Ліцензії невалідні'
 });
 
-const BULK_LICENSE_OUTCOME_LABELS = Object.freeze({
-    success: 'Успішно',
-    'not-updated': 'Без підтвердження',
-    'manual-check': 'Потрібна перевірка',
-    'server-unavailable': 'Сервер недоступний',
-    error: 'Помилка',
-    warning: 'Увага'
-});
-
-const formatBulkLicenseResultLabel = (item) => {
-    const normalizedCode = String(item?.resultCode || '').trim().toUpperCase();
-    if (normalizedCode && BULK_LICENSE_RESULT_LABELS[normalizedCode]) {
-        return BULK_LICENSE_RESULT_LABELS[normalizedCode];
-    }
-
-    const normalizedOutcome = String(item?.outcome || '').trim().toLowerCase();
-    if (normalizedOutcome && BULK_LICENSE_OUTCOME_LABELS[normalizedOutcome]) {
-        return BULK_LICENSE_OUTCOME_LABELS[normalizedOutcome];
-    }
-
-    if (item?.state === 'success') {
-        return 'Успішно';
-    }
-
-    if (item?.state === 'processing') {
-        return 'Обробка триває';
-    }
-
-    if (item?.state === 'warning') {
-        return 'Потрібна увага';
-    }
-
-    if (item?.state === 'error') {
-        return 'Помилка';
-    }
-
-    return 'Очікує обробки';
-};
-
-const BULK_LICENSE_RESULT_HELP_DESCRIPTIONS = Object.freeze({
-    SUCCESS: 'Ліцензії на сервері активні. Додаткових дій зараз не потрібно.',
-    OK: 'Ліцензії на сервері активні. Додаткових дій зараз не потрібно.',
-    ACTIVE: 'Ліцензії на сервері активні. Додаткових дій зараз не потрібно.',
-    EXPIRED: 'Ліцензії знайдено, але їх термін уже завершився. Потрібне продовження або ручна перевірка.',
-    LICENSE_STATUS_EXPIRED: 'Ліцензії знайдено, але їх термін уже завершився. Потрібне продовження або ручна перевірка.',
-    NOT_VALID: 'Сервер вважає ліцензії невалідними. Потрібна ручна перевірка перед подальшими діями.',
-    INVALID: 'Сервер вважає ліцензії невалідними. Потрібна ручна перевірка перед подальшими діями.',
-    LICENSE_STATUS_NOT_VALID: 'Сервер вважає ліцензії невалідними. Потрібна ручна перевірка перед подальшими діями.',
-    MISSED: 'Сервер не підтвердив продовження ліцензій. Варто перевірити результат вручну.',
-    UPDATED_CONFIRMED: 'Сервер підтвердив, що зміни застосовані. Ліцензію або термін дії вже оновлено.',
-    UPDATED_PARTIAL: 'Частина змін застосована, але не все підтверджено однозначно. Відкрийте деталі для перевірки.',
-    UPDATED_NOT_CONFIRMED: 'Після оновлення сервер не підтвердив новий стан. Варто перевірити результат трохи пізніше або відкрити деталі.',
-    MANUAL_SERIAL_REQUIRED: 'Для цього сервера потрібен UID вручну. Без нього автоматичне оновлення не продовжиться.',
-    MANUAL_SERIAL_CANCELLED: 'Оновлення зупинено, бо введення UID було скасовано. Сервер не оброблено до кінця.',
-    HTTP_ERROR: 'Сервер тимчасово не відповів коректно. Зазвичай допомагає повторна спроба трохи пізніше.',
-    TRANSPORT_ERROR: 'Не вдалося встановити з\'єднання із сервером. Перевірте адресу, порт або доступність мережі.',
-    AUTH_ERROR: 'Сервер відхилив авторизацію або доступ налаштовано некоректно. Потрібно перевірити облікові дані.',
-    XML_RESPONSE_ERROR: 'Сервер повернув помилку у своїй відповіді. Автоматично завершити операцію не вдалося.',
-    XML_PARSE_ERROR: 'Відповідь сервера прийшла у неочікуваному форматі. Потрібна ручна перевірка результату.',
-    REQUEST_FORMAT_ERROR: 'Запит до сервера не вдалося коректно обробити. Потрібно перевірити умови оновлення вручну.',
-    BUSINESS_STATUS_UNKNOWN: 'Сервер повернув нестандартний статус ліцензій. Потрібно переглянути деталі та перевірити сервер вручну.',
-    UNKNOWN_ERROR: 'Під час операції сталася невідома помилка. Варто повторити спробу або перевірити сервер окремо.',
-    CHECK_OK: 'Перевірка завершилася без критичних зауважень. Ліцензії прочитані успішно.'
-});
-
-const BULK_LICENSE_OUTCOME_HELP_DESCRIPTIONS = Object.freeze({
-    success: 'Операція завершилася успішно. Додаткових дій зараз не потрібно.',
-    'not-updated': 'Операція завершилася без повного підтвердження змін. Варто переглянути деталі цього сервера.',
-    'manual-check': 'Автоматичного підтвердження недостатньо. Потрібна ручна перевірка цього сервера.',
-    'server-unavailable': 'Сервер тимчасово недоступний або не відповідає. Спробуйте ще раз пізніше.',
-    error: 'Операція завершилася з помилкою. Відкрийте деталі або перевірте сервер окремо.',
-    warning: 'Результат потребує уваги. Відкрийте деталі для уточнення.'
-});
-
-const BULK_LICENSE_STATE_HELP_DESCRIPTIONS = Object.freeze({
-    idle: 'Цей сервер ще не почали обробляти. Підсумковий статус з\'явиться після запуску або продовження черги.',
-    processing: 'Сервер ще обробляється. Підсумковий результат з\'явиться після завершення поточного запиту.',
-    success: 'Операція для цього сервера завершилася успішно.',
-    warning: 'Операція завершилася, але результат потребує уваги. Відкрийте деталі цього сервера.',
-    error: 'Під час обробки цього сервера сталася помилка. Відкрийте деталі або повторіть спробу.'
-});
-
-const resolveBulkLicenseResultHelpInfo = (item) => {
-    const label = formatBulkLicenseResultLabel(item);
-    const tone = resolveBulkLicenseQueueItemTone(item);
-    const normalizedCode = String(item?.resultCode || '').trim().toUpperCase();
-    if (normalizedCode && BULK_LICENSE_RESULT_HELP_DESCRIPTIONS[normalizedCode]) {
-        return {
-            label,
-            description: BULK_LICENSE_RESULT_HELP_DESCRIPTIONS[normalizedCode],
-            tone
-        };
-    }
-
-    const normalizedOutcome = String(item?.outcome || '').trim().toLowerCase();
-    if (normalizedOutcome && BULK_LICENSE_OUTCOME_HELP_DESCRIPTIONS[normalizedOutcome]) {
-        return {
-            label,
-            description: BULK_LICENSE_OUTCOME_HELP_DESCRIPTIONS[normalizedOutcome],
-            tone
-        };
-    }
-
-    const normalizedState = String(item?.state || '').trim().toLowerCase();
-    return {
-        label,
-        description: BULK_LICENSE_STATE_HELP_DESCRIPTIONS[normalizedState]
-            || 'Статус отримано, але без додаткового пояснення. За потреби відкрийте деталі цього сервера.',
-        tone
-    };
-};
-
 const formatBulkLicenseProcessedAtLabel = (value) => {
     if (!value) {
         return 'Ще не оброблено';
@@ -6857,100 +7182,6 @@ const formatBulkLicenseProcessedAtLabel = (value) => {
         minute: '2-digit'
     });
 };
-
-const formatBulkLicenseValidityChip = (value) => {
-    const normalizedValue = String(value || '').trim();
-    if (!normalizedValue) {
-        return '';
-    }
-
-    return normalizedValue.toLowerCase().includes('перманент')
-        ? 'Перманентно'
-        : `До ${normalizedValue}`;
-};
-
-const normalizeBulkLicenseValidityDateLabel = (value) => {
-    const normalizedValue = String(value || '').trim();
-    if (!normalizedValue || normalizedValue === '—') {
-        return '';
-    }
-
-    if (normalizedValue === 'Перманентно') {
-        return 'перманентно';
-    }
-
-    return normalizedValue.startsWith('До ')
-        ? normalizedValue.slice(3)
-        : normalizedValue;
-};
-
-const resolveBulkLicenseValidityTone = (item) => {
-    const normalizedFreshnessStatus = String(item?.freshnessStatus || '').trim().toLowerCase();
-
-    if (normalizedFreshnessStatus === 'updated' || normalizedFreshnessStatus === 'current') {
-        return 'success';
-    }
-
-    if (normalizedFreshnessStatus === 'expiring-soon') {
-        return 'warning';
-    }
-
-    if (normalizedFreshnessStatus === 'expired') {
-        return 'error';
-    }
-
-    return '';
-};
-
-const formatBulkLicenseValidityPrimaryLabel = (validitySummary) => {
-    const normalizedDateLabel = normalizeBulkLicenseValidityDateLabel(validitySummary);
-
-    if (!normalizedDateLabel) {
-        return validitySummary;
-    }
-
-    return normalizedDateLabel === 'перманентно'
-        ? 'Перманентно'
-        : normalizedDateLabel;
-};
-
-const formatBulkLicenseValidityStatusLabel = (item) => {
-    const normalizedFreshnessStatus = String(item?.freshnessStatus || '').trim().toLowerCase();
-
-    if (normalizedFreshnessStatus === 'updated') {
-        return 'Оновлено';
-    }
-
-    if (normalizedFreshnessStatus === 'current') {
-        return 'Актуально';
-    }
-
-    if (normalizedFreshnessStatus === 'expiring-soon') {
-        return 'Скоро спливе';
-    }
-
-    if (normalizedFreshnessStatus === 'expired') {
-        return 'Прострочено';
-    }
-
-    return '';
-};
-
-const buildBulkLicenseValiditySummary = (item) => {
-    const normalizedValiditySummary = String(item?.validitySummary || '').trim();
-    if (normalizedValiditySummary) {
-        return normalizedValiditySummary;
-    }
-
-    return '—';
-};
-
-const resolveBulkLicenseSummaryCount = (value) => {
-    const numberValue = Number(value);
-    return Number.isFinite(numberValue) && numberValue > 0 ? numberValue : 0;
-};
-
-const getBulkLicenseArrayCount = (value) => Array.isArray(value) ? value.length : 0;
 
 const buildBulkLicenseSnapshotKey = (license) => {
     const id = String(license?.id || '').trim();
@@ -6987,445 +7218,1678 @@ const buildBulkLicenseSnapshotMap = (licenses) => {
     return licenseMap;
 };
 
-const normalizeBulkLicenseSnapshotValue = (value) => String(value ?? '').trim();
-
-const hasBulkLicenseSnapshotChange = (beforeLicense, afterLicense) => {
-    if (!beforeLicense || !afterLicense) {
-        return true;
-    }
-
-    return normalizeBulkLicenseSnapshotValue(beforeLicense.validUntil) !== normalizeBulkLicenseSnapshotValue(afterLicense.validUntil)
-        || normalizeBulkLicenseSnapshotValue(beforeLicense.count) !== normalizeBulkLicenseSnapshotValue(afterLicense.count);
-};
-
-const resolveBulkLicenseSnapshotChangedCount = (response) => {
-    const beforeLicenses = Array.isArray(response?.licensesBefore) ? response.licensesBefore : [];
-    const afterLicenses = Array.isArray(response?.licensesAfter) ? response.licensesAfter : [];
-
-    if (!beforeLicenses.length || !afterLicenses.length) {
-        return 0;
-    }
-
-    const beforeLicenseMap = buildBulkLicenseSnapshotMap(beforeLicenses);
-    return afterLicenses.reduce((count, afterLicense) => {
-        const key = buildBulkLicenseSnapshotKey(afterLicense);
-        const beforeLicense = key ? beforeLicenseMap.get(key) : null;
-        return hasBulkLicenseSnapshotChange(beforeLicense, afterLicense) ? count + 1 : count;
-    }, 0);
-};
-
-const resolveBulkLicenseUpdateCount = (response) => {
-    const snapshotChangedCount = resolveBulkLicenseSnapshotChangedCount(response);
-    if (snapshotChangedCount) {
-        return snapshotChangedCount;
-    }
-
-    return Math.max(
-        getBulkLicenseArrayCount(response?.updatedTargetLicenses),
-        resolveBulkLicenseSummaryCount(response?.diffSummary?.newLicenses),
-        resolveBulkLicenseSummaryCount(response?.diffSummary?.changedValidUntil),
-        resolveBulkLicenseSummaryCount(response?.diffSummary?.changedCount)
-    );
-};
-
-const resolveBulkLicenseUpdateTotalCount = (response, updatedCount) => {
-    const fullSnapshotCount = Math.max(
-        getBulkLicenseArrayCount(response?.licensesAfter),
-        getBulkLicenseArrayCount(response?.licensesBefore)
-    );
-    if (fullSnapshotCount) {
-        return Math.max(fullSnapshotCount, updatedCount);
-    }
-
-    return Math.max(
-        getBulkLicenseArrayCount(response?.targetLicenses),
-        getBulkLicenseArrayCount(response?.updatedTargetLicenses),
-        updatedCount
-    );
-};
-
-const buildBulkLicenseUpdateSummaryLabel = (response) => {
-    const updatedCount = resolveBulkLicenseUpdateCount(response);
-    const totalCount = resolveBulkLicenseUpdateTotalCount(response, updatedCount);
-
-    if (!updatedCount && !totalCount) {
-        return '';
-    }
-
-    return `Обновлено: ${updatedCount} из ${totalCount || updatedCount}`;
-};
-
-const resolveBulkLicenseValidityFromLicenses = (licenses, keyName) => {
-    const validityValues = Array.isArray(licenses)
-        ? [...new Set(licenses.map((license) => String(license?.[keyName] || '').trim()).filter(Boolean))]
-        : [];
-
-    if (!validityValues.length) {
-        return '';
-    }
-
-    return formatBulkLicenseValidityChip(validityValues[0]);
-};
-
-const resolveBulkLicenseUpdateValiditySummary = (response) => {
-    const directAfterSummary = formatBulkLicenseValidityChip(response?.targetValidUntilAfter);
-    if (directAfterSummary) {
-        return directAfterSummary;
-    }
-
-    const updatedTargetLicenses = Array.isArray(response?.updatedTargetLicenses) ? response.updatedTargetLicenses : [];
-    const updatedAfterSummary = resolveBulkLicenseValidityFromLicenses(updatedTargetLicenses, 'validUntilAfter');
-    if (updatedAfterSummary) {
-        return updatedAfterSummary;
-    }
-
-    const directBeforeSummary = formatBulkLicenseValidityChip(response?.targetValidUntilBefore);
-    if (directBeforeSummary) {
-        return directBeforeSummary;
-    }
-
-    const updatedBeforeSummary = resolveBulkLicenseValidityFromLicenses(updatedTargetLicenses, 'validUntilBefore');
-    if (updatedBeforeSummary) {
-        return updatedBeforeSummary;
-    }
-
-    return formatBulkLicenseValidityChip(response?.nearestTargetValidUntil);
-};
-
-const stampBulkLicenseItem = (item) => {
-    item.updatedAt = new Date().toISOString();
-};
-
-const resetBulkLicenseItemFreshness = (item) => {
-    item.freshnessStatus = '';
-    item.freshnessReason = '';
-    item.freshnessThresholdDays = null;
-    item.nearestTargetValidUntil = '';
-    item.nearestTargetDaysUntilExpiry = null;
-    item.hasTargetDateChange = false;
-    item.isCurrentByThreshold = false;
-};
-
-const buildBulkLicenseValidityNode = (item) => {
-    const validitySummary = buildBulkLicenseValiditySummary(item);
-    const validityTone = resolveBulkLicenseValidityTone(item);
-    const validityStackNode = createCardLicenseModalNode('div', 'dao-license-modal__queue-value-stack');
-    const licenseValueNode = createCardLicenseModalNode(
-        'p',
-        'dao-license-modal__queue-value',
-        formatBulkLicenseValidityPrimaryLabel(validitySummary)
-    );
-
-    if (validitySummary === '—') {
-        licenseValueNode.classList.add('dao-license-modal__queue-value--empty');
-    }
-
-    validityStackNode.appendChild(licenseValueNode);
-
-    const validityStatusLabel = formatBulkLicenseValidityStatusLabel(item);
-    if (validityTone && validityStatusLabel) {
-        validityStackNode.appendChild(
-            createCardLicenseModalNode(
-                'span',
-                `dao-license-modal__status-pill dao-license-modal__status-pill--${validityTone}`,
-                validityStatusLabel
-            )
-        );
-    }
-
-    return validityStackNode;
-};
-
-const buildBulkLicenseQueueStats = (run) => run.items.reduce((stats, item) => {
-    stats.total += 1;
-    if (item.state === 'success') {
-        stats.success += 1;
-    } else if (item.state === 'warning') {
-        stats.warning += 1;
-    } else if (item.state === 'error') {
-        stats.error += 1;
-    } else if (item.state === 'processing') {
-        stats.processing += 1;
-    } else {
-        stats.idle += 1;
-    }
-
-    return stats;
-}, {
-    total: 0,
-    success: 0,
-    warning: 0,
-    error: 0,
-    processing: 0,
-    idle: 0
-});
-
-const buildBulkLicenseQueueContent = (run) => {
-    const fragment = document.createDocumentFragment();
-    const stats = buildBulkLicenseQueueStats(run);
-    const summaryPanel = createCardLicenseModalNode('section', 'dao-license-modal__panel dao-license-modal__panel--queue-summary');
-    const summaryHead = createCardLicenseModalNode('div', 'dao-license-modal__queue-summary-head');
-    summaryHead.appendChild(
-        createCardLicenseModalNode(
-            'h3',
-            'dao-license-modal__queue-summary-title',
-            run.action === BULK_LICENSE_ACTIONS.update ? 'Масове оновлення ліцензій' : 'Масова перевірка ліцензій'
-        )
-    );
-    summaryPanel.appendChild(summaryHead);
-    const badgeContainer = createCardLicenseModalNode('div', 'dao-license-modal__summary-badges');
-    badgeContainer.appendChild(createBulkLicenseSummaryBadge('Усього', String(stats.total), 'total'));
-    badgeContainer.appendChild(createBulkLicenseSummaryBadge('Готово', String(stats.success), 'success'));
-    badgeContainer.appendChild(createBulkLicenseSummaryBadge('Увага', String(stats.warning), 'warning'));
-    badgeContainer.appendChild(createBulkLicenseSummaryBadge('Помилки', String(stats.error), 'error'));
-    summaryPanel.appendChild(badgeContainer);
-    fragment.appendChild(summaryPanel);
-
-    if (run.globalError) {
-        const note = buildCardLicenseStatusNote('error', run.globalError);
-        if (note) {
-            fragment.appendChild(note);
-        }
-    }
-
-    const listPanel = createCardLicenseModalNode('section', 'dao-license-modal__panel dao-license-modal__panel--queue');
-    const listHead = createCardLicenseModalNode('div', 'dao-license-modal__section-head dao-license-modal__section-head--queue');
-    listHead.appendChild(createCardLicenseModalNode('h3', 'dao-license-modal__section-title', 'Сервери'));
-    listHead.appendChild(
-        createCardLicenseModalNode(
-            'p',
-            'dao-license-modal__queue-panel-meta',
-            [run.sourceLabel, `${run.items.length} серверів`].filter(Boolean).join(' • ')
-        )
-    );
-    listPanel.appendChild(listHead);
-
-    if (!run.items.length) {
-        listPanel.appendChild(createCardLicenseModalNode('div', 'dao-license-modal__empty-state', 'Немає серверів для обробки.'));
-        fragment.appendChild(listPanel);
-        return fragment;
-    }
-
-    const headerRow = createCardLicenseModalNode('div', 'dao-license-modal__queue-header');
-    ['Сервер', 'Результат', 'Термін'].forEach((label) => {
-        headerRow.appendChild(createCardLicenseModalNode('span', 'dao-license-modal__queue-header-cell', label));
-    });
-    listPanel.appendChild(headerRow);
-
-    const listNode = createCardLicenseModalNode('div', 'dao-license-modal__queue-list');
-
-    run.items.forEach((item, index) => {
-        const itemTone = resolveBulkLicenseQueueItemTone(item);
-        const resultLabel = formatBulkLicenseResultLabel(item);
-        const resultHelpInfo = resolveBulkLicenseResultHelpInfo(item);
-        const normalizedMessage = String(item?.message || '').trim();
-        const normalizedDetails = String(item?.details || '').trim();
-        const shouldRenderMessage = Boolean(normalizedMessage) && normalizedMessage !== resultLabel;
-        const shouldRenderDetails = Boolean(normalizedDetails)
-            && normalizedDetails !== resultLabel
-            && normalizedDetails !== normalizedMessage
-            && normalizedDetails !== 'Операцію завершено без додаткових деталей.';
-        const rowClassName = [
-            'dao-license-modal__queue-row',
-            `dao-license-modal__queue-row--${itemTone}`,
-            item.state === 'processing' ? 'dao-license-modal__queue-row--processing' : ''
-        ].filter(Boolean).join(' ');
-        const row = createCardLicenseModalNode('article', rowClassName);
-
-        const main = createCardLicenseModalNode('div', 'dao-license-modal__queue-cell dao-license-modal__queue-cell--server');
-        main.appendChild(createCardLicenseModalNode('span', 'dao-license-modal__queue-cell-label', 'Сервер'));
-
-        const serverContent = createCardLicenseModalNode('div', 'dao-license-modal__queue-server');
-        serverContent.appendChild(createCardLicenseModalNode('span', 'dao-license-modal__queue-index', String(index + 1)));
-
-        const serverMain = createCardLicenseModalNode('div', 'dao-license-modal__queue-server-main');
-        serverMain.appendChild(createCardLicenseModalNode('p', 'dao-license-modal__license-name', item.label));
-
-        const notes = createCardLicenseModalNode('div', 'dao-license-modal__queue-notes');
-        if (shouldRenderMessage) {
-            notes.appendChild(createCardLicenseModalNode('p', 'dao-license-modal__queue-note', normalizedMessage));
-        }
-        if (shouldRenderDetails) {
-            notes.appendChild(createCardLicenseModalNode('p', 'dao-license-modal__queue-note', normalizedDetails));
-        }
-        if (item.diffSummaryLabel) {
-            notes.appendChild(createCardLicenseModalNode('p', 'dao-license-modal__queue-note', item.diffSummaryLabel));
-        }
-        if (notes.childElementCount) {
-            serverMain.appendChild(notes);
-        }
-        serverContent.appendChild(serverMain);
-        main.appendChild(serverContent);
-
-        const resultCell = createCardLicenseModalNode('div', 'dao-license-modal__queue-cell');
-        resultCell.appendChild(createCardLicenseModalNode('span', 'dao-license-modal__queue-cell-label', 'Результат'));
-        const resultMeta = createCardLicenseModalNode('div', 'dao-license-modal__queue-meta-card');
-        const resultPillNode = buildBulkLicenseResultStatusNode(item, itemTone, resultLabel);
-        resultMeta.appendChild(buildCardLicenseStatusHelpCluster({
-            statusNode: resultPillNode,
-            label: resultHelpInfo.label,
-            description: resultHelpInfo.description,
-            tone: resultHelpInfo.tone,
-            context: 'queue'
-        }));
-        resultCell.appendChild(resultMeta);
-
-        const licenseCell = createCardLicenseModalNode('div', 'dao-license-modal__queue-cell');
-        licenseCell.appendChild(createCardLicenseModalNode('span', 'dao-license-modal__queue-cell-label', 'Термін'));
-        const licenseMeta = createCardLicenseModalNode('div', 'dao-license-modal__queue-meta-card');
-        licenseMeta.appendChild(buildBulkLicenseValidityNode(item));
-        licenseCell.appendChild(licenseMeta);
-
-        row.appendChild(main);
-        row.appendChild(resultCell);
-        row.appendChild(licenseCell);
-
-        if (hasBulkLicenseQueueItemResultDetails(item)) {
-            row.classList.add('dao-license-modal__queue-row--interactive');
-            row.tabIndex = 0;
-
-            const openDetails = () => {
-                showBulkLicenseQueueItemResultModal(run, item);
-            };
-
-            row.addEventListener('click', openDetails);
-            row.addEventListener('keydown', (event) => {
-                if (event.key === 'Enter' || event.key === ' ') {
-                    event.preventDefault();
-                    openDetails();
-                }
-            });
-        }
-
-        listNode.appendChild(row);
-    });
-
-    listPanel.appendChild(listNode);
-    fragment.appendChild(listPanel);
-    return fragment;
-};
-
-const renderBulkLicenseQueueModal = (run) => {
-    renderCardLicenseModal({
-        title: '',
-        subtitle: '',
-        content: buildBulkLicenseQueueContent(run),
-        displayMode: CARD_LICENSE_DISPLAY_MODES.list
-    });
-};
-
 const applyBulkLicenseCheckItemResult = (item, response) => {
     const licenseResult = response?.result && typeof response.result === 'object' ? response.result : {};
     const serverInfo = licenseResult.server && typeof licenseResult.server === 'object' ? licenseResult.server : {};
     const licenses = Array.isArray(licenseResult.licenses) ? licenseResult.licenses : [];
-    const tone = resolveCardLicenseStatusTone(serverInfo.licenseStatus);
 
-    resetBulkLicenseItemFreshness(item);
-    item.state = tone === 'success' ? 'success' : tone === 'warning' ? 'warning' : 'error';
+    item.licensesBefore = [];
+    item.licensesAfter = licenses;
+    item.serverBefore = {};
+    item.serverAfter = serverInfo;
+    item.thresholdDays = LICENSE_UPDATE_DEFAULT_THRESHOLD_DAYS;
+    item.updateDiff = buildLicenseCheckSnapshot(licenses, item.thresholdDays);
+    item.verdict = resolveLicenseCheckVerdict({ licenseStatus: serverInfo.licenseStatus, diff: item.updateDiff });
+    item.state = LICENSE_UPDATE_VERDICT_STATES[item.verdict] || 'error';
     item.resultCode = normalizeCardLicenseStatus(serverInfo.licenseStatus).toUpperCase();
-    item.outcome = tone;
-    item.updatedTargetCount = licenses.length;
-    item.message = formatCardLicenseBusinessStatus(serverInfo.licenseStatus);
-    item.details = serverInfo.statusMessage || (licenses.length ? `Знайдено ліцензій: ${licenses.length}` : 'Список ліцензій порожній.');
-    item.validitySummary = resolveBulkLicenseValidityFromLicenses(licenses, 'validUntil');
-    item.diffSummaryLabel = '';
-    item.serverSnapshot = serverInfo;
-    item.licenseSnapshot = licenses;
-    stampBulkLicenseItem(item);
+    item.message = item.verdict === 'error'
+        ? formatCardLicenseBusinessStatus(serverInfo.licenseStatus)
+        : LICENSE_UPDATE_VERDICTS[item.verdict].label;
+    item.serverMessage = String(serverInfo.statusMessage || '').trim();
+    item.details = item.serverMessage;
 };
 
-const resolveBulkLicenseUpdateServerSnapshot = (response) => {
-    if (response?.serverAfter && typeof response.serverAfter === 'object' && Object.keys(response.serverAfter).length) {
-        return response.serverAfter;
-    }
+const applyBulkLicenseUpdateItemResult = (item, response) => {
+    const thresholdDays = Number(response?.freshnessThresholdDays);
 
-    if (response?.serverBefore && typeof response.serverBefore === 'object' && Object.keys(response.serverBefore).length) {
-        return response.serverBefore;
-    }
-
-    return {};
+    item.licensesBefore = Array.isArray(response?.licensesBefore) ? response.licensesBefore : [];
+    item.licensesAfter = Array.isArray(response?.licensesAfter) ? response.licensesAfter : [];
+    item.serverBefore = response?.serverBefore && typeof response.serverBefore === 'object' ? response.serverBefore : {};
+    item.serverAfter = response?.serverAfter && typeof response.serverAfter === 'object' ? response.serverAfter : {};
+    item.thresholdDays = Number.isSafeInteger(thresholdDays) && thresholdDays >= 0
+        ? thresholdDays
+        : LICENSE_UPDATE_DEFAULT_THRESHOLD_DAYS;
+    item.updateDiff = buildLicenseUpdateDiff(item.licensesBefore, item.licensesAfter, item.thresholdDays);
+    item.verdict = resolveLicenseUpdateVerdict({
+        resultCode: response?.resultCode,
+        outcome: response?.outcome,
+        diff: item.updateDiff
+    });
+    item.state = LICENSE_UPDATE_VERDICT_STATES[item.verdict] || 'error';
+    item.resultCode = response?.resultCode || '';
+    item.message = LICENSE_UPDATE_VERDICTS[item.verdict].label;
+    item.serverMessage = typeof response?.statusMessage === 'string' ? response.statusMessage.trim() : '';
+    item.details = item.serverMessage;
 };
 
-const resolveBulkLicenseUpdateLicenseSnapshot = (response) => {
-    if (Array.isArray(response?.licensesAfter) && response.licensesAfter.length) {
-        return response.licensesAfter;
+// --- Масове оновлення ліцензій: порівняння «до/після», підсумок по серверу і вікно черги ---
+
+const LICENSE_UPDATE_SURFACE = 'license-update';
+const LICENSE_UPDATE_DEFAULT_THRESHOLD_DAYS = 15;
+const LICENSE_UPDATE_DAY_MS = 24 * 60 * 60 * 1000;
+const LICENSE_UPDATE_PROBLEM_PREVIEW_LIMIT = 3;
+const LICENSE_UPDATE_ERROR_RESULT_CODES = new Set([
+    'HTTP_ERROR',
+    'TRANSPORT_ERROR',
+    'AUTH_ERROR',
+    'XML_RESPONSE_ERROR',
+    'XML_PARSE_ERROR',
+    'REQUEST_FORMAT_ERROR',
+    'UNKNOWN_ERROR',
+    'BUSINESS_STATUS_UNKNOWN',
+    'LICENSE_STATUS_NOT_VALID',
+    'MANUAL_SERIAL_CANCELLED'
+]);
+const LICENSE_UPDATE_VERDICTS = Object.freeze({
+    updated: { label: 'Оновлено', tone: 'success', category: 'updated' },
+    current: { label: 'Актуальні', tone: 'current', category: 'current' },
+    partial: { label: 'Оновлено частково', tone: 'warning', category: 'warning' },
+    'not-updated': { label: 'Не оновилась', tone: 'warning', category: 'warning' },
+    active: { label: 'Активні', tone: 'success', category: 'active' },
+    expiring: { label: 'Скоро спливають', tone: 'warning', category: 'expiring' },
+    expired: { label: 'Прострочені', tone: 'error', category: 'expired' },
+    missing: { label: 'Ліцензій немає', tone: 'error', category: 'expired' },
+    invalid: { label: 'Невалідні', tone: 'error', category: 'expired' },
+    error: { label: 'Помилка', tone: 'error', category: 'error' },
+    processing: { label: 'Обробляємо', tone: 'progress', category: 'queue' },
+    pending: { label: 'Очікує', tone: 'idle', category: 'queue' }
+});
+const LICENSE_UPDATE_VERDICT_STATES = Object.freeze({
+    updated: 'success',
+    current: 'success',
+    partial: 'warning',
+    'not-updated': 'warning',
+    active: 'success',
+    expiring: 'warning',
+    expired: 'warning',
+    missing: 'warning',
+    invalid: 'warning',
+    error: 'error'
+});
+const LICENSE_UPDATE_ENTRY_STATUSES = Object.freeze({
+    new: { label: 'Нова', tone: 'success', problem: false },
+    extended: { label: 'Продовжено', tone: 'success', problem: false },
+    stale: { label: 'Не оновилась', tone: 'warning', problem: true },
+    expired: { label: 'Прострочена', tone: 'error', problem: true },
+    removed: { label: 'Зникла', tone: 'error', problem: true },
+    shortened: { label: 'Термін скоротився', tone: 'error', problem: true },
+    current: { label: 'Без змін', tone: 'idle', problem: false },
+    permanent: { label: 'Перманентна', tone: 'idle', problem: false },
+    unknown: { label: 'Без терміну', tone: 'idle', problem: false }
+});
+// У перевірці немає стану «до», тому ті самі статуси означають термін, а не результат оновлення.
+const LICENSE_CHECK_ENTRY_STATUSES = Object.freeze({
+    current: { label: 'Активна', tone: 'success', problem: false },
+    stale: { label: 'Скоро спливає', tone: 'warning', problem: true },
+    expired: { label: 'Прострочена', tone: 'error', problem: true }
+});
+const LICENSE_UPDATE_ATTENTION_CATEGORIES = Object.freeze(['warning', 'error', 'expiring', 'expired']);
+const LICENSE_UPDATE_PROGRESS_TONES = Object.freeze({
+    updated: 'ok',
+    current: 'ok',
+    active: 'ok',
+    warning: 'attention',
+    expiring: 'attention',
+    expired: 'attention',
+    error: 'error'
+});
+const BULK_LICENSE_RUN_PROFILES = Object.freeze({
+    [BULK_LICENSE_ACTIONS.update]: {
+        title: 'Масове оновлення ліцензій',
+        resultLabel: 'Результат оновлення',
+        processingLabel: 'Оновлюємо',
+        retryLabel: 'Повторити невдалі',
+        retryTitle: 'Ще раз оновити сервери з помилкою або без оновлення'
+    },
+    [BULK_LICENSE_ACTIONS.check]: {
+        title: 'Масова перевірка ліцензій',
+        resultLabel: 'Результат перевірки',
+        processingLabel: 'Перевіряємо',
+        retryLabel: 'Повторити помилки',
+        retryTitle: 'Ще раз перевірити сервери, які не відповіли або повернули помилку'
+    }
+});
+const pluralizeLicenseUpdateUk = (count, [one, few, many]) => {
+    const value = Math.abs(Number(count) || 0);
+    const lastTwo = value % 100;
+    const last = value % 10;
+
+    if (lastTwo > 10 && lastTwo < 20) {
+        return many;
     }
 
-    if (Array.isArray(response?.licensesBefore) && response.licensesBefore.length) {
-        return response.licensesBefore;
+    if (last === 1) {
+        return one;
     }
 
-    return [];
+    return last > 1 && last < 5 ? few : many;
 };
 
-const resolveBulkLicenseUpdateItemState = (response) => {
-    if (response?.resultCode === 'UPDATED_CONFIRMED' || response?.outcome === 'success') {
-        return 'success';
+const formatLicenseUpdateDayCount = (count) => `${count} ${pluralizeLicenseUpdateUk(count, ['день', 'дні', 'днів'])}`;
+
+const parseLicenseUpdateValidity = (value) => {
+    const label = String(value ?? '').trim();
+    if (!label || label === '—') {
+        return { kind: 'unknown', label: '', time: null, daysLeft: null };
     }
 
-    if (response?.outcome === 'warning' || response?.resultCode === 'UPDATED_NOT_CONFIRMED') {
-        return 'warning';
+    const lowerLabel = label.toLowerCase();
+    if (lowerLabel.includes('перманент') || lowerLabel.includes('бессроч') || lowerLabel.includes('безстроков')) {
+        return { kind: 'permanent', label: 'Перманентно', time: Number.POSITIVE_INFINITY, daysLeft: null };
     }
 
-    if (response?.resultCode === 'MANUAL_SERIAL_REQUIRED') {
-        return 'warning';
+    const match = label.match(/^(\d{1,2})\.(\d{1,2})\.(\d{4})$/);
+    if (!match) {
+        return { kind: 'unknown', label, time: null, daysLeft: null };
     }
 
-    return 'error';
+    const time = Date.UTC(Number(match[3]), Number(match[2]) - 1, Number(match[1]));
+    const now = new Date();
+    const today = Date.UTC(now.getFullYear(), now.getMonth(), now.getDate());
+
+    return {
+        kind: 'dated',
+        label,
+        time,
+        daysLeft: Math.floor((time - today) / LICENSE_UPDATE_DAY_MS)
+    };
 };
 
-const buildBulkLicenseUpdateDetails = (response) => {
-    if (response?.statusMessage) {
-        return response.statusMessage;
+const formatLicenseUpdateValidityLabel = (validity) => {
+    if (!validity || validity.kind === 'unknown') {
+        return validity?.label || '—';
     }
 
-    if (response?.resultCode === 'UPDATED_NOT_CONFIRMED' && resolveBulkLicenseUpdateValiditySummary(response)) {
-        return 'Показано останній підтверджений термін.';
+    return validity.kind === 'permanent' ? 'Перманентно' : validity.label;
+};
+
+const formatLicenseUpdateDaysLeft = (daysLeft) => {
+    if (!Number.isFinite(daysLeft)) {
+        return '';
+    }
+
+    if (daysLeft < 0) {
+        return `прострочено на ${formatLicenseUpdateDayCount(Math.abs(daysLeft))}`;
+    }
+
+    if (daysLeft === 0) {
+        return 'спливає сьогодні';
+    }
+
+    return `ще ${formatLicenseUpdateDayCount(daysLeft)}`;
+};
+
+const resolveLicenseUpdateDaysTone = (daysLeft, thresholdDays) => {
+    if (!Number.isFinite(daysLeft)) {
+        return 'idle';
+    }
+
+    if (daysLeft < 0) {
+        return 'error';
+    }
+
+    return daysLeft <= thresholdDays ? 'warning' : 'success';
+};
+
+const normalizeLicenseUpdateCount = (value) => {
+    if (value === null || value === undefined || value === '') {
+        return null;
+    }
+
+    const numberValue = Number(value);
+    return Number.isFinite(numberValue) ? numberValue : null;
+};
+
+const resolveLicenseUpdateEntryStatus = (before, after, validityBefore, validityAfter, thresholdDays) => {
+    if (!before) {
+        return 'new';
+    }
+
+    if (!after) {
+        return 'removed';
+    }
+
+    if (validityBefore.label !== validityAfter.label) {
+        const beforeTime = validityBefore.time ?? Number.NEGATIVE_INFINITY;
+        const afterTime = validityAfter.time ?? Number.NEGATIVE_INFINITY;
+        return afterTime >= beforeTime ? 'extended' : 'shortened';
+    }
+
+    if (validityAfter.kind === 'permanent') {
+        return 'permanent';
+    }
+
+    if (validityAfter.kind !== 'dated') {
+        return 'unknown';
+    }
+
+    if (validityAfter.daysLeft < 0) {
+        return 'expired';
+    }
+
+    return validityAfter.daysLeft <= thresholdDays ? 'stale' : 'current';
+};
+
+// Порівнює повні списки ліцензій до і після оновлення, як це робила стара версія менеджера.
+const buildLicenseUpdateDiff = (licensesBefore, licensesAfter, thresholdDays = LICENSE_UPDATE_DEFAULT_THRESHOLD_DAYS) => {
+    const beforeMap = buildBulkLicenseSnapshotMap(licensesBefore);
+    const afterMap = buildBulkLicenseSnapshotMap(licensesAfter);
+    const keys = [
+        ...afterMap.keys(),
+        ...[...beforeMap.keys()].filter((key) => !afterMap.has(key))
+    ];
+
+    const entries = keys.map((key) => {
+        const before = beforeMap.get(key) || null;
+        const after = afterMap.get(key) || null;
+        const source = after || before;
+        const { primaryName, secondaryText } = buildCardLicenseIdentity(source);
+        const validityBefore = parseLicenseUpdateValidity(before?.validUntil);
+        const validityAfter = parseLicenseUpdateValidity(after?.validUntil);
+        const countBefore = normalizeLicenseUpdateCount(before?.count);
+        const countAfter = normalizeLicenseUpdateCount(after?.count);
+
+        return {
+            key,
+            id: String(source?.id || '').trim(),
+            groupId: normalizeCardLicenseGroup(source?.groupId),
+            displayName: primaryName,
+            secondaryName: secondaryText,
+            status: resolveLicenseUpdateEntryStatus(before, after, validityBefore, validityAfter, thresholdDays),
+            before,
+            after,
+            validityBefore,
+            validityAfter,
+            countBefore,
+            countAfter,
+            countDiff: before && after && countBefore !== null && countAfter !== null ? countAfter - countBefore : 0
+        };
+    });
+
+    const counts = {
+        total: entries.length,
+        new: 0,
+        extended: 0,
+        stale: 0,
+        expired: 0,
+        removed: 0,
+        shortened: 0,
+        current: 0,
+        permanent: 0,
+        unknown: 0,
+        countChanged: 0,
+        unchanged: 0,
+        changed: 0,
+        problems: 0
+    };
+
+    entries.forEach((entry) => {
+        counts[entry.status] += 1;
+        const hasCountOnlyChange = Boolean(entry.countDiff) && !['new', 'extended', 'removed', 'shortened'].includes(entry.status);
+
+        if (hasCountOnlyChange) {
+            counts.countChanged += 1;
+        }
+
+        if (LICENSE_UPDATE_ENTRY_STATUSES[entry.status].problem) {
+            counts.problems += 1;
+        }
+
+        if (['current', 'permanent', 'unknown'].includes(entry.status) && !entry.countDiff) {
+            counts.unchanged += 1;
+        }
+    });
+
+    counts.changed = counts.new + counts.extended + counts.countChanged;
+
+    return { entries, counts, thresholdDays };
+};
+
+const resolveLicenseUpdateNearestValidity = (entries, side = 'after') => {
+    const presenceKey = side === 'before' ? 'before' : 'after';
+    const validityKey = side === 'before' ? 'validityBefore' : 'validityAfter';
+    const datedLabels = new Set();
+    let nearest = null;
+    let hasPermanent = false;
+
+    (Array.isArray(entries) ? entries : []).forEach((entry) => {
+        if (!entry?.[presenceKey]) {
+            return;
+        }
+
+        const validity = entry[validityKey];
+        if (validity.kind === 'permanent') {
+            hasPermanent = true;
+            return;
+        }
+
+        if (validity.kind !== 'dated') {
+            return;
+        }
+
+        datedLabels.add(validity.label);
+        if (!nearest || validity.time < nearest.time) {
+            nearest = validity;
+        }
+    });
+
+    if (nearest) {
+        return { ...nearest, distinctLabels: [...datedLabels] };
+    }
+
+    return hasPermanent
+        ? { kind: 'permanent', label: 'Перманентно', time: Number.POSITIVE_INFINITY, daysLeft: null, distinctLabels: [] }
+        : null;
+};
+
+const resolveLicenseUpdateVerdict = ({ resultCode, outcome, diff }) => {
+    const normalizedCode = String(resultCode || '').trim().toUpperCase();
+    if (LICENSE_UPDATE_ERROR_RESULT_CODES.has(normalizedCode)) {
+        return 'error';
+    }
+
+    if (normalizedCode === 'MANUAL_SERIAL_REQUIRED') {
+        return 'not-updated';
+    }
+
+    if (!diff?.entries?.length) {
+        if (normalizedCode === 'UPDATED_CONFIRMED' || outcome === 'success') {
+            return 'updated';
+        }
+
+        return normalizedCode ? 'not-updated' : 'error';
+    }
+
+    const { changed, problems } = diff.counts;
+    if (changed > 0) {
+        return problems > 0 ? 'partial' : 'updated';
+    }
+
+    return problems > 0 ? 'not-updated' : 'current';
+};
+
+const buildLicenseCheckSnapshot = (licenses, thresholdDays = LICENSE_UPDATE_DEFAULT_THRESHOLD_DAYS) => {
+    const snapshot = buildLicenseUpdateDiff(licenses, licenses, thresholdDays);
+    snapshot.mode = BULK_LICENSE_ACTIONS.check;
+    snapshot.entries.forEach((entry) => {
+        entry.mode = BULK_LICENSE_ACTIONS.check;
+    });
+    return snapshot;
+};
+
+const resolveLicenseCheckVerdict = ({ licenseStatus, diff }) => {
+    const normalizedStatus = normalizeCardLicenseStatus(licenseStatus);
+    const knownStatuses = ['', 'ok', 'success', 'valid', 'active', 'missed', 'expired', 'not_valid', 'invalid'];
+    if (!knownStatuses.includes(normalizedStatus)) {
+        return 'error';
+    }
+
+    if (normalizedStatus === 'not_valid' || normalizedStatus === 'invalid') {
+        return 'invalid';
+    }
+
+    if (!diff?.entries?.length) {
+        return 'missing';
+    }
+
+    if (diff.counts.expired > 0 || normalizedStatus === 'expired') {
+        return 'expired';
+    }
+
+    return diff.counts.stale > 0 ? 'expiring' : 'active';
+};
+
+const getLicenseEntryStatusMeta = (entry) => (
+    (entry?.mode === BULK_LICENSE_ACTIONS.check && LICENSE_CHECK_ENTRY_STATUSES[entry.status])
+    || LICENSE_UPDATE_ENTRY_STATUSES[entry?.status]
+    || LICENSE_UPDATE_ENTRY_STATUSES.unknown
+);
+
+const getBulkLicenseRunProfile = (run) => BULK_LICENSE_RUN_PROFILES[run?.action] || BULK_LICENSE_RUN_PROFILES[BULK_LICENSE_ACTIONS.update];
+
+// Перевірку має сенс повторювати лише після технічної помилки, оновлення — і після «не оновилась».
+const isBulkLicenseItemRetryable = (run, item) => (
+    run?.action === BULK_LICENSE_ACTIONS.check
+        ? item?.state === 'error'
+        : item?.state === 'warning' || item?.state === 'error'
+);
+
+const getLicenseUpdateItemVerdictKey = (item) => {
+    if (!item || item.state === 'idle') {
+        return 'pending';
+    }
+
+    if (item.state === 'processing') {
+        return 'processing';
+    }
+
+    if (item.state === 'error') {
+        return 'error';
+    }
+
+    if (item.verdict && LICENSE_UPDATE_VERDICTS[item.verdict]) {
+        return item.verdict;
+    }
+
+    return item.state === 'success' ? 'updated' : 'not-updated';
+};
+
+const getLicenseUpdateItemCategory = (item) => LICENSE_UPDATE_VERDICTS[getLicenseUpdateItemVerdictKey(item)].category;
+
+const isLicenseUpdateItemProcessed = (item) => ['success', 'warning', 'error'].includes(item?.state);
+
+const clearLicenseUpdateItemResult = (item) => {
+    item.resultCode = '';
+    item.verdict = '';
+    item.updateDiff = null;
+    item.licensesBefore = [];
+    item.licensesAfter = [];
+    item.serverBefore = {};
+    item.serverAfter = {};
+    item.serverMessage = '';
+};
+
+const resetLicenseUpdateItem = (item) => {
+    clearLicenseUpdateItemResult(item);
+    item.state = 'idle';
+    item.message = '';
+    item.details = '';
+};
+
+const ensureLicenseUpdateRunView = (run) => {
+    if (!run.view || typeof run.view !== 'object') {
+        run.view = {};
+    }
+
+    const view = run.view;
+    if (!view.statusFilter) {
+        view.statusFilter = 'all';
+    }
+    if (typeof view.licenseFilter !== 'string') {
+        view.licenseFilter = '';
+    }
+    if (typeof view.detailItemId !== 'string') {
+        view.detailItemId = '';
+    }
+
+    return view;
+};
+
+const resolveLicenseUpdateCompanyName = (item) => String(
+    item?.serverAfter?.companyName || item?.serverBefore?.companyName || ''
+).trim();
+
+const getLicenseUpdateProblemEntries = (diff) => (diff?.entries || [])
+    .filter((entry) => getLicenseEntryStatusMeta(entry).problem);
+
+const buildLicenseUpdateChangeParts = (diff) => {
+    const counts = diff?.counts;
+    if (!counts) {
+        return [];
+    }
+
+    if (diff.mode === BULK_LICENSE_ACTIONS.check) {
+        return [
+            counts.current && { tone: 'success', text: `${counts.current} ${pluralizeLicenseUpdateUk(counts.current, ['активна', 'активні', 'активних'])}` },
+            counts.stale && { tone: 'warning', text: `${counts.stale} скоро ${pluralizeLicenseUpdateUk(counts.stale, ['спливає', 'спливають', 'спливають'])}` },
+            counts.expired && { tone: 'error', text: `${counts.expired} ${pluralizeLicenseUpdateUk(counts.expired, ['прострочена', 'прострочені', 'прострочених'])}` },
+            counts.permanent && { tone: 'idle', text: `${counts.permanent} ${pluralizeLicenseUpdateUk(counts.permanent, ['перманентна', 'перманентні', 'перманентних'])}` },
+            counts.unknown && { tone: 'idle', text: `${counts.unknown} без терміну` }
+        ].filter(Boolean);
+    }
+
+    return [
+        counts.extended && { tone: 'success', text: `${counts.extended} ${pluralizeLicenseUpdateUk(counts.extended, ['продовжена', 'продовжені', 'продовжених'])}` },
+        counts.new && { tone: 'success', text: `${counts.new} ${pluralizeLicenseUpdateUk(counts.new, ['нова', 'нові', 'нових'])}` },
+        counts.countChanged && { tone: 'progress', text: `кількість змінено: ${counts.countChanged}` },
+        counts.stale && { tone: 'warning', text: `${counts.stale} не ${pluralizeLicenseUpdateUk(counts.stale, ['оновилась', 'оновились', 'оновились'])}` },
+        counts.expired && { tone: 'error', text: `${counts.expired} ${pluralizeLicenseUpdateUk(counts.expired, ['прострочена', 'прострочені', 'прострочених'])}` },
+        counts.removed && { tone: 'error', text: `${counts.removed} ${pluralizeLicenseUpdateUk(counts.removed, ['зникла', 'зникли', 'зникли'])}` },
+        counts.shortened && { tone: 'error', text: `${counts.shortened} зі скороченим терміном` },
+        counts.unchanged && { tone: 'idle', text: `${counts.unchanged} без змін` }
+    ].filter(Boolean);
+};
+
+const resolveLicenseUpdateErrorText = (item) => {
+    const normalizedCode = String(item?.resultCode || '').trim().toUpperCase();
+    const parts = [];
+
+    if (normalizedCode && BULK_LICENSE_RESULT_LABELS[normalizedCode]) {
+        parts.push(BULK_LICENSE_RESULT_LABELS[normalizedCode]);
+    } else if (item?.message && item.message !== LICENSE_UPDATE_VERDICTS.error.label) {
+        parts.push(item.message);
+    }
+
+    const details = String(item?.details || item?.serverMessage || '').trim();
+    if (details && !parts.includes(details)) {
+        parts.push(details);
+    }
+
+    return parts.join('. ') || 'Невідома помилка під час оновлення.';
+};
+
+const describeLicenseUpdateVerdict = (verdictKey, thresholdDays) => {
+    const thresholdLabel = formatLicenseUpdateDayCount(thresholdDays);
+
+    switch (verdictKey) {
+        case 'updated':
+            return `Терміни продовжено або додано нові ліцензії, і жодна ліцензія не спливає раніше ніж за ${thresholdLabel}.`;
+        case 'current':
+            return `Сервер нічого не змінив, але оновлення не потрібне: усі ліцензії діють довше ніж ${thresholdLabel} або перманентні.`;
+        case 'partial':
+            return `Частину ліцензій оновлено, але деякі не оновились, зникли або спливають протягом ${thresholdLabel}. Відкрийте деталі сервера.`;
+        case 'not-updated':
+            return `Терміни не змінились, а деякі ліцензії спливають протягом ${thresholdLabel} або вже прострочені.`;
+        case 'active':
+            return `Усі ліцензії діють довше ніж ${thresholdLabel} або перманентні. Оновлення зараз не потрібне.`;
+        case 'expiring':
+            return `Деякі ліцензії спливають протягом ${thresholdLabel}. Варто запустити оновлення.`;
+        case 'expired':
+            return 'Деякі ліцензії вже прострочені або сервер повідомляє, що їх термін завершився. Потрібне оновлення.';
+        case 'missing':
+            return 'Сервер не повернув жодної ліцензії. Імовірно, ліцензію не активовано: потрібно зайти в бекофіс і ввести UID.';
+        case 'invalid':
+            return 'Сервер вважає ліцензії невалідними. Автоматично це не виправити — потрібна ручна перевірка.';
+        case 'error':
+            return 'Операцію не виконано через помилку. Перевірте сервер або повторіть спробу.';
+        case 'processing':
+            return 'Сервер зараз обробляється.';
+        default:
+            return 'Сервер ще не оброблено.';
+    }
+};
+
+const buildLicenseUpdateVerdictSentence = (run, item, verdictKey) => {
+    if (verdictKey === 'error') {
+        return resolveLicenseUpdateErrorText(item);
+    }
+
+    if (verdictKey === 'processing') {
+        return item?.message || 'Сервер зараз обробляється.';
+    }
+
+    if (verdictKey === 'pending') {
+        return run?.stopped ? 'Чергу зупинено — сервер ще не оброблено.' : 'Сервер ще не оброблено.';
+    }
+
+    if (String(item?.resultCode || '').trim().toUpperCase() === 'MANUAL_SERIAL_REQUIRED') {
+        return 'Сервер не повернув серійний номер — для оновлення потрібен UID вручну.';
+    }
+
+    if (verdictKey === 'missing' || verdictKey === 'invalid') {
+        return describeLicenseUpdateVerdict(verdictKey, item?.thresholdDays);
+    }
+
+    const diff = item?.updateDiff;
+    const counts = diff?.counts;
+    if (!counts?.total) {
+        return 'Сервер не повернув список ліцензій.';
+    }
+
+    const problems = getLicenseUpdateProblemEntries(diff);
+    const problemNames = problems.slice(0, LICENSE_UPDATE_PROBLEM_PREVIEW_LIMIT).map((entry) => entry.displayName).join(', ')
+        + (problems.length > LICENSE_UPDATE_PROBLEM_PREVIEW_LIMIT ? ` і ще ${problems.length - LICENSE_UPDATE_PROBLEM_PREVIEW_LIMIT}` : '');
+
+    if (verdictKey === 'active') {
+        const nearest = resolveLicenseUpdateNearestValidity(diff.entries, 'after');
+        const subject = counts.total === 1
+            ? 'Ліцензія активна'
+            : `Усі ${counts.total} ${pluralizeLicenseUpdateUk(counts.total, ['ліцензія', 'ліцензії', 'ліцензій'])} активні`;
+        if (!nearest || nearest.kind === 'permanent') {
+            return `${subject}, термін необмежений.`;
+        }
+
+        return `${subject}. Найближчий термін ${nearest.label}, ${formatLicenseUpdateDaysLeft(nearest.daysLeft)}.`;
+    }
+
+    if (verdictKey === 'expiring' || verdictKey === 'expired') {
+        return problems.length
+            ? `Потребують уваги: ${problemNames}.`
+            : 'Сервер повідомляє, що термін ліцензій завершився.';
+    }
+    const changedText = [
+        counts.extended && `продовжено ${counts.extended} з ${counts.total}`,
+        counts.new && `додано ${counts.new}`,
+        counts.countChanged && `змінено кількість у ${counts.countChanged}`
+    ].filter(Boolean).join(', ');
+    const changedSentence = changedText.charAt(0).toUpperCase() + changedText.slice(1);
+
+    switch (verdictKey) {
+        case 'updated':
+            return `${changedSentence}. Жодна ліцензія не спливає найближчим часом.`;
+        case 'current': {
+            const nearest = resolveLicenseUpdateNearestValidity(diff.entries, 'after');
+            if (!nearest || nearest.kind === 'permanent') {
+                return 'Терміни не змінились, але оновлення не потрібне: ліцензії перманентні.';
+            }
+
+            return `Терміни не змінились, але оновлення не потрібне: найближчий термін ${nearest.label}, ${formatLicenseUpdateDaysLeft(nearest.daysLeft)}.`;
+        }
+        case 'partial':
+            return `${changedSentence}, але потребують уваги: ${problemNames}.`;
+        default:
+            return `Терміни не змінились. Потребують уваги: ${problemNames}.`;
+    }
+};
+
+// --- Масове оновлення: керування чергою ---
+
+const requestLicenseUpdateQueueStop = (run) => {
+    if (!run?.processing || run.stopRequested) {
+        return;
+    }
+
+    run.stopRequested = true;
+    renderLicenseUpdateQueueModal(run);
+};
+
+const canRestartLicenseUpdateQueue = (run) => Boolean(
+    run && !run.processing && !run.aborted && activeBulkLicenseRun === run
+);
+
+const resumeLicenseUpdateQueue = (run) => {
+    if (!canRestartLicenseUpdateQueue(run)) {
+        return;
+    }
+
+    void runBulkLicenseQueue(run);
+};
+
+const retryLicenseUpdateItems = (run, items) => {
+    if (!canRestartLicenseUpdateQueue(run)) {
+        return;
+    }
+
+    const targets = (Array.isArray(items) ? items : []).filter((item) => isBulkLicenseItemRetryable(run, item));
+    if (!targets.length) {
+        return;
+    }
+
+    targets.forEach(resetLicenseUpdateItem);
+    ensureLicenseUpdateRunView(run).detailItemId = '';
+    void runBulkLicenseQueue(run);
+};
+
+// --- Масове оновлення: відмальовка черги ---
+
+const createLicenseUpdatePill = (label, tone, extraClassName = '') => createCardLicenseModalNode(
+    'span',
+    ['dao-upd-pill', `dao-upd-pill--${tone}`, extraClassName].filter(Boolean).join(' '),
+    label
+);
+
+const formatLicenseUpdateDuration = (milliseconds) => {
+    const totalSeconds = Math.max(0, Math.round(milliseconds / 1000));
+    const hours = Math.floor(totalSeconds / 3600);
+    const minutes = Math.floor((totalSeconds % 3600) / 60);
+    const seconds = totalSeconds % 60;
+
+    if (hours) {
+        return `${hours} год ${minutes} хв`;
+    }
+
+    return minutes ? `${minutes} хв ${String(seconds).padStart(2, '0')} с` : `${seconds} с`;
+};
+
+const buildLicenseUpdateRunCaption = (run) => {
+    if (run.processing) {
+        if (run.stopRequested) {
+            return 'зупиняємо після поточного сервера';
+        }
+
+        const currentItem = run.items.find((item) => item.state === 'processing');
+        return currentItem ? `зараз: ${currentItem.label}` : 'обробляємо…';
+    }
+
+    if (run.aborted && run.globalError) {
+        return 'чергу перервано';
+    }
+
+    if (run.stopped) {
+        return 'чергу зупинено';
+    }
+
+    const startedAt = Date.parse(run.startedAt || '');
+    const completedAt = Date.parse(run.completedAt || '');
+    if (Number.isFinite(startedAt) && Number.isFinite(completedAt)) {
+        return `завершено за ${formatLicenseUpdateDuration(completedAt - startedAt)}`;
     }
 
     return '';
 };
 
-const applyBulkLicenseUpdateItemResult = (item, response) => {
-    const updatedTargetLicenses = Array.isArray(response?.updatedTargetLicenses) ? response.updatedTargetLicenses : [];
+const buildLicenseUpdateRunStats = (run) => run.items.reduce((stats, item) => {
+    stats.total += 1;
+    stats[getLicenseUpdateItemCategory(item)] += 1;
+    return stats;
+}, {
+    total: 0,
+    updated: 0,
+    current: 0,
+    warning: 0,
+    active: 0,
+    expiring: 0,
+    expired: 0,
+    error: 0,
+    queue: 0
+});
 
-    item.state = resolveBulkLicenseUpdateItemState(response);
-    item.resultCode = response?.resultCode || '';
-    item.outcome = response?.outcome || '';
-    item.updatedTargetCount = updatedTargetLicenses.length;
-    item.message = formatBulkLicenseResultLabel({
-        resultCode: response?.resultCode,
-        outcome: response?.outcome,
-        state: item.state,
+const formatLicenseUpdateLicenseCount = (count) => `${count} ${pluralizeLicenseUpdateUk(count, ['ліцензія', 'ліцензії', 'ліцензій'])}`;
+
+const collectLicenseUpdateLicenseOptions = (run) => {
+    const options = new Map();
+
+    run.items.forEach((item) => {
+        (item.updateDiff?.entries || []).forEach((entry) => {
+            if (!options.has(entry.key)) {
+                options.set(entry.key, { key: entry.key, label: entry.displayName, groupId: entry.groupId });
+            }
+        });
     });
-    item.details = buildBulkLicenseUpdateDetails(response);
-    item.validitySummary = resolveBulkLicenseUpdateValiditySummary(response);
-    item.diffSummaryLabel = buildBulkLicenseUpdateSummaryLabel(response);
-    item.serverSnapshot = resolveBulkLicenseUpdateServerSnapshot(response);
-    item.licenseSnapshot = resolveBulkLicenseUpdateLicenseSnapshot(response);
-    item.targetBefore = response?.targetBefore && typeof response.targetBefore === 'object' ? response.targetBefore : null;
-    item.targetAfter = response?.targetAfter && typeof response.targetAfter === 'object' ? response.targetAfter : null;
-    item.targetLicenses = Array.isArray(response?.targetLicenses) ? response.targetLicenses : [];
-    item.targetLabel = response?.updatedTargetLicenseDisplayName || response?.targetLicenseDisplayName || response?.requestedTargetLabel || '';
-    item.freshnessStatus = typeof response?.freshnessStatus === 'string' ? response.freshnessStatus : '';
-    item.freshnessReason = typeof response?.freshnessReason === 'string' ? response.freshnessReason : '';
-    item.freshnessThresholdDays = Number.isSafeInteger(Number(response?.freshnessThresholdDays))
-        ? Number(response.freshnessThresholdDays)
-        : null;
-    item.nearestTargetValidUntil = typeof response?.nearestTargetValidUntil === 'string' ? response.nearestTargetValidUntil : '';
-    item.nearestTargetDaysUntilExpiry = Number.isSafeInteger(Number(response?.nearestTargetDaysUntilExpiry))
-        ? Number(response.nearestTargetDaysUntilExpiry)
-        : null;
-    item.hasTargetDateChange = response?.hasTargetDateChange === true;
-    item.isCurrentByThreshold = response?.isCurrentByThreshold === true;
-    stampBulkLicenseItem(item);
+
+    return [...options.values()].sort((left, right) => (
+        CARD_LICENSE_GROUP_ORDER.indexOf(left.groupId) - CARD_LICENSE_GROUP_ORDER.indexOf(right.groupId)
+        || left.label.localeCompare(right.label, 'uk')
+    ));
+};
+
+const findLicenseUpdateItemEntry = (item, licenseKey) => (
+    licenseKey ? (item.updateDiff?.entries || []).find((entry) => entry.key === licenseKey) || null : null
+);
+
+// Коли вибрано ліцензію, «потребують уваги» — сервери, де саме вона проблемна, а не весь сервер.
+const isLicenseUpdateItemAttention = (item, licenseKey) => {
+    if (!licenseKey) {
+        return LICENSE_UPDATE_ATTENTION_CATEGORIES.includes(getLicenseUpdateItemCategory(item));
+    }
+
+    const entry = findLicenseUpdateItemEntry(item, licenseKey);
+    return Boolean(entry && getLicenseEntryStatusMeta(entry).problem);
+};
+
+const getLicenseUpdateScopedItems = (run) => {
+    const { licenseFilter } = ensureLicenseUpdateRunView(run);
+    return run.items
+        .map((item, index) => ({ item, index }))
+        .filter(({ item }) => !licenseFilter || findLicenseUpdateItemEntry(item, licenseFilter));
+};
+
+const buildLicenseUpdateProgressNode = (run, stats) => {
+    const processedCount = stats.total - stats.queue;
+    const node = createCardLicenseModalNode('section', 'dao-upd-progress');
+    node.dataset.updPart = 'progress';
+
+    const text = createCardLicenseModalNode('p', 'dao-upd-progress__text');
+    text.appendChild(createCardLicenseModalNode('strong', '', `Оброблено ${processedCount} з ${stats.total}`));
+    const caption = buildLicenseUpdateRunCaption(run);
+    if (caption) {
+        text.appendChild(createCardLicenseModalNode('span', '', caption));
+    }
+    node.appendChild(text);
+
+    const bar = createCardLicenseModalNode('div', 'dao-upd-progress__bar');
+    bar.setAttribute('role', 'progressbar');
+    bar.setAttribute('aria-label', 'Оброблено серверів');
+    bar.setAttribute('aria-valuemin', '0');
+    bar.setAttribute('aria-valuemax', String(stats.total));
+    bar.setAttribute('aria-valuenow', String(processedCount));
+
+    const toneTotals = { ok: 0, attention: 0, error: 0 };
+    Object.entries(LICENSE_UPDATE_PROGRESS_TONES).forEach(([category, tone]) => {
+        toneTotals[tone] += stats[category] || 0;
+    });
+    Object.entries(toneTotals).forEach(([tone, value]) => {
+        if (!value || !stats.total) {
+            return;
+        }
+
+        const segment = createCardLicenseModalNode('span', `dao-upd-progress__segment dao-upd-progress__segment--${tone}`);
+        segment.style.width = `${(value / stats.total) * 100}%`;
+        bar.appendChild(segment);
+    });
+    if (run.processing && stats.total) {
+        const segment = createCardLicenseModalNode('span', 'dao-upd-progress__segment dao-upd-progress__segment--processing');
+        segment.style.width = `${100 / stats.total}%`;
+        bar.appendChild(segment);
+    }
+    node.appendChild(bar);
+
+    return node;
+};
+
+const buildLicenseUpdateStatusSwitch = (run) => {
+    const view = ensureLicenseUpdateRunView(run);
+    const scopedItems = getLicenseUpdateScopedItems(run);
+    const attentionCount = scopedItems.filter(({ item }) => isLicenseUpdateItemAttention(item, view.licenseFilter)).length;
+    const node = createCardLicenseModalNode('div', 'dao-upd-switch');
+    node.dataset.updPart = 'switch';
+    node.setAttribute('role', 'group');
+    node.setAttribute('aria-label', 'Які сервери показати');
+
+    [
+        { key: 'all', label: 'Усі', count: scopedItems.length },
+        { key: 'attention', label: 'Потребують уваги', count: attentionCount }
+    ].forEach(({ key, label, count }) => {
+        const isActive = view.statusFilter === key;
+        const button = createCardLicenseModalNode('button', [
+            'dao-upd-switch__option',
+            isActive ? 'is-active' : '',
+            key === 'attention' && count ? 'has-attention' : ''
+        ].filter(Boolean).join(' '));
+        button.type = 'button';
+        button.disabled = !isActive && !count;
+        button.setAttribute('aria-pressed', isActive ? 'true' : 'false');
+        button.appendChild(createCardLicenseModalNode('span', '', label));
+        button.appendChild(createCardLicenseModalNode('span', 'dao-upd-switch__count', String(count)));
+        button.addEventListener('click', () => {
+            if (view.statusFilter === key) {
+                return;
+            }
+
+            view.statusFilter = key;
+            renderLicenseUpdateQueueModal(run);
+        });
+        node.appendChild(button);
+    });
+
+    return node;
+};
+
+const buildLicenseUpdateLicenseSelect = (run, options) => {
+    if (!options.length) {
+        return null;
+    }
+
+    const view = ensureLicenseUpdateRunView(run);
+    const field = createCardLicenseModalNode('label', 'dao-upd-select');
+    field.dataset.updPart = 'license';
+    field.appendChild(createCardLicenseModalNode('span', 'dao-upd-select__label', 'Ліцензія'));
+
+    const select = createCardLicenseModalNode('select', `dao-upd-select__control${view.licenseFilter ? ' is-active' : ''}`);
+    select.title = 'Показати лише сервери з цією ліцензією та її термін';
+    select.appendChild(new Option('Усі ліцензії', ''));
+    CARD_LICENSE_GROUP_ORDER.forEach((groupId) => {
+        const groupOptions = options.filter((option) => option.groupId === groupId);
+        if (!groupOptions.length) {
+            return;
+        }
+
+        const group = createCardLicenseModalNode('optgroup');
+        group.label = CARD_LICENSE_GROUP_LABELS[groupId] || CARD_LICENSE_GROUP_LABELS.other;
+        groupOptions.forEach((option) => {
+            group.appendChild(new Option(option.label, option.key));
+        });
+        select.appendChild(group);
+    });
+    // Вибір задаємо атрибутом: так його бачить порівняння частин вікна під час оновлення.
+    [...select.options].forEach((option) => {
+        if (option.value === view.licenseFilter) {
+            option.setAttribute('selected', '');
+        }
+    });
+    select.addEventListener('change', () => {
+        view.licenseFilter = select.value;
+        renderLicenseUpdateQueueModal(run);
+        document.querySelector(`#${CARD_LICENSE_MODAL_ID} .dao-upd-select__control`)?.focus({ preventScroll: true });
+    });
+    field.appendChild(select);
+
+    return field;
+};
+
+const buildLicenseUpdateToolbar = (run, options) => {
+    const toolbar = createCardLicenseModalNode('div', 'dao-upd-toolbar');
+    toolbar.dataset.updPart = 'toolbar';
+    toolbar.dataset.updGroup = 'true';
+    toolbar.appendChild(buildLicenseUpdateStatusSwitch(run));
+
+    const select = buildLicenseUpdateLicenseSelect(run, options);
+    if (select) {
+        toolbar.appendChild(select);
+    }
+
+    return toolbar;
+};
+
+const LICENSE_UPDATE_PROBLEM_FORMS = Object.freeze({
+    expired: ['прострочена', 'прострочені', 'прострочені'],
+    removed: ['зникла', 'зникли', 'зникли'],
+    shortened: ['скоротився термін', 'скоротився термін', 'скоротився термін'],
+    stale: ['не оновилась', 'не оновились', 'не оновились']
+});
+const LICENSE_CHECK_PROBLEM_FORMS = Object.freeze({
+    expired: ['прострочена', 'прострочені', 'прострочені'],
+    stale: ['спливає', 'спливають', 'спливають']
+});
+
+const describeLicenseUpdateProblems = (diff) => {
+    const forms = diff?.mode === BULK_LICENSE_ACTIONS.check ? LICENSE_CHECK_PROBLEM_FORMS : LICENSE_UPDATE_PROBLEM_FORMS;
+    return Object.entries(forms)
+        .map(([status, statusForms]) => {
+            const names = (diff?.entries || [])
+                .filter((entry) => entry.status === status)
+                .map((entry) => entry.displayName);
+            return names.length ? `${pluralizeLicenseUpdateUk(names.length, statusForms)}: ${names.join(', ')}` : '';
+        })
+        .filter(Boolean)
+        .join(' · ');
+};
+
+// Стовпець «Ліцензії»: скільки їх і що з ними, другим рядком — які саме потребують уваги.
+const buildLicenseUpdateRowSummary = (run, item, verdictKey) => {
+    if (verdictKey === 'pending') {
+        return { main: '—', tone: 'idle' };
+    }
+
+    if (verdictKey === 'processing') {
+        return { main: item.message || 'Зачекайте…', tone: 'idle' };
+    }
+
+    if (verdictKey === 'error') {
+        return { main: resolveLicenseUpdateErrorText(item), tone: 'error', wrap: true };
+    }
+
+    if (String(item.resultCode || '').trim().toUpperCase() === 'MANUAL_SERIAL_REQUIRED') {
+        return { main: 'Потрібен UID вручну', detail: 'сервер пропущено без оновлення' };
+    }
+
+    const diff = item.updateDiff;
+    const counts = diff?.counts;
+    if (verdictKey === 'missing') {
+        return { main: formatLicenseUpdateLicenseCount(0), detail: 'активуйте ліцензію: введіть UID у бекофісі' };
+    }
+
+    if (verdictKey === 'invalid') {
+        return {
+            main: counts?.total ? formatLicenseUpdateLicenseCount(counts.total) : 'Ліцензії невалідні',
+            detail: item.serverMessage || 'сервер вважає їх невалідними — потрібна ручна перевірка'
+        };
+    }
+
+    if (!counts?.total) {
+        return { main: 'Список ліцензій порожній', detail: item.serverMessage };
+    }
+
+    const problems = describeLicenseUpdateProblems(diff);
+    if (run.action === BULK_LICENSE_ACTIONS.check) {
+        return {
+            main: formatLicenseUpdateLicenseCount(counts.total),
+            detail: problems || (verdictKey === 'expired' ? item.serverMessage || 'сервер повідомляє, що термін завершився' : '')
+        };
+    }
+
+    return {
+        main: counts.changed
+            ? `оновлено ${counts.changed} з ${counts.total}`
+            : `${formatLicenseUpdateLicenseCount(counts.total)}, без змін`,
+        detail: problems || (verdictKey === 'not-updated' ? item.serverMessage : '')
+    };
+};
+
+// Коли вибрано одну ліцензію, стовпець показує саме її: стан, кількість і що змінилось.
+const buildLicenseUpdateEntrySummary = (entry) => {
+    const status = getLicenseEntryStatusMeta(entry);
+    const count = entry.after ? entry.countAfter : entry.countBefore;
+    const changes = [];
+
+    if (entry.countDiff) {
+        changes.push(`кількість ${entry.countBefore} → ${entry.countAfter}`);
+    }
+
+    if (
+        entry.mode !== BULK_LICENSE_ACTIONS.check
+        && entry.before
+        && ['extended', 'shortened', 'removed'].includes(entry.status)
+        && entry.validityBefore.kind !== 'unknown'
+    ) {
+        changes.push(`було: ${formatLicenseUpdateValidityLabel(entry.validityBefore)}`);
+    }
+
+    return {
+        main: count === null ? status.label : `${status.label} · ${count} шт.`,
+        detail: changes.join(', '),
+        tone: status.tone
+    };
+};
+
+const buildLicenseUpdateLicensesCell = ({ main, detail = '', tone = '', wrap = false }) => {
+    const cell = createCardLicenseModalNode('div', 'dao-upd-cell dao-upd-cell--licenses');
+    const mainClassName = ['dao-upd-cell__main'];
+    if (tone === 'warning' || tone === 'error') {
+        mainClassName.push(`dao-upd-cell__main--${tone}`);
+    } else if (tone === 'idle') {
+        mainClassName.push('dao-upd-cell__main--muted');
+    }
+    if (wrap) {
+        mainClassName.push('dao-upd-cell__main--wrap');
+    }
+
+    cell.appendChild(createCardLicenseModalNode('span', mainClassName.join(' '), main));
+    if (detail) {
+        cell.appendChild(createCardLicenseModalNode('span', 'dao-upd-cell__sub', detail));
+    }
+    if (main !== '—') {
+        cell.title = [main, detail].filter(Boolean).join('\n');
+    }
+
+    return cell;
+};
+
+const buildLicenseUpdateValidityCell = (item, entry, licenseKey) => {
+    const cell = createCardLicenseModalNode('div', 'dao-upd-cell dao-upd-cell--validity');
+    let validity = null;
+
+    if (licenseKey) {
+        validity = entry?.after ? entry.validityAfter : null;
+    } else {
+        const entries = item.updateDiff?.entries;
+        const after = resolveLicenseUpdateNearestValidity(entries, 'after');
+        const before = resolveLicenseUpdateNearestValidity(entries, 'before');
+        validity = after || before;
+
+        const titleParts = [];
+        if (validity?.distinctLabels?.length > 1) {
+            titleParts.push(`Терміни ліцензій: ${validity.distinctLabels.join(', ')}`);
+        }
+        if (after && before && before.label !== after.label) {
+            titleParts.push(`До оновлення: ${formatLicenseUpdateValidityLabel(before)}`);
+        }
+        if (titleParts.length) {
+            cell.title = titleParts.join('\n');
+        }
+    }
+
+    if (!validity || (validity.kind === 'unknown' && !validity.label)) {
+        cell.appendChild(createCardLicenseModalNode('span', 'dao-upd-cell__main dao-upd-cell__main--muted', '—'));
+        return cell;
+    }
+
+    cell.appendChild(createCardLicenseModalNode('span', 'dao-upd-cell__main', formatLicenseUpdateValidityLabel(validity)));
+    if (validity.kind === 'dated') {
+        const tone = resolveLicenseUpdateDaysTone(validity.daysLeft, item.thresholdDays);
+        cell.appendChild(createCardLicenseModalNode(
+            'span',
+            `dao-upd-cell__sub${tone === 'warning' || tone === 'error' ? ` dao-upd-days--${tone}` : ''}`,
+            formatLicenseUpdateDaysLeft(validity.daysLeft)
+        ));
+    }
+
+    return cell;
+};
+
+const buildLicenseUpdateStatusCell = (run, item, verdictKey) => {
+    const verdict = LICENSE_UPDATE_VERDICTS[verdictKey];
+    const cell = createCardLicenseModalNode('div', `dao-upd-cell dao-upd-cell--status dao-upd-status--${verdict.tone}`);
+    cell.appendChild(createCardLicenseModalNode(
+        'span',
+        verdictKey === 'processing' ? 'dao-license-modal__queue-spinner' : 'dao-upd-status__dot'
+    ));
+    cell.appendChild(createCardLicenseModalNode(
+        'span',
+        'dao-upd-status__label',
+        verdictKey === 'processing' ? getBulkLicenseRunProfile(run).processingLabel : verdict.label
+    ));
+    if (isLicenseUpdateItemProcessed(item)) {
+        cell.title = describeLicenseUpdateVerdict(verdictKey, item.thresholdDays);
+    }
+
+    return cell;
+};
+
+const buildLicenseUpdateQueueRow = (run, item, index) => {
+    const { licenseFilter } = ensureLicenseUpdateRunView(run);
+    const verdictKey = getLicenseUpdateItemVerdictKey(item);
+    const entry = findLicenseUpdateItemEntry(item, licenseFilter);
+    const row = createCardLicenseModalNode('div', `dao-upd-row dao-upd-row--${verdictKey}`);
+    row.dataset.updPart = `row:${item.id}`;
+
+    row.appendChild(createCardLicenseModalNode('span', 'dao-upd-cell dao-upd-cell--index', String(index + 1)));
+
+    const server = createCardLicenseModalNode('div', 'dao-upd-cell dao-upd-cell--server');
+    server.appendChild(createCardLicenseModalNode('span', 'dao-upd-cell__main', item.label));
+    const companyName = resolveLicenseUpdateCompanyName(item);
+    if (companyName) {
+        server.appendChild(createCardLicenseModalNode('span', 'dao-upd-cell__sub', companyName));
+    }
+    server.title = [item.label, companyName].filter(Boolean).join('\n');
+    row.appendChild(server);
+
+    row.appendChild(buildLicenseUpdateStatusCell(run, item, verdictKey));
+    row.appendChild(buildLicenseUpdateLicensesCell(
+        entry ? buildLicenseUpdateEntrySummary(entry) : buildLicenseUpdateRowSummary(run, item, verdictKey)
+    ));
+    row.appendChild(buildLicenseUpdateValidityCell(item, entry, licenseFilter));
+
+    const isProcessed = isLicenseUpdateItemProcessed(item);
+    row.appendChild(createCardLicenseModalNode('span', 'dao-upd-cell dao-upd-cell--chevron', isProcessed ? '›' : ''));
+
+    if (isProcessed) {
+        row.classList.add('dao-upd-row--interactive');
+        row.tabIndex = 0;
+        row.setAttribute('role', 'button');
+        row.setAttribute('aria-label', `${item.label}: ${LICENSE_UPDATE_VERDICTS[verdictKey].label}. Відкрити деталі`);
+
+        const openDetails = () => showLicenseUpdateItemDetailModal(run, item);
+        row.addEventListener('click', openDetails);
+        row.addEventListener('keydown', (event) => {
+            if (event.target !== row || (event.key !== 'Enter' && event.key !== ' ')) {
+                return;
+            }
+
+            event.preventDefault();
+            openDetails();
+        });
+    }
+
+    return row;
+};
+
+const buildLicenseUpdateQueueTable = (run, options) => {
+    const view = ensureLicenseUpdateRunView(run);
+    const visibleItems = getLicenseUpdateScopedItems(run)
+        .filter(({ item }) => view.statusFilter !== 'attention' || isLicenseUpdateItemAttention(item, view.licenseFilter));
+
+    if (!visibleItems.length) {
+        const empty = createCardLicenseModalNode('div', 'dao-upd-empty');
+        empty.dataset.updPart = 'list';
+        empty.appendChild(createCardLicenseModalNode(
+            'p',
+            '',
+            run.items.length ? 'Немає серверів за вибраним фільтром.' : 'Немає серверів для обробки.'
+        ));
+        if (run.items.length) {
+            const resetButton = createCardLicenseModalNode('button', 'dao-upd-link-button', 'Показати всі сервери');
+            resetButton.type = 'button';
+            resetButton.addEventListener('click', () => {
+                view.statusFilter = 'all';
+                view.licenseFilter = '';
+                renderLicenseUpdateQueueModal(run);
+            });
+            empty.appendChild(resetButton);
+        }
+        return empty;
+    }
+
+    const table = createCardLicenseModalNode('div', 'dao-upd-grid');
+    table.dataset.updPart = 'list';
+    table.dataset.updGroup = 'true';
+
+    const selectedLicense = options.find((option) => option.key === view.licenseFilter);
+    const head = createCardLicenseModalNode('div', 'dao-upd-grid__head');
+    head.dataset.updPart = 'head';
+    ['#', 'Сервер', 'Статус', selectedLicense?.label || 'Ліцензії', selectedLicense ? 'Діє до' : 'Найближчий термін', ''].forEach((label) => {
+        head.appendChild(createCardLicenseModalNode('span', '', label));
+    });
+    table.appendChild(head);
+
+    visibleItems.forEach(({ item, index }) => {
+        table.appendChild(buildLicenseUpdateQueueRow(run, item, index));
+    });
+
+    return table;
+};
+
+const buildLicenseUpdateQueueContent = (run) => {
+    const view = ensureLicenseUpdateRunView(run);
+    const options = collectLicenseUpdateLicenseOptions(run);
+    // Після повтору сервера вибрана ліцензія могла тимчасово зникнути з відповідей.
+    if (view.licenseFilter && !options.some((option) => option.key === view.licenseFilter)) {
+        view.licenseFilter = '';
+    }
+
+    const fragment = document.createDocumentFragment();
+    fragment.appendChild(buildLicenseUpdateProgressNode(run, buildLicenseUpdateRunStats(run)));
+
+    if (run.globalError) {
+        const notice = createCardLicenseModalNode('p', 'dao-upd-notice', run.globalError);
+        notice.dataset.updPart = 'notice';
+        fragment.appendChild(notice);
+    }
+
+    fragment.appendChild(buildLicenseUpdateToolbar(run, options));
+    fragment.appendChild(buildLicenseUpdateQueueTable(run, options));
+    return fragment;
+};
+
+const buildLicenseUpdateQueueFooterActions = (run) => {
+    const actions = [];
+    const retryableItems = () => run.items.filter((item) => isBulkLicenseItemRetryable(run, item));
+    const failedCount = retryableItems().length;
+    const pendingCount = run.items.filter((item) => item.state === 'idle').length;
+
+    if (run.processing) {
+        actions.push({
+            label: run.stopRequested ? 'Зупиняємо…' : 'Зупинити',
+            disabled: run.stopRequested,
+            title: 'Поточний сервер буде дооброблено, решту черги — ні',
+            onClick: () => requestLicenseUpdateQueueStop(run)
+        });
+    } else if (canRestartLicenseUpdateQueue(run)) {
+        if (pendingCount) {
+            actions.push({
+                label: `Продовжити (${pendingCount})`,
+                variant: 'primary',
+                onClick: () => resumeLicenseUpdateQueue(run)
+            });
+        }
+
+        if (failedCount) {
+            const profile = getBulkLicenseRunProfile(run);
+            actions.push({
+                label: `${profile.retryLabel} (${failedCount})`,
+                variant: pendingCount ? '' : 'primary',
+                title: profile.retryTitle,
+                onClick: () => retryLicenseUpdateItems(run, retryableItems())
+            });
+        }
+    }
+
+    actions.push({
+        label: 'Закрити',
+        title: run.processing ? 'Закриття зупинить чергу після поточного сервера' : '',
+        onClick: () => closeCardLicenseCheckModal()
+    });
+
+    return actions;
+};
+
+// Показану чергу оновлюємо частинами: незмінені вузли лишаються на місці, тому рядки не блимають,
+// а відкритий список ліцензій не закривається, поки сервери ще обробляються.
+const patchLicenseUpdateParts = (currentParent, nextParent) => {
+    const currentParts = [...currentParent.children];
+    const nextParts = [...nextParent.children];
+    const hasSameShape = currentParts.length === nextParts.length
+        && nextParts.every((node, index) => node.dataset.updPart && node.dataset.updPart === currentParts[index].dataset.updPart);
+    if (!hasSameShape) {
+        return false;
+    }
+
+    nextParts.forEach((nextNode, index) => {
+        const currentNode = currentParts[index];
+        if (currentNode.isEqualNode(nextNode)) {
+            return;
+        }
+
+        if (nextNode.dataset.updGroup === 'true' && patchLicenseUpdateParts(currentNode, nextNode)) {
+            return;
+        }
+
+        currentNode.replaceWith(nextNode);
+    });
+
+    return true;
+};
+
+const patchLicenseUpdateFooterActions = (actionsNode, footerActions) => {
+    const nextButtons = buildCardLicenseModalActions(footerActions);
+    const currentButtons = [...actionsNode.children];
+    const isSame = nextButtons.length === currentButtons.length
+        && nextButtons.every((button, index) => button.isEqualNode(currentButtons[index]));
+    if (!isSame) {
+        actionsNode.replaceChildren(...nextButtons);
+    }
+};
+
+const getLicenseUpdateModalViewport = () => document.querySelector(`#${CARD_LICENSE_MODAL_ID} [data-role="viewport"]`);
+
+const renderLicenseUpdateQueueModal = (run) => {
+    const view = ensureLicenseUpdateRunView(run);
+    // Поверх черги відкрито деталі сервера: не перебиваємо їх, черга оновиться при поверненні.
+    if (view.detailItemId) {
+        return;
+    }
+
+    const currentModal = document.getElementById(CARD_LICENSE_MODAL_ID);
+    const isQueueOnScreen = currentModal?.dataset.surface === LICENSE_UPDATE_SURFACE
+        && currentModal.dataset.updateView === 'queue';
+    const content = buildLicenseUpdateQueueContent(run);
+    const footerActions = buildLicenseUpdateQueueFooterActions(run);
+
+    if (isQueueOnScreen) {
+        const { bodyNode, actionsNode } = ensureCardLicenseModalShell();
+        if (patchLicenseUpdateParts(bodyNode, content)) {
+            patchLicenseUpdateFooterActions(actionsNode, footerActions);
+            return;
+        }
+    }
+
+    renderCardLicenseModal({
+        title: getBulkLicenseRunProfile(run).title,
+        subtitle: [
+            run.sourceLabel,
+            `${run.items.length} ${pluralizeLicenseUpdateUk(run.items.length, ['сервер', 'сервери', 'серверів'])}`
+        ].filter(Boolean).join(' • '),
+        surface: LICENSE_UPDATE_SURFACE,
+        content,
+        footerActions,
+        preserveScroll: isQueueOnScreen
+    });
+
+    const modal = document.getElementById(CARD_LICENSE_MODAL_ID);
+    if (!modal) {
+        return;
+    }
+
+    modal.dataset.updateView = 'queue';
+    const viewport = getLicenseUpdateModalViewport();
+    if (!isQueueOnScreen && Number.isFinite(view.queueScrollTop) && viewport) {
+        viewport.scrollTop = view.queueScrollTop;
+    }
+    view.queueScrollTop = null;
+};
+
+// --- Масове оновлення: деталі одного сервера «було → стало» ---
+
+const buildLicenseUpdateServerFacts = (run, item) => {
+    const before = item.serverBefore || {};
+    const after = item.serverAfter || {};
+    const facts = [
+        ['Компанія', after.companyName || before.companyName],
+        ['Тип сервера', after.serverType || before.serverType],
+        ['Serial', after.serialNumber || before.serialNumber],
+        ['CRM ID', after.crmId || before.crmId]
+    ];
+
+    // Власний код SLM лишаємо в деталях, щоб підсумок можна було звірити з журналом сервісу.
+    const normalizedCode = String(item.resultCode || '').trim().toUpperCase();
+    if (run.action === BULK_LICENSE_ACTIONS.update && BULK_LICENSE_RESULT_LABELS[normalizedCode]) {
+        facts.push(['Відповідь SLM', `${BULK_LICENSE_RESULT_LABELS[normalizedCode]} (${normalizedCode})`]);
+    }
+
+    const statusBefore = normalizeCardLicenseStatus(before.licenseStatus);
+    const statusAfter = normalizeCardLicenseStatus(after.licenseStatus);
+    if (statusBefore && statusAfter && statusBefore !== statusAfter) {
+        facts.push(['Стан ліцензій', `${formatCardLicenseBusinessStatus(before.licenseStatus)} → ${formatCardLicenseBusinessStatus(after.licenseStatus)}`]);
+    } else if (statusAfter || statusBefore) {
+        facts.push(['Стан ліцензій', formatCardLicenseBusinessStatus(after.licenseStatus || before.licenseStatus)]);
+    }
+
+    const visibleFacts = facts.filter(([, value]) => String(value || '').trim());
+    if (!visibleFacts.length) {
+        return null;
+    }
+
+    const list = createCardLicenseModalNode('dl', 'dao-upd-facts');
+    visibleFacts.forEach(([label, value]) => {
+        const fact = createCardLicenseModalNode('div', 'dao-upd-fact');
+        fact.appendChild(createCardLicenseModalNode('dt', '', label));
+        fact.appendChild(createCardLicenseModalNode('dd', '', String(value).trim()));
+        list.appendChild(fact);
+    });
+
+    return list;
+};
+
+const buildLicenseUpdateDiffRow = (entry, thresholdDays) => {
+    const status = getLicenseEntryStatusMeta(entry);
+    const row = createCardLicenseModalNode('tr', `dao-upd-table__row dao-upd-table__row--${entry.status}`);
+
+    const nameCell = createCardLicenseModalNode('td', 'dao-upd-table__name');
+    nameCell.appendChild(createCardLicenseModalNode('span', '', entry.displayName));
+    if (entry.secondaryName) {
+        nameCell.appendChild(createCardLicenseModalNode('span', 'dao-upd-table__subname', entry.secondaryName));
+    }
+    row.appendChild(nameCell);
+
+    const countCell = createCardLicenseModalNode('td', 'is-numeric');
+    const count = entry.after ? entry.countAfter : entry.countBefore;
+    countCell.appendChild(document.createTextNode(count === null ? '—' : String(count)));
+    if (entry.countDiff) {
+        countCell.appendChild(createCardLicenseModalNode(
+            'span',
+            `dao-upd-delta dao-upd-delta--${entry.countDiff > 0 ? 'up' : 'down'}`,
+            `${entry.countDiff > 0 ? '+' : '−'}${Math.abs(entry.countDiff)}`
+        ));
+        countCell.title = `Було: ${entry.countBefore}`;
+    }
+    row.appendChild(countCell);
+
+    if (entry.mode !== BULK_LICENSE_ACTIONS.check) {
+        row.appendChild(createCardLicenseModalNode(
+            'td',
+            'is-numeric dao-upd-table__old',
+            entry.before ? formatLicenseUpdateValidityLabel(entry.validityBefore) : '—'
+        ));
+    }
+
+    const afterCell = createCardLicenseModalNode('td', 'is-numeric');
+    const afterValue = createCardLicenseModalNode(
+        'span',
+        ['new', 'extended'].includes(entry.status) ? 'dao-upd-table__after--changed' : '',
+        entry.after ? formatLicenseUpdateValidityLabel(entry.validityAfter) : '—'
+    );
+    afterCell.appendChild(afterValue);
+    if (entry.after && entry.validityAfter.kind === 'dated') {
+        afterCell.appendChild(createCardLicenseModalNode(
+            'span',
+            `dao-upd-table__days dao-upd-table__days--${resolveLicenseUpdateDaysTone(entry.validityAfter.daysLeft, thresholdDays)}`,
+            formatLicenseUpdateDaysLeft(entry.validityAfter.daysLeft)
+        ));
+    }
+    row.appendChild(afterCell);
+
+    const statusCell = createCardLicenseModalNode('td');
+    statusCell.appendChild(createLicenseUpdatePill(status.label, status.tone, 'dao-upd-pill--small'));
+    row.appendChild(statusCell);
+
+    return row;
+};
+
+const buildLicenseUpdateDiffTable = (diff) => {
+    const wrap = createCardLicenseModalNode('div', 'dao-upd-table-wrap');
+    const table = createCardLicenseModalNode('table', 'dao-upd-table');
+    const head = createCardLicenseModalNode('thead');
+    const headRow = createCardLicenseModalNode('tr');
+    const columns = diff.mode === BULK_LICENSE_ACTIONS.check
+        ? ['Ліцензія', 'Кількість', 'Діє до', 'Статус']
+        : ['Ліцензія', 'Кількість', 'Було', 'Стало', 'Статус'];
+    columns.forEach((label) => {
+        headRow.appendChild(createCardLicenseModalNode('th', '', label));
+    });
+    head.appendChild(headRow);
+    table.appendChild(head);
+
+    CARD_LICENSE_GROUP_ORDER.forEach((groupId) => {
+        const groupEntries = diff.entries.filter((entry) => entry.groupId === groupId);
+        if (!groupEntries.length) {
+            return;
+        }
+
+        const body = createCardLicenseModalNode('tbody');
+        const groupRow = createCardLicenseModalNode('tr', `dao-upd-table__group dao-upd-table__group--${groupId}`);
+        const groupCell = createCardLicenseModalNode('th', '', CARD_LICENSE_GROUP_LABELS[groupId] || CARD_LICENSE_GROUP_LABELS.other);
+        groupCell.colSpan = columns.length;
+        groupCell.appendChild(createCardLicenseModalNode('span', 'dao-upd-table__group-count', String(groupEntries.length)));
+        groupRow.appendChild(groupCell);
+        body.appendChild(groupRow);
+
+        groupEntries.forEach((entry) => {
+            body.appendChild(buildLicenseUpdateDiffRow(entry, diff.thresholdDays));
+        });
+        table.appendChild(body);
+    });
+
+    wrap.appendChild(table);
+    return wrap;
+};
+
+const buildLicenseUpdateChangeChips = (diff) => {
+    const parts = buildLicenseUpdateChangeParts(diff);
+    if (!parts.length) {
+        return null;
+    }
+
+    const chips = createCardLicenseModalNode('div', 'dao-upd-chips');
+    parts.forEach((part) => {
+        chips.appendChild(createCardLicenseModalNode('span', `dao-upd-chip dao-upd-chip--${part.tone}`, part.text));
+    });
+
+    return chips;
+};
+
+const buildLicenseUpdateVerdictValidity = (item) => {
+    const entries = item.updateDiff?.entries;
+    const after = resolveLicenseUpdateNearestValidity(entries, 'after');
+    const before = resolveLicenseUpdateNearestValidity(entries, 'before');
+    const primary = after || before;
+    if (!primary) {
+        return null;
+    }
+
+    const node = createCardLicenseModalNode('div', 'dao-upd-verdict__validity');
+    node.appendChild(createCardLicenseModalNode('span', 'dao-upd-verdict__validity-label', 'Найближчий термін'));
+
+    const valueNode = createCardLicenseModalNode('span', 'dao-upd-validity__value', formatLicenseUpdateValidityLabel(primary));
+    if (primary.distinctLabels.length > 1) {
+        valueNode.title = `Терміни ліцензій: ${primary.distinctLabels.join(', ')}`;
+    }
+    node.appendChild(valueNode);
+
+    if (after && before && before.label !== after.label) {
+        const oldNode = createCardLicenseModalNode('span', 'dao-upd-validity__old', formatLicenseUpdateValidityLabel(before));
+        oldNode.title = 'Найближчий термін до оновлення';
+        node.appendChild(oldNode);
+    }
+
+    if (after?.kind === 'dated') {
+        node.appendChild(createLicenseUpdatePill(
+            formatLicenseUpdateDaysLeft(after.daysLeft),
+            resolveLicenseUpdateDaysTone(after.daysLeft, item.thresholdDays),
+            'dao-upd-pill--small'
+        ));
+    }
+
+    return node;
+};
+
+// Для цих підсумків лічильники ліцензій лише плутають: сервер не визнає ліцензії або не повернув їх.
+const shouldShowLicenseUpdateChanges = (verdictKey) => !['error', 'missing', 'invalid'].includes(verdictKey);
+
+const buildLicenseUpdateDetailContent = (run, item) => {
+    const fragment = document.createDocumentFragment();
+    const verdictKey = getLicenseUpdateItemVerdictKey(item);
+    const verdict = LICENSE_UPDATE_VERDICTS[verdictKey];
+
+    const banner = createCardLicenseModalNode('section', `dao-upd-verdict dao-upd-verdict--${verdict.tone}`);
+    const bannerMain = createCardLicenseModalNode('div', 'dao-upd-verdict__main');
+    bannerMain.appendChild(createCardLicenseModalNode('p', 'dao-upd-verdict__eyebrow', getBulkLicenseRunProfile(run).resultLabel));
+    bannerMain.appendChild(createCardLicenseModalNode('h3', 'dao-upd-verdict__title', verdict.label));
+    bannerMain.appendChild(createCardLicenseModalNode('p', 'dao-upd-verdict__text', buildLicenseUpdateVerdictSentence(run, item, verdictKey)));
+    const chips = shouldShowLicenseUpdateChanges(verdictKey) ? buildLicenseUpdateChangeChips(item.updateDiff) : null;
+    if (chips) {
+        bannerMain.appendChild(chips);
+    }
+    banner.appendChild(bannerMain);
+    const validity = buildLicenseUpdateVerdictValidity(item);
+    if (validity) {
+        banner.appendChild(validity);
+    }
+    fragment.appendChild(banner);
+
+    const facts = buildLicenseUpdateServerFacts(run, item);
+    if (facts) {
+        fragment.appendChild(facts);
+    }
+
+    if (item.serverMessage && verdictKey !== 'error') {
+        fragment.appendChild(createCardLicenseModalNode('p', 'dao-upd-message', `Повідомлення сервера: ${item.serverMessage}`));
+    }
+
+    if (item.updateDiff?.entries.length) {
+        fragment.appendChild(buildLicenseUpdateDiffTable(item.updateDiff));
+    } else if (verdictKey !== 'error' && verdictKey !== 'missing') {
+        fragment.appendChild(createCardLicenseModalNode('div', 'dao-upd-empty', 'Сервер не повернув список ліцензій.'));
+    }
+
+    return fragment;
+};
+
+const openLicenseCheckItemInCalculator = async (event, item) => {
+    const button = event?.currentTarget;
+    if (button instanceof HTMLButtonElement) {
+        button.disabled = true;
+    }
+
+    try {
+        await requestOpenLicenseCalculator(item.context, {
+            server: item.serverAfter || {},
+            licenses: item.licensesAfter || []
+        });
+    } catch (error) {
+        const labelNode = button instanceof HTMLButtonElement ? button.lastChild : null;
+        if (labelNode) {
+            const defaultLabel = labelNode.textContent;
+            button.title = error?.message || 'Не вдалося відкрити калькулятор ліцензій.';
+            labelNode.textContent = 'Не вдалося відкрити калькулятор';
+            window.setTimeout(() => {
+                labelNode.textContent = defaultLabel;
+            }, 2400);
+        }
+    } finally {
+        if (button instanceof HTMLButtonElement) {
+            button.disabled = false;
+        }
+    }
+};
+
+const showLicenseUpdateItemDetailModal = (run, item) => {
+    const view = ensureLicenseUpdateRunView(run);
+    const currentModal = document.getElementById(CARD_LICENSE_MODAL_ID);
+    const viewport = getLicenseUpdateModalViewport();
+    if (currentModal?.dataset.updateView === 'queue' && viewport) {
+        view.queueScrollTop = viewport.scrollTop;
+    }
+    view.detailItemId = item.id;
+
+    const backToQueue = () => {
+        view.detailItemId = '';
+        renderLicenseUpdateQueueModal(run);
+    };
+
+    const actions = [];
+    const isCheckRun = run.action === BULK_LICENSE_ACTIONS.check;
+    if (isCheckRun && item.licensesAfter?.length) {
+        actions.push({
+            label: CARD_LICENSE_CALCULATOR_BUTTON_LABEL,
+            title: 'Перенести ліцензії сервера в калькулятор дозамовлення',
+            onClick: (event) => {
+                void openLicenseCheckItemInCalculator(event, item);
+            }
+        });
+    }
+    if (isBulkLicenseItemRetryable(run, item) && canRestartLicenseUpdateQueue(run)) {
+        actions.push({
+            label: isCheckRun ? 'Перевірити ще раз' : 'Повторити оновлення',
+            variant: 'primary',
+            onClick: () => retryLicenseUpdateItems(run, [item])
+        });
+    }
+    actions.push({ label: 'Назад до черги', onClick: backToQueue, autoFocus: true });
+
+    renderCardLicenseModal({
+        title: item.label,
+        subtitle: resolveLicenseUpdateCompanyName(item) || getBulkLicenseRunProfile(run).resultLabel,
+        surface: LICENSE_UPDATE_SURFACE,
+        content: buildLicenseUpdateDetailContent(run, item),
+        footerActions: actions,
+        onClose: backToQueue
+    });
+
+    const modal = document.getElementById(CARD_LICENSE_MODAL_ID);
+    if (modal) {
+        modal.dataset.updateView = 'detail';
+    }
 };
 
 const promptBulkLicenseSerialNumber = (item, response) => new Promise((resolve) => {
-    const baseMessage = response?.statusMessage || 'Сервер вимагає ручний UID або serial для продовження оновлення ліцензії.';
+    const baseMessage = 'Сервер не повернув серійний номер — зазвичай так буває, коли ліцензії відсутні або прострочені. Введіть UID із бекофісу сервера, щоб продовжити оновлення.';
+    const serverMessage = String(response?.statusMessage || '').trim();
     const fragment = document.createDocumentFragment();
     const panel = createCardLicenseModalNode('section', 'dao-license-modal__panel');
     panel.appendChild(createCardLicenseModalNode('p', 'dao-license-modal__dialog-message', baseMessage));
+    if (serverMessage) {
+        panel.appendChild(createCardLicenseModalNode('p', 'dao-license-modal__dialog-hint', `Повідомлення сервера: ${serverMessage}`));
+    }
 
     const field = createCardLicenseModalNode('label', 'dao-license-modal__dialog-field');
     field.appendChild(createCardLicenseModalNode('span', 'dao-license-modal__dialog-label', 'UID / Serial'));
@@ -7467,15 +8931,22 @@ const promptBulkLicenseSerialNumber = (item, response) => new Promise((resolve) 
     });
 
     renderCardLicenseModal({
-        title: 'Потрібен ручний UID',
-        subtitle: item?.label || '',
+        title: 'Потрібен UID вручну',
+        subtitle: [item?.label, resolveLicenseUpdateCompanyName(item)].filter(Boolean).join(' • '),
         content: fragment,
+        surface: LICENSE_UPDATE_SURFACE,
+        layout: CARD_LICENSE_MODAL_LAYOUTS.compact,
         onClose: () => finish(null),
         footerActions: [
-            { label: 'Скасувати', onClick: () => finish(null) },
-            { label: 'Продовжити', variant: 'primary', onClick: submit }
+            { label: 'Пропустити сервер', onClick: () => finish(null) },
+            { label: 'Продовжити оновлення', variant: 'primary', onClick: submit }
         ]
     });
+
+    const modal = document.getElementById(CARD_LICENSE_MODAL_ID);
+    if (modal) {
+        modal.dataset.updateView = 'prompt';
+    }
 
     queueMicrotask(() => {
         input.focus({ preventScroll: true });
@@ -7519,7 +8990,6 @@ const markBulkLicenseQueueRemainingItems = (run, state, message) => {
             return;
         }
 
-        resetBulkLicenseItemFreshness(item);
         item.state = state;
         item.message = message;
         item.details = 'Чергу завершено раніше, ніж дійшла черга до цього сервера.';
@@ -7544,16 +9014,15 @@ const performBulkLicenseQueueItem = async (run, item) => {
             return;
         }
 
+        if (run.view) {
+            run.view.detailItemId = '';
+        }
         const manualSerialNumber = await promptBulkLicenseSerialNumber(item, response);
         if (!manualSerialNumber) {
-            resetBulkLicenseItemFreshness(item);
             item.state = 'error';
             item.resultCode = 'MANUAL_SERIAL_CANCELLED';
-            item.outcome = 'error';
             item.message = 'Ручний UID не введено.';
             item.details = 'Оновлення для цього сервера скасовано користувачем.';
-            item.diffSummaryLabel = '';
-            stampBulkLicenseItem(item);
             return;
         }
 
@@ -7561,18 +9030,19 @@ const performBulkLicenseQueueItem = async (run, item) => {
         item.state = 'processing';
         item.message = 'Повторюємо оновлення з ручним UID...';
         item.details = `UID: ${manualSerialNumber}`;
-        item.diffSummaryLabel = '';
-        resetBulkLicenseItemFreshness(item);
-        stampBulkLicenseItem(item);
         if (!run.aborted) {
-            renderBulkLicenseQueueModal(run);
+            renderLicenseUpdateQueueModal(run);
         }
     }
 };
 
 const runBulkLicenseQueue = async (run) => {
     run.processing = true;
-    renderBulkLicenseQueueModal(run);
+    run.stopRequested = false;
+    run.stopped = false;
+    run.startedAt = new Date().toISOString();
+    run.completedAt = '';
+    renderLicenseUpdateQueueModal(run);
 
     try {
         for (const item of run.items) {
@@ -7580,26 +9050,28 @@ const runBulkLicenseQueue = async (run) => {
                 break;
             }
 
+            if (run.stopRequested) {
+                run.stopped = true;
+                break;
+            }
+
+            // Повторний запуск черги обробляє лише сервери, які ще чекають.
+            if (item.state !== 'idle') {
+                continue;
+            }
+
+            clearLicenseUpdateItemResult(item);
             item.state = 'processing';
             item.message = run.action === BULK_LICENSE_ACTIONS.update ? 'Запускаємо оновлення...' : 'Запускаємо перевірку...';
             item.details = '';
-            item.diffSummaryLabel = '';
-            item.validitySummary = '';
-            resetBulkLicenseItemFreshness(item);
-            stampBulkLicenseItem(item);
-            renderBulkLicenseQueueModal(run);
+            renderLicenseUpdateQueueModal(run);
 
             try {
                 await performBulkLicenseQueueItem(run, item);
             } catch (error) {
-                resetBulkLicenseItemFreshness(item);
                 item.state = 'error';
-                item.outcome = 'error';
                 item.message = error?.message || 'Невідома помилка під час обробки сервера.';
                 item.details = '';
-                item.diffSummaryLabel = '';
-                item.validitySummary = '';
-                stampBulkLicenseItem(item);
 
                 if (shouldStopBulkLicenseQueueAfterError(error)) {
                     run.globalError = item.message;
@@ -7610,20 +9082,25 @@ const runBulkLicenseQueue = async (run) => {
             }
 
             if (!run.aborted) {
-                renderBulkLicenseQueueModal(run);
+                renderLicenseUpdateQueueModal(run);
             }
         }
     } finally {
         run.processing = false;
+        run.stopRequested = false;
         run.completedAt = new Date().toISOString();
 
         if (run.aborted) {
             activeBulkLicenseRun = null;
+            // Доступ відкликано посеред черги: показуємо причину, якщо вікно ще відкрите.
+            if (run.globalError && document.getElementById(CARD_LICENSE_MODAL_ID)) {
+                renderLicenseUpdateQueueModal(run);
+            }
             return;
         }
 
         if (activeBulkLicenseRun === run) {
-            renderBulkLicenseQueueModal(run);
+            renderLicenseUpdateQueueModal(run);
         }
     }
 };
@@ -7677,7 +9154,16 @@ const startBulkLicenseQueue = ({ action, sourceLabel, targets, bulkModeFormat = 
         sourceLabel,
         processing: false,
         aborted: false,
+        stopRequested: false,
+        stopped: false,
+        startedAt: '',
+        completedAt: '',
         globalError: '',
+        view: {
+            statusFilter: 'all',
+            licenseFilter: '',
+            detailItemId: ''
+        },
         items: dedupedTargets.map((context, index) => ({
             id: `${index + 1}-${formatCardServerContextLabel(context)}`,
             context,
@@ -7686,30 +9172,20 @@ const startBulkLicenseQueue = ({ action, sourceLabel, targets, bulkModeFormat = 
             message: '',
             details: '',
             resultCode: '',
-            outcome: '',
             serialNumber: '',
-            updatedTargetCount: 0,
-            updatedAt: '',
-            validitySummary: '',
-            diffSummaryLabel: '',
-            serverSnapshot: {},
-            licenseSnapshot: [],
-            targetBefore: null,
-            targetAfter: null,
-            targetLicenses: [],
-            targetLabel: '',
-            freshnessStatus: '',
-            freshnessReason: '',
-            freshnessThresholdDays: null,
-            nearestTargetValidUntil: '',
-            nearestTargetDaysUntilExpiry: null,
-            hasTargetDateChange: false,
-            isCurrentByThreshold: false
+            licensesBefore: [],
+            licensesAfter: [],
+            serverBefore: {},
+            serverAfter: {},
+            thresholdDays: LICENSE_UPDATE_DEFAULT_THRESHOLD_DAYS,
+            serverMessage: '',
+            updateDiff: null,
+            verdict: ''
         }))
     };
 
     activeBulkLicenseRun = run;
-    renderBulkLicenseQueueModal(run);
+    renderLicenseUpdateQueueModal(run);
     void runBulkLicenseQueue(run);
 };
 
