@@ -441,6 +441,7 @@ const CARD_PERIOD_ID = 'license-buttons-panel-period';
 const CARD_VERSION_STATUS_ATTR = 'data-dao-version-status';
 const LICENSE_BUTTON_ID = 'check-card-license-button';
 const CALCULATOR_BUTTON_ID = 'open-license-calculator-button';
+const LICENSE_UPDATE_BUTTON_ID = 'update-card-license-button';
 const RESTO_BUTTON_ID = 'open-resto-button';
 const DEVICES_BUTTON_ID = 'open-connections-button';
 const PERIOD_BUTTON_ID = 'get-period-button';
@@ -509,6 +510,7 @@ const CARD_BUTTON_INTENTS = {
     login: 'login',
     license: 'license',
     calculator: 'calculator',
+    licenseUpdate: 'licenseUpdate',
     resto: 'resto',
     devices: 'devices',
     loyalty: 'loyalty',
@@ -543,6 +545,12 @@ const CARD_BUTTON_THEME_TOKENS = {
                 background: '#9fbe64',
                 color: '#ffffff',
                 border: '1px solid #8aa84f',
+                boxShadow: 'none'
+            },
+            licenseUpdate: {
+                background: '#d97706',
+                color: '#fff',
+                border: '1px solid transparent',
                 boxShadow: 'none'
             },
             resto: {
@@ -620,6 +628,12 @@ const CARD_BUTTON_THEME_TOKENS = {
                 color: '#ffffff',
                 border: '1px solid #9fbe64',
                 boxShadow: 'inset 0 1px 0 rgba(255, 255, 255, 0.12), 0 1px 2px rgba(0, 0, 0, 0.3)'
+            },
+            licenseUpdate: {
+                background: 'rgba(180, 83, 9, 0.85)',
+                color: '#fffbeb',
+                border: '1px solid rgba(251, 191, 36, 0.18)',
+                boxShadow: 'inset 0 1px 0 rgba(255, 255, 255, 0.03), 0 1px 2px rgba(0, 0, 0, 0.3)'
             },
             resto: {
                 background: 'rgba(30, 64, 175, 0.8)',
@@ -2007,6 +2021,13 @@ const applyCompactCardActionButtonStyle = (button) => {
     syncCardActionButtonInteractivity(button);
 };
 
+const createCardLicenseToolsConnector = () => {
+    const connector = document.createElement('span');
+    connector.setAttribute('aria-hidden', 'true');
+    connector.style.cssText = 'width: 10px; height: 2px; flex: 0 0 10px; background: #819c50;';
+    return connector;
+};
+
 // Тримати перевірку й калькулятор разом навіть при перенесенні панелі кнопок.
 const groupCardLicenseTools = (container) => {
     const licenseButton = container.querySelector(`#${LICENSE_BUTTON_ID}`);
@@ -2018,11 +2039,26 @@ const groupCardLicenseTools = (container) => {
     group.setAttribute('role', 'group');
     group.setAttribute('aria-label', 'Ліцензії та калькулятор');
     group.style.cssText = 'display: inline-flex; align-items: center; flex: 0 0 auto;';
-    const connector = document.createElement('span');
-    connector.setAttribute('aria-hidden', 'true');
-    connector.style.cssText = 'width: 10px; height: 2px; flex: 0 0 10px; background: #819c50;';
     licenseButton.before(group);
-    group.append(licenseButton, connector, calculatorButton);
+    group.append(licenseButton, createCardLicenseToolsConnector(), calculatorButton);
+};
+
+// «Оновити» стоїть у тій самій групі одразу після перевірки й з'єднана такою ж лінією.
+const attachCardLicenseUpdateButton = (container, button) => {
+    const licenseButton = container.querySelector(`#${LICENSE_BUTTON_ID}`);
+    if (!licenseButton) {
+        container.appendChild(button);
+        return;
+    }
+
+    const connector = createCardLicenseToolsConnector();
+    connector.dataset.connectorFor = LICENSE_UPDATE_BUTTON_ID;
+    licenseButton.after(connector, button);
+};
+
+const detachCardLicenseUpdateButton = (container) => {
+    container.querySelector(`[data-connector-for="${LICENSE_UPDATE_BUTTON_ID}"]`)?.remove();
+    container.querySelector(`#${LICENSE_UPDATE_BUTTON_ID}`)?.remove();
 };
 
 const resetActiveHelpDeskDraftButton = () => {
@@ -8533,6 +8569,15 @@ const patchLicenseUpdateFooterActions = (actionsNode, footerActions) => {
 const getLicenseUpdateModalViewport = () => document.querySelector(`#${CARD_LICENSE_MODAL_ID} [data-role="viewport"]`);
 
 const renderLicenseUpdateQueueModal = (run) => {
+    // Одиночне оновлення з картки одразу показує вікно сервера: черга з одного рядка нічого не додає.
+    if (run.single) {
+        const [singleItem] = run.items;
+        if (singleItem) {
+            showLicenseUpdateItemDetailModal(run, singleItem);
+        }
+        return;
+    }
+
     const view = ensureLicenseUpdateRunView(run);
     // Поверх черги відкрито деталі сервера: не перебиваємо їх, черга оновиться при поверненні.
     if (view.detailItemId) {
@@ -8797,6 +8842,12 @@ const buildLicenseUpdateDetailContent = (run, item) => {
 
     if (item.updateDiff?.entries.length) {
         fragment.appendChild(buildLicenseUpdateDiffTable(item.updateDiff));
+    } else if (verdictKey === 'processing' || verdictKey === 'pending') {
+        // Поки сервер ще обробляється, таблиці «було → стало» ще немає — показуємо, що запит триває.
+        const progress = createCardLicenseModalNode('div', 'dao-upd-empty');
+        progress.appendChild(createCardLicenseModalNode('div', 'dao-license-modal__spinner'));
+        progress.appendChild(createCardLicenseModalNode('span', '', 'Таблиця «було → стало» з’явиться тут, щойно сервер завершить оновлення.'));
+        fragment.appendChild(progress);
     } else if (verdictKey !== 'error' && verdictKey !== 'missing') {
         fragment.appendChild(createCardLicenseModalNode('div', 'dao-upd-empty', 'Сервер не повернув список ліцензій.'));
     }
@@ -8845,6 +8896,13 @@ const showLicenseUpdateItemDetailModal = (run, item) => {
         view.detailItemId = '';
         renderLicenseUpdateQueueModal(run);
     };
+    // В одиночному режимі черги з одного рядка не показуємо: закриття деталей закриває вікно.
+    const closeDetail = run.single
+        ? () => {
+            view.detailItemId = '';
+            closeCardLicenseCheckModal();
+        }
+        : backToQueue;
 
     const actions = [];
     const isCheckRun = run.action === BULK_LICENSE_ACTIONS.check;
@@ -8864,15 +8922,17 @@ const showLicenseUpdateItemDetailModal = (run, item) => {
             onClick: () => retryLicenseUpdateItems(run, [item])
         });
     }
-    actions.push({ label: 'Назад до черги', onClick: backToQueue, autoFocus: true });
+    actions.push(run.single
+        ? { label: 'Закрити', onClick: closeDetail, autoFocus: true }
+        : { label: 'Назад до черги', onClick: backToQueue, autoFocus: true });
 
     renderCardLicenseModal({
         title: item.label,
-        subtitle: resolveLicenseUpdateCompanyName(item) || getBulkLicenseRunProfile(run).resultLabel,
+        subtitle: resolveLicenseUpdateCompanyName(item) || (run.single && run.sourceLabel) || getBulkLicenseRunProfile(run).resultLabel,
         surface: LICENSE_UPDATE_SURFACE,
         content: buildLicenseUpdateDetailContent(run, item),
         footerActions: actions,
-        onClose: backToQueue
+        onClose: closeDetail
     });
 
     const modal = document.getElementById(CARD_LICENSE_MODAL_ID);
@@ -8979,7 +9039,7 @@ const openLegacyBulkLicenseManager = ({ action, targets }) => {
 
 const shouldStopBulkLicenseQueueAfterError = (error) => {
     const message = String(error?.message || '').toLowerCase();
-    return message.includes('право на масове оновлення ліцензій')
+    return message.includes('право на оновлення ліцензій')
         || message.includes('персональний доступ цього пристрою відкликано')
         || message.includes('завершіть доступ пристрою');
 };
@@ -9105,7 +9165,7 @@ const runBulkLicenseQueue = async (run) => {
     }
 };
 
-const startBulkLicenseQueue = ({ action, sourceLabel, targets, bulkModeFormat = BULK_LICENSE_MODE_FORMATS.legacy }) => {
+const startBulkLicenseQueue = ({ action, sourceLabel, targets, bulkModeFormat = BULK_LICENSE_MODE_FORMATS.legacy, single = false }) => {
     const dedupedTargets = Array.isArray(targets)
         ? targets.reduce((result, context) => {
             const label = formatCardServerContextLabel(context);
@@ -9128,7 +9188,8 @@ const startBulkLicenseQueue = ({ action, sourceLabel, targets, bulkModeFormat = 
         return;
     }
 
-    if (normalizeBulkLicenseModeFormat(bulkModeFormat) === BULK_LICENSE_MODE_FORMATS.legacy) {
+    // Старий менеджер уміє лише масову чергу, тому одиночне оновлення завжди йде новим вікном.
+    if (!single && normalizeBulkLicenseModeFormat(bulkModeFormat) === BULK_LICENSE_MODE_FORMATS.legacy) {
         openLegacyBulkLicenseManager({
             action,
             targets: dedupedTargets
@@ -9138,7 +9199,7 @@ const startBulkLicenseQueue = ({ action, sourceLabel, targets, bulkModeFormat = 
 
     if (activeBulkLicenseRun?.processing) {
         void showInlineBulkNoticeModal({
-            title: 'Масова операція вже виконується',
+            title: activeBulkLicenseRun.single ? 'Оновлення ліцензій вже виконується' : 'Масова операція вже виконується',
             subtitle: activeBulkLicenseRun.sourceLabel || '',
             message: 'Дочекайтеся завершення поточної черги, перш ніж запускати нову.',
             tone: 'warning',
@@ -9150,7 +9211,9 @@ const startBulkLicenseQueue = ({ action, sourceLabel, targets, bulkModeFormat = 
     const run = {
         id: createBulkLicenseBatchId(),
         action,
-        batchId: action === BULK_LICENSE_ACTIONS.update ? createBulkLicenseBatchId() : null,
+        // Одиночне оновлення не є пакетом, тому batchId не передаємо.
+        batchId: action === BULK_LICENSE_ACTIONS.update && !single ? createBulkLicenseBatchId() : null,
+        single: Boolean(single),
         sourceLabel,
         processing: false,
         aborted: false,
@@ -10513,6 +10576,7 @@ const rememberServerInPopupHistory = ({ server, port, name, cardUrl } = {}) => n
         const availability = {
             [LICENSE_BUTTON_ID]: serverActionAvailability,
             [CALCULATOR_BUTTON_ID]: serverActionAvailability,
+            [LICENSE_UPDATE_BUTTON_ID]: serverActionAvailability,
             [RESTO_BUTTON_ID]: serverActionAvailability,
             [DEVICES_BUTTON_ID]: serverActionAvailability,
             [PERIOD_BUTTON_ID]: serverActionAvailability,
@@ -10616,7 +10680,7 @@ const rememberServerInPopupHistory = ({ server, port, name, cardUrl } = {}) => n
 
         const availability = buildCardActionButtonAvailability(scopeRoot);
 
-        [LICENSE_BUTTON_ID, CALCULATOR_BUTTON_ID, RESTO_BUTTON_ID, DEVICES_BUTTON_ID, PERIOD_BUTTON_ID, LOYALTY_BUTTON_ID, WEB_BUTTON_ID, DIRECTORIES_BUTTON_ID, API_BUTTON_ID].forEach((buttonId) => {
+        [LICENSE_BUTTON_ID, CALCULATOR_BUTTON_ID, LICENSE_UPDATE_BUTTON_ID, RESTO_BUTTON_ID, DEVICES_BUTTON_ID, PERIOD_BUTTON_ID, LOYALTY_BUTTON_ID, WEB_BUTTON_ID, DIRECTORIES_BUTTON_ID, API_BUTTON_ID].forEach((buttonId) => {
             const button = container.querySelector(`#${buttonId}`);
             if (!(button instanceof HTMLButtonElement)) {
                 return;
@@ -11089,6 +11153,137 @@ const rememberServerInPopupHistory = ({ server, port, name, cardUrl } = {}) => n
         });
         return btn;
     };
+
+    // Право на одиночне оновлення видає SLM. Відповідь тримаємо хвилину, щоб не питати сервер на кожну зміну сторінки.
+    const CARD_LICENSE_UPDATE_ACCESS_TTL_MS = 60 * 1000;
+    let cardLicenseUpdateAccess = null;
+    let cardLicenseUpdateAccessPromise = null;
+
+    const isCardLicenseUpdateAccessFresh = () => Boolean(
+        cardLicenseUpdateAccess && Date.now() - cardLicenseUpdateAccess.checkedAt < CARD_LICENSE_UPDATE_ACCESS_TTL_MS
+    );
+
+    const requestCardLicenseUpdateAccess = (forceRefresh = false) => {
+        if (!forceRefresh && isCardLicenseUpdateAccessFresh()) {
+            return Promise.resolve(cardLicenseUpdateAccess.allowed);
+        }
+
+        if (cardLicenseUpdateAccessPromise) {
+            return cardLicenseUpdateAccessPromise;
+        }
+
+        cardLicenseUpdateAccessPromise = new Promise((resolve) => {
+            chrome.runtime.sendMessage({
+                action: 'GET_EXTENSION_ACCESS_STATE'
+            }, (response) => {
+                // Збій зв'язку не забирає вже показану кнопку: сервер однаково перевірить право під час оновлення.
+                if (chrome.runtime.lastError || !response?.ok || !response.state) {
+                    resolve(Boolean(cardLicenseUpdateAccess?.allowed));
+                    return;
+                }
+
+                resolve(Boolean(response.state.hasExtensionKey && response.state.hasSingleLicenseUpdateAccess));
+            });
+        })
+            .then((allowed) => {
+                cardLicenseUpdateAccess = { allowed, checkedAt: Date.now() };
+                return allowed;
+            })
+            .finally(() => {
+                cardLicenseUpdateAccessPromise = null;
+            });
+
+        return cardLicenseUpdateAccessPromise;
+    };
+
+    const createLicenseUpdateBtn = (scopeRoot) => {
+        const btn = document.createElement('button');
+        btn.id = LICENSE_UPDATE_BUTTON_ID;
+        btn.type = 'button';
+        btn.dataset.cardButtonIntent = CARD_BUTTON_INTENTS.licenseUpdate;
+        btn.textContent = 'Оновити';
+        btn.setAttribute('aria-label', 'Оновити ліцензії');
+        btn.style.cssText = 'cursor: pointer; border-radius: 4px; border: none; font-weight: 600; white-space: nowrap;';
+        btn.addEventListener('mouseenter', () => {
+            if (canUseCardActionButtonHover(btn)) btn.style.opacity = '0.82';
+        });
+        btn.addEventListener('mouseleave', () => syncCardActionButtonInteractivity(btn));
+        btn.addEventListener('click', async () => {
+            if (btn.disabled || isCardActionButtonActionDisabled(btn)) return;
+            const currentScopeRoot = getCardScopeRoot(btn) || scopeRoot;
+            const serverData = getServerData(currentScopeRoot, false);
+            if (!serverData) return;
+
+            btn.disabled = true;
+            syncCardActionButtonInteractivity(btn);
+            invalidateCardErrorPolling();
+            clearCardErrorMessage();
+            const [daoServiceStatus, allowed] = await Promise.all([
+                getCardDaoServiceStatus(),
+                requestCardLicenseUpdateAccess(true)
+            ]);
+            btn.disabled = false;
+            syncCardActionButtonInteractivity(btn);
+
+            if (isCardDaoServiceOffline(daoServiceStatus)) {
+                setCardErrorMessage(buildCardDaoServiceUnavailableMessage(daoServiceStatus, 'Функція оновлення ліцензій'));
+                return;
+            }
+
+            // Право могли зняти в SLM, поки картка була відкрита.
+            if (!allowed) {
+                const container = btn.closest(`#${BUTTONS_ID}`);
+                if (container) detachCardLicenseUpdateButton(container);
+                setCardErrorMessage('Право на оновлення ліцензій для цього пристрою вимкнено в SLM.');
+                return;
+            }
+
+            startBulkLicenseQueue({
+                action: BULK_LICENSE_ACTIONS.update,
+                sourceLabel: getCardFieldText(currentScopeRoot, 260),
+                targets: [serverData],
+                bulkModeFormat: BULK_LICENSE_MODE_FORMATS.inline,
+                single: true
+            });
+        });
+        return btn;
+    };
+
+    // Кнопка з'являється лише з правом у SLM; без нього її в картці просто немає.
+    const syncCardLicenseUpdateButton = (container, scopeRoot) => {
+        const applyAccess = (allowed) => {
+            if (!container.isConnected) return;
+
+            if (!allowed) {
+                detachCardLicenseUpdateButton(container);
+                return;
+            }
+
+            if (container.querySelector(`#${LICENSE_UPDATE_BUTTON_ID}`)) return;
+
+            const button = createLicenseUpdateBtn(scopeRoot);
+            attachCardLicenseUpdateButton(container, button);
+            applyCompactCardActionButtonStyle(button);
+            syncCardActionButtonsAvailability(container, scopeRoot);
+        };
+
+        if (isCardLicenseUpdateAccessFresh()) {
+            applyAccess(cardLicenseUpdateAccess.allowed);
+            return;
+        }
+
+        void requestCardLicenseUpdateAccess().then(applyAccess);
+    };
+
+    // Після повернення на вкладку перечитуємо право: його могли змінити в SLM.
+    document.addEventListener('visibilitychange', () => {
+        if (document.hidden) return;
+
+        cardLicenseUpdateAccess = null;
+        document.querySelectorAll(`#${BUTTONS_ID}`).forEach((container) => {
+            syncCardLicenseUpdateButton(container, getCardScopeRoot(container));
+        });
+    });
 
     const createRestoBtn = (scopeRoot) => {
         const btn = document.createElement('button');
@@ -11662,6 +11857,7 @@ const rememberServerInPopupHistory = ({ server, port, name, cardUrl } = {}) => n
         }
 
         groupCardLicenseTools(container);
+        syncCardLicenseUpdateButton(container, scopeRoot);
 
         const existingLoyaltyButton = container.querySelector(`#${LOYALTY_BUTTON_ID}`);
         if (!existingLoyaltyButton) {

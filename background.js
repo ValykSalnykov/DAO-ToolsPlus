@@ -1545,7 +1545,7 @@ function buildLicenseUpdateErrorMessage(status, payload) {
     case 401:
       return 'Розширення не передало X-Extension-Key для оновлення ліцензій. Завершіть доступ пристрою у popup.';
     case 403:
-      return 'Для цього пристрою не видано право на масове оновлення ліцензій. Увімкніть його в Users розділі SLM і перевидайте доступ пристрою.';
+      return 'Для цього пристрою не видано право на оновлення ліцензій. Увімкніть одиночне або масове оновлення в Users розділі SLM.';
     case 500:
       return 'Сервер оновлення ліцензій не налаштований або має внутрішню помилку.';
     case 502:
@@ -1692,6 +1692,12 @@ function hasBulkLicenseAccess(scopes) {
   return normalizeExtensionAccessScopes(scopes).includes('license.bulk');
 }
 
+// Масове право включає одиночне: SLM пускає /license/update з будь-яким із двох.
+function hasSingleLicenseUpdateAccess(scopes) {
+  const normalizedScopes = normalizeExtensionAccessScopes(scopes);
+  return normalizedScopes.includes('license.update') || normalizedScopes.includes('license.bulk');
+}
+
 function normalizeBulkModeFormat(value) {
   return String(value ?? '').trim().toLowerCase() === 'inline' ? 'inline' : 'legacy';
 }
@@ -1753,6 +1759,7 @@ function buildExtensionAccessState(storageData) {
     hasExtensionKey: Boolean(extensionKey),
     scopes,
     hasBulkLicenseAccess: Boolean(extensionKey) && hasBulkLicenseAccess(scopes),
+    hasSingleLicenseUpdateAccess: Boolean(extensionKey) && hasSingleLicenseUpdateAccess(scopes),
     bulkModeFormat,
     notice
   };
@@ -2782,7 +2789,9 @@ async function fetchSyrveLicenseUpdate({ address, port, batchId = null, serialNu
       if (shouldClearInvalidExtensionAccess(payload)) {
         await clearInvalidExtensionKey('Персональний доступ цього пристрою відкликано або він більше недійсний. Попросіть адміністратора видати новий код підтвердження.');
       } else {
+        // SLM відмовляє лише тоді, коли немає жодного з прав на оновлення.
         await removeStoredExtensionAccessScope('license.bulk');
+        await removeStoredExtensionAccessScope('license.update');
       }
     }
 
